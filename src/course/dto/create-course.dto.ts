@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsOptional, IsString, Length } from "class-validator";
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, IsUUID, Length } from "class-validator";
 
 export class CreateCourseDto {
     @IsString()
@@ -23,6 +23,13 @@ export class CreateCourseDto {
     @IsOptional()
     is_approved?: boolean;
 
-    @IsString()
-    tutor: string;
+    @IsOptional()
+    @IsArray()
+    @IsUUID("4", { each: true })  // Ensure each ID is a valid UUID
+    categories?: string[];
+
+    @IsOptional()
+    @IsArray()
+    @IsUUID("4", { each: true })
+    standards?: string[];
 }

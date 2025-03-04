@@ -12,7 +12,7 @@ import 'reflect-metadata'; // Ensure this is imported
 @Injectable()
 export class ResponseInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-        const customMessage = this.getCustomMessage(context) || 'Request successful'; // Default message
+        const customMessage = this.getCustomMessage(context) || 'Request successful';
 
         return next.handle().pipe(
             map((data) => ({
@@ -25,7 +25,6 @@ export class ResponseInterceptor implements NestInterceptor {
     }
 
     private getCustomMessage(context: ExecutionContext): string | null {
-        // Retrieve the custom message from handler metadata
         const handler = context.getHandler();
         return Reflect.getMetadata('responseMessage', handler);
     }

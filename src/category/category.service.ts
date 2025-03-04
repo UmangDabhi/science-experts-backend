@@ -89,8 +89,12 @@ export class CategoryService {
       await this.categoryRepository.delete(category.id);
       return;
     } catch (error) {
+      console.log(error);
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
+      }
+      if(error.code  == "23503"){
+        throw new ConflictException(ERRORS.ERROR_CATEGORY_ASSIGNED_ALREADY);
       }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_CATEGORY);
     }

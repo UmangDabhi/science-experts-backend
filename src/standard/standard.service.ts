@@ -92,6 +92,9 @@ export class StandardService {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
         throw error;
       }
+      if (error.code == "23503") {
+        throw new ConflictException(ERRORS.ERROR_STANDARD_ASSIGNED_ALREADY);
+      }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_STANDARD);
     }
   }

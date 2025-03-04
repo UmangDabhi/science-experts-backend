@@ -12,7 +12,6 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  // @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_USER)
   @ResponseMessage(MESSAGES.USER_CREATED)
   create(@Body() createUserDto: CreateUserDto) {

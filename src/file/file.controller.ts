@@ -18,18 +18,16 @@ export class FileController {
             data: result,  // { localPath, s3Url }
         };
     }
-    // Uploads a file to both local storage and S3 under a specific folder
     @Post('upload_locally')
     @ResponseMessage("File Uploaded")
     @UseInterceptors(FileInterceptor('file'))
     async uploadLocally(@UploadedFile() file: Express.Multer.File, @Body('folder') folder: string) {
         console.log(file);
         const result = await this.fileService.uploadLocally(file, folder || 'default');
-        const responsePath = result.replace(/\\/g, '/'); // Replace all backslashes with forward slashes
+        const responsePath = result.replace(/\\/g, '/'); 
         return responsePath;
     }
 
-    // Get files from a specific folder (local and S3)
     @Post('list')
     async listFiles(@Body('folder') folder: string) {
         const [localFiles, s3Files] = await Promise.all([

@@ -20,6 +20,12 @@ export const MESSAGES = {
     MODULE_UPDATED: 'Module Updated Successfully',
     MODULE_DELETED: 'Module Deleted Successfully',
 
+    ALL_MATERIAL_FETCHED: 'Materials Fetched Successfully',
+    MATERIAL_CREATED: 'Material Created Successfully',
+    MATERIAL_FETCHED: 'Material Fethced Successfully',
+    MATERIAL_UPDATED: 'Material Updated Successfully',
+    MATERIAL_DELETED: 'Material Deleted Successfully',
+
     CATEGORY_CREATED: 'Category Created Successfully',
     ALL_CATEGORY_FETCHED: 'Categories Fetched Successfully',
     CATEGORY_FETCHED: 'Category Fethced Successfully',

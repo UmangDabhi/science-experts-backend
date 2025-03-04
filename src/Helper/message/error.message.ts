@@ -29,6 +29,13 @@ export const ERRORS = {
     ERROR_DELETING_MODULE: 'Error Deleting Module',
     ERROR_MODULE_NOT_FOUND: 'Module Not Found',
 
+    ERROR_CREATING_MATERIAL: 'Error Creating Material',
+    ERROR_FETCHING_MATERIALS: 'Error Fetching Materials',
+    ERROR_FETCHING_MATERIAL: 'Error Fetching Material',
+    ERROR_UPDATING_MATERIAL: 'Error Updating Material',
+    ERROR_DELETING_MATERIAL: 'Error Deleting Material',
+    ERROR_MATERIAL_NOT_FOUND: 'Material Not Found',
+
     ERROR_CREATING_CATEGORY: 'Error Creating Category',
     ERROR_FETCHING_CATEGORIES: 'Error Fetching Categories',
     ERROR_FETCHING_CATEGORY: 'Error Fetching Category',
@@ -36,6 +43,8 @@ export const ERRORS = {
     ERROR_DELETING_CATEGORY: 'Error Deleting Category',
     ERROR_CATEGORY_NOT_FOUND: 'Category Not Found',
     ERROR_CATEGORY_ALREADY_EXISTS: "Category Already Exists",
+
+    ERROR_CATEGORY_ASSIGNED_ALREADY: "Category Already Assigned To Courses",
 
 
     ERROR_CREATING_STANDARD: 'Error Creating Standard',
@@ -45,5 +54,7 @@ export const ERRORS = {
     ERROR_DELETING_STANDARD: 'Error Deleting Standard',
     ERROR_STANDARD_NOT_FOUND: 'Standard Not Found',
     ERROR_STANDARD_ALREADY_EXISTS: "Standard Already Exists",
+
+    ERROR_STANDARD_ASSIGNED_ALREADY: "Standards Already Assigned To Courses",
 
 }

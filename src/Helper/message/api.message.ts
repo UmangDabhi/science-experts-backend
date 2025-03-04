@@ -16,9 +16,17 @@ export const API_ENDPOINT = {
 
     CREATE_MODULE: 'create_module',
     GET_ALL_MODULE: 'get_all_module',
+    GET_COURSE_MODULE: 'get_course_module',
     GET_MODULE: 'get_module',
     UPDATE_MODULE: 'update_module',
     DELETE_MODULE: 'delete_module',
+
+    CREATE_MATERIAL: 'create_material',
+    GET_ALL_MATERIAL: 'get_all_material',
+    GET_COURSE_MATERIAL: 'get_course_material',
+    GET_MATERIAL: 'get_material',
+    UPDATE_MATERIAL: 'update_material',
+    DELETE_MATERIAL: 'delete_material',
 
     CREATE_CATEGORY: 'create_category',
     GET_ALL_CATEGORY: 'get_all_category',

@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request, Response } from 'express';
 import { Log } from './log.entity';
-import { RequestWithUser } from './request-with-user.interface';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

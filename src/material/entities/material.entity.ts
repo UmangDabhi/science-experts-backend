@@ -5,6 +5,11 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity()
 export class Material extends BaseEntity {
+    @Column()
+    title: string;
+
+    @Column()
+    description: string;
 
     @Column()
     material_url: string;
@@ -13,12 +18,10 @@ export class Material extends BaseEntity {
     @JoinColumn({ name: 'course_id' })
     course: Course;
 
-
     @ManyToOne(() => User, (tutor) => (tutor.courses))
     @JoinColumn({ name: 'tutor_id' })
     tutor: User
 
     @Column()
     amount: Number;
-
 }

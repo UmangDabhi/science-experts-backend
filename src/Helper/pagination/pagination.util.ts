@@ -36,12 +36,16 @@ export async function pagniateRecords<T>(
         return { data, total: data.length };
     }
 
-    const [data, total] = await repository.findAndCount({
+    const data = await repository.find({
         where,
         skip,
         take: limit,
         order,
     });
+    const  total = await repository.count({
+        where,
+        order,
+    })
 
     return {
         data,

@@ -13,15 +13,13 @@ export class ModuleService {
   constructor(
     @InjectRepository(ModuleEntity)
     private readonly moduleRepository: Repository<ModuleEntity>
-  ) { }
+  ) { }c
   async create(createModuleDto: CreateModuleDto) {
     try {
-      console.log(createModuleDto);
       const newModule = this.moduleRepository.create({
         ...createModuleDto,
         course: { id: createModuleDto.course },
       });
-      console.log(newModule);
       return await this.moduleRepository.save(newModule);
     } catch (error) {
       console.log(error)
@@ -42,6 +40,20 @@ export class ModuleService {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULES);
     }
   }
+  async findAllByCourseId(courseId: string) {
+    try {
+      const result = await this.moduleRepository.find({
+          where: {
+            course: {
+              id: courseId
+            }
+          }
+        });
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULES);
+    }
+  }
 
   async findOne(id: string) {
     try {
@@ -49,7 +61,6 @@ export class ModuleService {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED)
 
       const module = await this.moduleRepository.findOne({ where: { id } })
-
       if (!module)
         throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
 
