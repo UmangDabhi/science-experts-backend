@@ -19,9 +19,10 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { CourseFilterDto } from './dto/filter-course.dto';
 @Controller('course')
 export class CourseController {
-  constructor(private readonly courseService: CourseService) {}
+  constructor(private readonly courseService: CourseService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_COURSE)
@@ -36,8 +37,8 @@ export class CourseController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.courseService.findAll(paginationDto);
+  findAll(@Query() courseFilterDto: CourseFilterDto, @Query() data: any) {
+    return this.courseService.findAll(courseFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

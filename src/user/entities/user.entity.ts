@@ -5,6 +5,7 @@ import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Role } from 'src/Helper/constants';
 import { Progress } from 'src/progress/entities/progress.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
@@ -67,4 +68,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Progress, (progress) => progress.student, { nullable: true })
   progress: Progress[];
+
+  @OneToMany(() => Review, (review) => review.student, { nullable: true })
+  review: Review[];
 }

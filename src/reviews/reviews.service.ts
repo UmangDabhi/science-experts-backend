@@ -17,6 +17,7 @@ import { ERRORS } from 'src/Helper/message/error.message';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Injectable()
 export class ReviewsService {
@@ -29,7 +30,7 @@ export class ReviewsService {
     private readonly courseRepository: Repository<Course>,
     @InjectRepository(ModuleEntity)
     private readonly moduleRepository: Repository<ModuleEntity>,
-  ) {}
+  ) { }
   async create(currUser: User, createReviewDto: CreateReviewDto) {
     try {
       const existingCourse = await this.courseRepository.findOne({
@@ -71,7 +72,25 @@ export class ReviewsService {
 
       return result;
     } catch (error) {
-      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_REVIEWS);
+    }
+  }
+  async findAllTestimonials(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Review>> {
+    try {
+      const searchableFields: (keyof Review)[] = ['review'];
+      const queryOptions = { show_as_testimonials: true };
+      const result = await pagniateRecords(
+        this.reviewRepository,
+        paginationDto,
+        searchableFields,
+        queryOptions
+      );
+
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_REVIEWS);
     }
   }
 
@@ -80,26 +99,27 @@ export class ReviewsService {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       await this.reviewRepository.update(
         { id: id, student: { id: currUser.id } },
-        { review: updateReviewDto.review },
+        { review: updateReviewDto.review, rating: updateReviewDto.rating },
       );
       return;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
+      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_REVIEW);
     }
   }
 
-  async showAsTestimonial(currUser: User, id: string) {
+  async changeTestimonial(id: string, updateTestimonialDto: UpdateTestimonialDto) {
     try {
+
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       await this.reviewRepository.update(
-        { id: id, student: { id: currUser.id } },
-        { show_as_testimonials: true },
+        { id: id },
+        { show_as_testimonials: updateTestimonialDto.show_as_testimonials },
       );
       return;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
+      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_REVIEW);
     }
   }
 

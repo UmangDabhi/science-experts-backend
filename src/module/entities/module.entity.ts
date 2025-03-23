@@ -3,6 +3,7 @@ import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Is_Free_To_Watch } from 'src/Helper/constants';
 import { Progress } from 'src/progress/entities/progress.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity('module')
@@ -38,4 +39,7 @@ export class ModuleEntity extends BaseEntity {
 
   @OneToMany(() => Progress, (progress) => progress.module)
   progress: Progress[];
+
+  @OneToMany(() => Review, (review) => review.module)
+  review: Review[];
 }

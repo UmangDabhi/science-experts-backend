@@ -12,6 +12,7 @@ export async function pagniateRecords<T>(
   paginationDto: PaginationDto,
   searchableFields: (keyof T)[] = [],
   queryOptions: Partial<Record<keyof T, any>> = {},
+  relations: string[] = [],
   orderBy?: OrderBy<T>,
 ): Promise<PaginatedResult<T>> {
   const { page, limit, search } = paginationDto;
@@ -37,20 +38,12 @@ export async function pagniateRecords<T>(
     : ({ [defaultOrder.field]: defaultOrder.direction } as FindOptionsOrder<T>);
 
   if (!page || !limit) {
-    const data = await repository.find({ where, order });
+    const data = await repository.find({ where, relations, order });
     return { data, total: data.length };
   }
 
-  const data = await repository.find({
-    where,
-    skip,
-    take: limit,
-    order,
-  });
-  const total = await repository.count({
-    where,
-    order,
-  });
+  const data = await repository.find({ where, relations, skip, take: limit, order });
+  const total = await repository.count({ where, order });
 
   return {
     data,

@@ -19,10 +19,11 @@ import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) {}
+  constructor(private readonly reviewsService: ReviewsService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_REVIEW)
@@ -40,6 +41,12 @@ export class ReviewsController {
   findAll(@Query() paginationDto: PaginationDto) {
     return this.reviewsService.findAll(paginationDto);
   }
+  @UseGuards(AuthGuard('jwt'))
+  @Get(API_ENDPOINT.GET_ALL_TESTIMONIALS)
+  @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
+  findAllTestimonials(@Query() paginationDto: PaginationDto) {
+    return this.reviewsService.findAllTestimonials(paginationDto);
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(`${API_ENDPOINT.UPDATE_REVIEW}/:id`)
@@ -53,10 +60,10 @@ export class ReviewsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch(`${API_ENDPOINT.UPDATE_REVIEW}/:id`)
+  @Patch(`${API_ENDPOINT.CHANGE_TESTIMONIAL}/:id`)
   @ResponseMessage(MESSAGES.REVIEW_DELETED)
-  showAsTestimonial(@Req() req: RequestWithUser, @Param('id') id: string) {
-    return this.reviewsService.showAsTestimonial(req.user, id);
+  changeTestimonial(@Param('id') id: string, @Body() updateTestimonialDto: UpdateTestimonialDto) {
+    return this.reviewsService.changeTestimonial(id, updateTestimonialDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

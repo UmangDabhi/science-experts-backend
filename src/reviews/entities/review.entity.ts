@@ -17,18 +17,22 @@ export class Review extends BaseEntity {
   @Column()
   review: string;
 
+  @Column({ type: "double precision", default: 5 })
+  rating: number;
+
+
   @Column({ type: 'boolean', default: false })
   show_as_testimonials: Boolean;
 
-  @ManyToOne(() => User, (user) => user.progress)
+  @ManyToOne(() => User, (user) => user.review)
   @JoinColumn({ name: 'student_id' })
   student: User;
 
-  @ManyToOne(() => Course, (course) => course.progress)
+  @ManyToOne(() => Course, (course) => course.review)
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @ManyToOne(() => ModuleEntity, (module) => module.progress)
+  @ManyToOne(() => ModuleEntity, (module) => module.review)
   @JoinColumn({ name: 'module_id' })
   module: ModuleEntity;
 }

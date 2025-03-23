@@ -16,6 +16,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
+import { CourseFilterDto } from './dto/filter-course.dto';
 
 @Injectable()
 export class CourseService {
@@ -26,19 +27,19 @@ export class CourseService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Standard)
     private readonly standardRepository: Repository<Standard>,
-  ) {}
+  ) { }
   async create(currUser: User, createCourseDto: CreateCourseDto): Promise<any> {
     try {
       const categoryEntities = createCourseDto.categories
         ? await this.categoryRepository.findBy({
-            id: In(createCourseDto.categories),
-          })
+          id: In(createCourseDto.categories),
+        })
         : [];
 
       const standardEntities = createCourseDto.standards
         ? await this.standardRepository.findBy({
-            id: In(createCourseDto.standards),
-          })
+          id: In(createCourseDto.standards),
+        })
         : [];
 
       const newCourse = this.courseRepository.create({
@@ -55,15 +56,24 @@ export class CourseService {
   }
 
   async findAll(
-    paginationDto: PaginationDto,
+    courseFilterDto: CourseFilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
       const searchableFields: (keyof Course)[] = ['title'];
-
+      const queryOptions: any = {};
+      if (courseFilterDto?.category) {
+        queryOptions.categories = { id: courseFilterDto.category };
+      }
+      if (courseFilterDto?.standard) {
+        queryOptions.standards = { id: courseFilterDto.standard };
+      }
+      const relations = ["modules", "enrollments", "review"];
       const result = await pagniateRecords(
         this.courseRepository,
-        paginationDto,
+        courseFilterDto,
         searchableFields,
+        queryOptions,
+        relations
       );
 
       result.data.forEach((course) => {
@@ -91,6 +101,8 @@ export class CourseService {
           'categories',
           'standards',
           'modules.progress',
+          'review',
+          'review.student',
         ],
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
@@ -125,14 +137,14 @@ export class CourseService {
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       const categoryEntities = updateCourseDto.categories
         ? await this.categoryRepository.findBy({
-            id: In(updateCourseDto.categories),
-          })
+          id: In(updateCourseDto.categories),
+        })
         : [];
 
       const standardEntities = updateCourseDto.standards
         ? await this.standardRepository.findBy({
-            id: In(updateCourseDto.standards),
-          })
+          id: In(updateCourseDto.standards),
+        })
         : [];
       const updateData: any = { ...updateCourseDto };
       updateData.tutor = { id: currUser.id };

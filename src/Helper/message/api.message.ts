@@ -52,5 +52,7 @@ export const API_ENDPOINT = {
   CREATE_REVIEW: 'create_review',
   GET_ALL_REVIEW: 'get_all_review',
   UPDATE_REVIEW: 'update_review',
+  GET_ALL_TESTIMONIALS: 'get_all_testimonials',
+  CHANGE_TESTIMONIAL: 'change_testimonial',
   DELETE_REVIEW: 'delete_review',
 };

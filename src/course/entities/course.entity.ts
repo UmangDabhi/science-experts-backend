@@ -5,6 +5,7 @@ import { Is_Approved, Is_Paid } from 'src/Helper/constants';
 import { Material } from 'src/material/entities/material.entity';
 import { ModuleEntity } from 'src/module/entities/module.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
+import { Review } from 'src/reviews/entities/review.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -82,6 +83,9 @@ export class Course extends BaseEntity {
 
   @OneToMany(() => Progress, (progress) => progress.course)
   progress: Progress[];
+
+  @OneToMany(() =>Review, (review) => review.course)
+  review: Review[];
 
   @ManyToMany(() => Category, (categories) => categories.courses)
   @JoinTable({
