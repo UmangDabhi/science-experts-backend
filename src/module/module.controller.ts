@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ModuleService } from './module.service';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
@@ -10,7 +20,7 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 
 @Controller('module')
 export class ModuleController {
-  constructor(private readonly moduleService: ModuleService) { }
+  constructor(private readonly moduleService: ModuleService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_MODULE)
@@ -39,7 +49,6 @@ export class ModuleController {
   findOne(@Param('id') id: string) {
     return this.moduleService.findOne(id);
   }
-
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(`${API_ENDPOINT.UPDATE_MODULE}/:id`)

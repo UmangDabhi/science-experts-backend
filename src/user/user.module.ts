@@ -10,6 +10,6 @@ import { CounterService } from 'src/counter/counter.service';
   imports: [TypeOrmModule.forFeature([User, Counter])],
   controllers: [UserController],
   providers: [UserService, CounterService],
-  exports: [UserService]
+  exports: [UserService],
 })
-export class UserModule { }
+export class UserModule {}

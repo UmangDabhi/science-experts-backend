@@ -9,4 +9,4 @@ import { Standard } from './entities/standard.entity';
   controllers: [StandardController],
   providers: [StandardService],
 })
-export class StandardModule { }
+export class StandardModule {}

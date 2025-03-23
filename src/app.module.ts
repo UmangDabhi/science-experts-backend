@@ -60,7 +60,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     StandardModule,
     CertificateModule,
     ProgressModule,
-    ReviewsModule
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -71,4 +71,4 @@ import { ReviewsModule } from './reviews/reviews.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

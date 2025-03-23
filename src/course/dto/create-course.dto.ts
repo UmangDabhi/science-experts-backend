@@ -1,35 +1,55 @@
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString, IsUUID, Length } from "class-validator";
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Length,
+  Max,
+  Min,
+} from 'class-validator';
 
 export class CreateCourseDto {
-    @IsString()
-    @Length(0, 100)
-    title: string;
+  @IsString()
+  @Length(0, 100)
+  title: string;
 
-    @IsString()
-    description: string;
+  @IsString()
+  description: string;
 
-    @IsOptional()
-    @IsString()
-    thumbnail_url?: string;
+  @IsString()
+  @IsOptional()
+  detail_description?: string;
 
-    @IsBoolean()
-    is_paid: boolean;
+  @IsOptional()
+  @IsString()
+  thumbnail_url?: string;
 
-    @IsNumber()
-    @IsOptional()
-    price?: number;
+  @IsBoolean()
+  is_paid: boolean;
 
-    @IsBoolean()
-    @IsOptional()
-    is_approved?: boolean;
+  @IsNumber()
+  @IsOptional()
+  price?: number;
 
-    @IsOptional()
-    @IsArray()
-    @IsUUID("4", { each: true })  
-    categories?: string[];
+  @IsNumber()
+  @IsOptional()
+  @Min(0)
+  @Max(100)
+  discount?: number;
 
-    @IsOptional()
-    @IsArray()
-    @IsUUID("4", { each: true })
-    standards?: string[];
+  @IsBoolean()
+  @IsOptional()
+  is_approved?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  categories?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  standards?: string[];
 }

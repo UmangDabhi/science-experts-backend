@@ -1,28 +1,33 @@
-import { IsBoolean, IsNumber, IsOptional, IsString, Length } from "class-validator";
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateModuleDto {
-    @IsString()
-    @Length(0, 100)
-    title: string;
+  @IsString()
+  @Length(0, 100)
+  title: string;
 
-    @IsOptional()
-    @IsString()
-    description?: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
 
-    @IsOptional()
-    @IsString()
-    thumbnail_url?: string;
+  @IsOptional()
+  @IsString()
+  thumbnail_url?: string;
 
-    @IsString()
-    video_url: string;
+  @IsString()
+  video_url: string;
 
-    @IsNumber()
-    duration: Number;
+  @IsNumber()
+  duration: Number;
 
-    @IsBoolean()
-    is_free_to_watch: boolean;
+  @IsBoolean()
+  is_free_to_watch: boolean;
 
-    @IsString()
-    course: string;
-
+  @IsString()
+  course: string;
 }

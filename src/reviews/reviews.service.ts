@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { User } from 'src/user/entities/user.entity';
@@ -22,39 +28,45 @@ export class ReviewsService {
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
     @InjectRepository(ModuleEntity)
-    private readonly moduleRepository: Repository<ModuleEntity>
-  ) { }
+    private readonly moduleRepository: Repository<ModuleEntity>,
+  ) {}
   async create(currUser: User, createReviewDto: CreateReviewDto) {
     try {
-      const existingCourse = await this.courseRepository.findOne({ where: { id: createReviewDto.course } });
+      const existingCourse = await this.courseRepository.findOne({
+        where: { id: createReviewDto.course },
+      });
       if (!existingCourse) {
-        throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND)
+        throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       }
-      const existingModule = await this.moduleRepository.findOne({ where: { id: createReviewDto.module } });
+      const existingModule = await this.moduleRepository.findOne({
+        where: { id: createReviewDto.module },
+      });
       if (!existingModule) {
-        throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND)
+        throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
       }
       const newReview = await this.reviewRepository.save({
         course: existingCourse,
         module: existingModule,
         student: { id: currUser.id },
-        review: createReviewDto.review
-      })
-      return newReview
+        review: createReviewDto.review,
+      });
+      return newReview;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_REVIEW);
     }
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<PaginatedResult<Review>> {
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Review>> {
     try {
       const searchableFields: (keyof Review)[] = ['review'];
 
       const result = await pagniateRecords(
         this.reviewRepository,
         paginationDto,
-        searchableFields
+        searchableFields,
       );
 
       return result;
@@ -65,26 +77,28 @@ export class ReviewsService {
 
   async update(currUser: User, id: string, updateReviewDto: UpdateReviewDto) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      await this.reviewRepository.update({ id: id, student: { id: currUser.id } }, { review: updateReviewDto.review });
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      await this.reviewRepository.update(
+        { id: id, student: { id: currUser.id } },
+        { review: updateReviewDto.review },
+      );
       return;
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw error;
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
     }
   }
 
   async showAsTestimonial(currUser: User, id: string) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      await this.reviewRepository.update({ id: id, student: { id: currUser.id } }, { show_as_testimonials: true });
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      await this.reviewRepository.update(
+        { id: id, student: { id: currUser.id } },
+        { show_as_testimonials: true },
+      );
       return;
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw error;
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
     }
   }
@@ -94,14 +108,19 @@ export class ReviewsService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const review = await this.reviewRepository.findOne({ where: { id: id, student: { id: currUser.id } } });
+      const review = await this.reviewRepository.findOne({
+        where: { id: id, student: { id: currUser.id } },
+      });
       if (!review) {
         throw new NotFoundException(ERRORS.ERROR_REVIEW_NOT_FOUND);
       }
       await this.reviewRepository.delete(review.id);
       return;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_REVIEW);

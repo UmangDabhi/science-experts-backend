@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { ProgressService } from './progress.service';
 import { CreateProgressDto } from './dto/create-progress.dto';
 import { UpdateProgressDto } from './dto/update-progress.dto';
@@ -10,12 +20,15 @@ import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface
 
 @Controller('progress')
 export class ProgressController {
-  constructor(private readonly progressService: ProgressService) { }
+  constructor(private readonly progressService: ProgressService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_PROGRESS)
   @ResponseMessage(MESSAGES.PROGRESS_CREATED)
-  create(@Req() req: RequestWithUser, @Body() createProgressDto: CreateProgressDto) {
+  create(
+    @Req() req: RequestWithUser,
+    @Body() createProgressDto: CreateProgressDto,
+  ) {
     return this.progressService.create(req.user, createProgressDto);
   }
 

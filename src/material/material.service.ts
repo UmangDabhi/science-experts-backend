@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ERRORS } from 'src/Helper/message/error.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
@@ -13,18 +18,18 @@ import { Material } from './entities/material.entity';
 export class MaterialService {
   constructor(
     @InjectRepository(Material)
-    private readonly materialRepository: Repository<Material>
-  ) { }
+    private readonly materialRepository: Repository<Material>,
+  ) {}
   async create(currUser: User, createMaterialDto: CreateMaterialDto) {
     try {
       const newMaterial = this.materialRepository.create({
         ...createMaterialDto,
         course: { id: createMaterialDto.course },
-        tutor: { id: currUser.id }
+        tutor: { id: currUser.id },
       });
       return await this.materialRepository.save(newMaterial);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_MATERIAL);
     }
   }
@@ -50,27 +55,37 @@ export class MaterialService {
 
   async findOne(id: string) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const material = await this.materialRepository.findOne({ where: { id: id } });
+      const material = await this.materialRepository.findOne({
+        where: { id: id },
+      });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
 
       material.material_url = `${process.env.BASE_MEDIA_URL}/${material.material_url}`;
       return material;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
+        throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIAL);
     }
   }
 
-  async update(currUser: User, id: string, updateMaterialDto: UpdateMaterialDto) {
+  async update(
+    currUser: User,
+    id: string,
+    updateMaterialDto: UpdateMaterialDto,
+  ) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const material = await this.materialRepository.findOne({ where: { id: id, tutor: { id: currUser.id } } });
+      const material = await this.materialRepository.findOne({
+        where: { id: id, tutor: { id: currUser.id } },
+      });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
 
@@ -80,7 +95,10 @@ export class MaterialService {
       await this.materialRepository.update(id, updateData);
       return;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof NotFoundException)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof NotFoundException
+      )
         throw error;
 
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MATERIAL);
@@ -92,14 +110,19 @@ export class MaterialService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const material = await this.materialRepository.findOne({ where: { id: id, tutor: { id: currUser.id } } })
+      const material = await this.materialRepository.findOne({
+        where: { id: id, tutor: { id: currUser.id } },
+      });
       if (!material) {
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
       }
       await this.materialRepository.softDelete(id);
       return;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_MATERIAL);

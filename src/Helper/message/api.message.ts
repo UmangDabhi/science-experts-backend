@@ -53,5 +53,4 @@ export const API_ENDPOINT = {
   GET_ALL_REVIEW: 'get_all_review',
   UPDATE_REVIEW: 'update_review',
   DELETE_REVIEW: 'delete_review',
-
 };

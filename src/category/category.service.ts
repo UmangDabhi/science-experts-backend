@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,11 +18,11 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 export class CategoryService {
   constructor(
     @InjectRepository(Category)
-    private readonly categoryRepository: Repository<Category>
-  ) { }
+    private readonly categoryRepository: Repository<Category>,
+  ) {}
   async create(createCategoryDto: CreateCategoryDto) {
     try {
-      const newCategory = this.categoryRepository.create(createCategoryDto,);
+      const newCategory = this.categoryRepository.create(createCategoryDto);
       return await this.categoryRepository.save(newCategory);
     } catch (error) {
       if (error.code === '23505') {
@@ -45,13 +51,18 @@ export class CategoryService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const category = await this.categoryRepository.findOne({ where: { id: id } });
+      const category = await this.categoryRepository.findOne({
+        where: { id: id },
+      });
       if (!category) {
         throw new NotFoundException(ERRORS.ERROR_CATEGORY_NOT_FOUND);
       }
       return category;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_CATEGORY);
@@ -63,14 +74,19 @@ export class CategoryService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const category = await this.categoryRepository.findOne({ where: { id: id } });
+      const category = await this.categoryRepository.findOne({
+        where: { id: id },
+      });
       if (!category) {
         throw new NotFoundException(ERRORS.ERROR_CATEGORY_NOT_FOUND);
       }
       await this.categoryRepository.update(id, updateCategoryDto);
       return;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_CATEGORY);
@@ -82,7 +98,9 @@ export class CategoryService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const category = await this.categoryRepository.findOne({ where: { id: id } });
+      const category = await this.categoryRepository.findOne({
+        where: { id: id },
+      });
       if (!category) {
         throw new NotFoundException(ERRORS.ERROR_CATEGORY_NOT_FOUND);
       }
@@ -90,10 +108,13 @@ export class CategoryService {
       return;
     } catch (error) {
       console.log(error);
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
-      if(error.code  == "23503"){
+      if (error.code == '23503') {
         throw new ConflictException(ERRORS.ERROR_CATEGORY_ASSIGNED_ALREADY);
       }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_CATEGORY);

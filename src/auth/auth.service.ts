@@ -1,5 +1,9 @@
 // src/auth/auth.service.ts
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
 import { User } from '../user/entities/user.entity';
@@ -10,14 +14,13 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private jwtService: JwtService,
-  ) { }
+  ) {}
 
   async login(user: User) {
     const user_data = await this.userService.findByEmail(user.email);
-    if (!user_data)
-      throw new UnauthorizedException("User Not Found");
+    if (!user_data) throw new UnauthorizedException('User Not Found');
     if (!(await bcrypt.compare(user.password, user_data.password)))
-      throw new ConflictException("Wrong Password");
+      throw new ConflictException('Wrong Password');
 
     const payload = { email: user.email, sub: user.id, role: user.role };
     return {

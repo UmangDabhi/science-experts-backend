@@ -22,9 +22,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message;
     if (exception instanceof HttpException) {
       const responseBody = exception.getResponse();
-      message = typeof responseBody === 'object' && responseBody['message']
-        ? responseBody['message']
-        : 'An error occurred';
+      message =
+        typeof responseBody === 'object' && responseBody['message']
+          ? responseBody['message']
+          : 'An error occurred';
     } else {
       message = 'Internal server error';
     }

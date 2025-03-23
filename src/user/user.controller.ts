@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, SetMetadata, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  SetMetadata,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,7 +21,7 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService) {}
 
   @Post(API_ENDPOINT.CREATE_USER)
   @ResponseMessage(MESSAGES.USER_CREATED)

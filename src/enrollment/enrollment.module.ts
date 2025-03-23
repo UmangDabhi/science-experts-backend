@@ -11,4 +11,4 @@ import { Course } from 'src/course/entities/course.entity';
   controllers: [EnrollmentController],
   providers: [EnrollmentService],
 })
-export class EnrollmentModule { }
+export class EnrollmentModule {}

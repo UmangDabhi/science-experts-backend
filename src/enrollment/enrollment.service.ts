@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { User } from 'src/user/entities/user.entity';
@@ -13,26 +19,27 @@ import { Course } from 'src/course/entities/course.entity';
 
 @Injectable()
 export class EnrollmentService {
-
   constructor(
     @InjectRepository(Enrollment)
     private readonly enrollmentRepository: Repository<Enrollment>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Course)
-    private readonly courseRepository: Repository<Course>
-  ) { }
+    private readonly courseRepository: Repository<Course>,
+  ) {}
   async create(currUser: User, createEnrollmentDto: CreateEnrollmentDto) {
     try {
-      const existingCourse = await this.courseRepository.findOne({ where: { id: createEnrollmentDto.course } });
+      const existingCourse = await this.courseRepository.findOne({
+        where: { id: createEnrollmentDto.course },
+      });
       if (!existingCourse) {
-        throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND)
+        throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       }
       const newEnrollment = await this.enrollmentRepository.save({
         course: existingCourse,
-        student: { id: currUser.id }
-      })
-      return newEnrollment
+        student: { id: currUser.id },
+      });
+      return newEnrollment;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error.code === '23505') {
@@ -42,7 +49,9 @@ export class EnrollmentService {
     }
   }
 
-  async findAll(paginationDto: PaginationDto): Promise<PaginatedResult<Enrollment>> {
+  async findAll(
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Enrollment>> {
     try {
       const result = await pagniateRecords(
         this.enrollmentRepository,
@@ -58,12 +67,17 @@ export class EnrollmentService {
     return `This action returns a #${id} enrollment`;
   }
 
-  async update(currUser: User, id: string, updateEnrollmentDto: UpdateEnrollmentDto) {
+  async update(
+    currUser: User,
+    id: string,
+    updateEnrollmentDto: UpdateEnrollmentDto,
+  ) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const enrollment = await this.enrollmentRepository.findOne({ where: { id: id, student: { id: currUser.id } } });
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: { id: id, student: { id: currUser.id } },
+      });
       if (!enrollment)
         throw new NotFoundException(ERRORS.ERROR_ENROLLMENT_NOT_FOUND);
 
@@ -71,7 +85,10 @@ export class EnrollmentService {
       await this.enrollmentRepository.update(id, updateData);
       return;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof NotFoundException)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof NotFoundException
+      )
         throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
     }
@@ -82,14 +99,19 @@ export class EnrollmentService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const enrollment = await this.enrollmentRepository.findOne({ where: { id: id, student: { id: currUser.id } } });
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: { id: id, student: { id: currUser.id } },
+      });
       if (!enrollment) {
         throw new NotFoundException(ERRORS.ERROR_ENROLLMENT_NOT_FOUND);
       }
       await this.enrollmentRepository.delete(enrollment.id);
       return;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       // if (error.code == "23503") {

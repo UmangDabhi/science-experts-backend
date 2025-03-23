@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleDto } from './dto/update-module.dto';
 import { ERRORS } from 'src/Helper/message/error.message';
@@ -12,8 +17,9 @@ import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 export class ModuleService {
   constructor(
     @InjectRepository(ModuleEntity)
-    private readonly moduleRepository: Repository<ModuleEntity>
-  ) { }c
+    private readonly moduleRepository: Repository<ModuleEntity>,
+  ) {}
+  c;
   async create(createModuleDto: CreateModuleDto) {
     try {
       const newModule = this.moduleRepository.create({
@@ -22,7 +28,7 @@ export class ModuleService {
       });
       return await this.moduleRepository.save(newModule);
     } catch (error) {
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_MODULE);
     }
   }
@@ -43,12 +49,12 @@ export class ModuleService {
   async findAllByCourseId(courseId: string) {
     try {
       const result = await this.moduleRepository.find({
-          where: {
-            course: {
-              id: courseId
-            }
-          }
-        });
+        where: {
+          course: {
+            id: courseId,
+          },
+        },
+      });
       return result;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULES);
@@ -57,54 +63,57 @@ export class ModuleService {
 
   async findOne(id: string) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED)
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const module = await this.moduleRepository.findOne({ where: { id } })
-      if (!module)
-        throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
+      const module = await this.moduleRepository.findOne({ where: { id } });
+      if (!module) throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
 
       return module;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
         throw error;
-      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULE)
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULE);
     }
   }
 
   async update(id: string, updateModuleDto: UpdateModuleDto) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED)
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       const module = await this.moduleRepository.findOne({ where: { id } });
-      if (!module)
-        throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND)
+      if (!module) throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
       const updateData: any = { ...updateModuleDto };
       if (updateModuleDto.course)
-        updateData.course = { id: updateModuleDto.course }
+        updateData.course = { id: updateModuleDto.course };
       else delete updateData.course;
       await this.moduleRepository.update(id, updateData);
       return;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
         throw error;
-      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MODULE)
+      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MODULE);
     }
   }
 
   async remove(id: string) {
     try {
-      if (!id)
-        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const module = await this.moduleRepository.findOne({ where: { id } })
-      if (!module)
-        throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
+      const module = await this.moduleRepository.findOne({ where: { id } });
+      if (!module) throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
 
       await this.moduleRepository.softDelete(id);
       return;
     } catch (error) {
-      if (error instanceof NotFoundException || error instanceof BadRequestException)
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
         throw error;
 
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_MODULE);

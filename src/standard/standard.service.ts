@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStandardDto } from './dto/create-standard.dto';
 import { UpdateStandardDto } from './dto/update-standard.dto';
 import { Standard } from './entities/standard.entity';
@@ -12,8 +18,8 @@ import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 export class StandardService {
   constructor(
     @InjectRepository(Standard)
-    private readonly standardRepository: Repository<Standard>
-  ) { }
+    private readonly standardRepository: Repository<Standard>,
+  ) {}
   async create(createStandardDto: CreateStandardDto) {
     try {
       const newStandard = this.standardRepository.create(createStandardDto);
@@ -45,13 +51,18 @@ export class StandardService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const standard = await this.standardRepository.findOne({ where: { id: id } });
+      const standard = await this.standardRepository.findOne({
+        where: { id: id },
+      });
       if (!standard) {
         throw new NotFoundException(ERRORS.ERROR_STANDARD_NOT_FOUND);
       }
       return standard;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_STANDARD);
@@ -63,14 +74,19 @@ export class StandardService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const standard = await this.standardRepository.findOne({ where: { id: id } });
+      const standard = await this.standardRepository.findOne({
+        where: { id: id },
+      });
       if (!standard) {
         throw new NotFoundException(ERRORS.ERROR_STANDARD_NOT_FOUND);
       }
       await this.standardRepository.update(id, updateStandardDto);
       return;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_STANDARD);
@@ -82,17 +98,22 @@ export class StandardService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const standard = await this.standardRepository.findOne({ where: { id: id } });
+      const standard = await this.standardRepository.findOne({
+        where: { id: id },
+      });
       if (!standard) {
         throw new NotFoundException(ERRORS.ERROR_STANDARD_NOT_FOUND);
       }
       await this.standardRepository.delete(standard.id);
       return;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
-      if (error.code == "23503") {
+      if (error.code == '23503') {
         throw new ConflictException(ERRORS.ERROR_STANDARD_ASSIGNED_ALREADY);
       }
       throw new InternalServerErrorException(ERRORS.ERROR_DELETING_STANDARD);

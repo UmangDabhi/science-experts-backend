@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { StandardService } from './standard.service';
 import { CreateStandardDto } from './dto/create-standard.dto';
 import { UpdateStandardDto } from './dto/update-standard.dto';
@@ -10,7 +20,7 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 
 @Controller('standard')
 export class StandardController {
-  constructor(private readonly standardService: StandardService) { }
+  constructor(private readonly standardService: StandardService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_STANDARD)
@@ -22,7 +32,7 @@ export class StandardController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_STANDARD)
   @ResponseMessage(MESSAGES.ALL_STANDARD_FETCHED)
-  findAll(@Query() paginationDto:PaginationDto) {
+  findAll(@Query() paginationDto: PaginationDto) {
     return this.standardService.findAll(paginationDto);
   }
 
@@ -36,7 +46,10 @@ export class StandardController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(`${API_ENDPOINT.UPDATE_STANDARD}/:id`)
   @ResponseMessage(MESSAGES.STANDARD_UPDATED)
-  update(@Param('id') id: string, @Body() updateStandardDto: UpdateStandardDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateStandardDto: UpdateStandardDto,
+  ) {
     return this.standardService.update(id, updateStandardDto);
   }
 

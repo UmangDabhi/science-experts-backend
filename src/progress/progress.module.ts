@@ -8,8 +8,8 @@ import { ProgressController } from './progress.controller';
 import { ProgressService } from './progress.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Progress,User,Course,ModuleEntity])],
+  imports: [TypeOrmModule.forFeature([Progress, User, Course, ModuleEntity])],
   controllers: [ProgressController],
   providers: [ProgressService],
 })
-export class ProgressModule { }
+export class ProgressModule {}

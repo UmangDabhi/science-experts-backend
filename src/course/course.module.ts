@@ -11,4 +11,4 @@ import { Standard } from 'src/standard/entities/standard.entity';
   controllers: [CourseController],
   providers: [CourseService],
 })
-export class CourseModule { }
+export class CourseModule {}

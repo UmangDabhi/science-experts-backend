@@ -14,7 +14,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -24,6 +24,9 @@ export class Course extends BaseEntity {
 
   @Column()
   description: string;
+
+  @Column({ nullable: true })
+  detail_description: string;
 
   @Column({ nullable: true })
   thumbnail_url: string;
@@ -40,6 +43,12 @@ export class Course extends BaseEntity {
     nullable: true,
   })
   price: number;
+
+  @Column({
+    type: 'int',
+    default: 0,
+  })
+  discount: number;
 
   @Column({ nullable: true })
   certificate_url: string;
@@ -63,7 +72,9 @@ export class Course extends BaseEntity {
   @OneToMany(() => ModuleEntity, (modules) => modules.course)
   modules: ModuleEntity[];
 
-  @OneToMany(() => Material, (materials) => materials.course, { nullable: true })
+  @OneToMany(() => Material, (materials) => materials.course, {
+    nullable: true,
+  })
   materials: Material[];
 
   @OneToMany(() => Enrollment, (enrollments) => enrollments.course)

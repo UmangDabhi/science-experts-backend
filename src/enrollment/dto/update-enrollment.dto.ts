@@ -3,13 +3,13 @@ import { CreateEnrollmentDto } from './create-enrollment.dto';
 import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateEnrollmentDto extends PartialType(CreateEnrollmentDto) {
-    @IsNumber()
-    @IsOptional()
-    course_progress?: number;
+  @IsNumber()
+  @IsOptional()
+  course_progress?: number;
 
-    @IsOptional()
-    feedback?: string;
+  @IsOptional()
+  feedback?: string;
 
-    @IsOptional()
-    completed_at?: Date;
+  @IsOptional()
+  completed_at?: Date;
 }

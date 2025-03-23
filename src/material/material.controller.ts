@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { MaterialService } from './material.service';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
@@ -11,15 +22,17 @@ import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface
 
 @Controller('material')
 export class MaterialController {
-  constructor(private readonly materialService: MaterialService) { }
+  constructor(private readonly materialService: MaterialService) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_MATERIAL)
   @ResponseMessage(MESSAGES.MATERIAL_CREATED)
-  create(@Req() req: RequestWithUser, @Body() createMaterialDto: CreateMaterialDto) {
+  create(
+    @Req() req: RequestWithUser,
+    @Body() createMaterialDto: CreateMaterialDto,
+  ) {
     return this.materialService.create(req.user, createMaterialDto);
   }
-
 
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
@@ -38,10 +51,13 @@ export class MaterialController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(`${API_ENDPOINT.UPDATE_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_UPDATED)
-  update(@Req() req: RequestWithUser, @Param('id') id: string, @Body() updateMaterialDto: UpdateMaterialDto) {
+  update(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+    @Body() updateMaterialDto: UpdateMaterialDto,
+  ) {
     return this.materialService.update(req.user, id, updateMaterialDto);
   }
-
 
   @UseGuards(AuthGuard('jwt'))
   @Delete(`${API_ENDPOINT.DELETE_MATERIAL}/:id`)
