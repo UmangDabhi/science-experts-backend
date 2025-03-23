@@ -1,29 +1,26 @@
 import { Course } from "src/course/entities/course.entity";
 import { BaseEntity } from "src/Helper/base.entity";
+import { ModuleEntity } from "src/module/entities/module.entity";
 import { User } from "src/user/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, Unique } from "typeorm";
 
 @Entity()
-@Unique(['student', 'course'])
-export class Enrollment extends BaseEntity {
+@Unique(['student', 'course', 'module'])
+export class Progress extends BaseEntity {
 
-    @ManyToOne(() => User, user => user.enrollments)
+    @ManyToOne(() => User, user => user.progress)
     @JoinColumn({ name: "student_id" })
     student: User;
 
-    @ManyToOne(() => Course, course => course.enrollments)
+    @ManyToOne(() => Course, course => course.progress)
     @JoinColumn({ name: "course_id" })
     course: Course;
 
-    @Column({ default: 0 })
-    course_progress: number;
-
-    @Column({ nullable: true })
-    feedback: String;
+    @ManyToOne(() => ModuleEntity, module => module.progress)
+    @JoinColumn({ name: "module_id" })
+    module: ModuleEntity;
 
     @Column({ default: () => 'CURRENT_TIMESTAMP' })
-    enrolled_at: Date;
-
-    @Column({ nullable: true })
     completed_at: Date;
+
 }

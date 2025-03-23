@@ -25,7 +25,7 @@ export class CreateCourseDto {
 
     @IsOptional()
     @IsArray()
-    @IsUUID("4", { each: true })  // Ensure each ID is a valid UUID
+    @IsUUID("4", { each: true })  
     categories?: string[];
 
     @IsOptional()

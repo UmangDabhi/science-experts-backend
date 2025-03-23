@@ -4,6 +4,7 @@ import { BaseEntity } from 'src/Helper/base.entity';
 import { Is_Approved, Is_Paid } from 'src/Helper/constants';
 import { Material } from 'src/material/entities/material.entity';
 import { ModuleEntity } from 'src/module/entities/module.entity';
+import { Progress } from 'src/progress/entities/progress.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -13,7 +14,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
+  OneToMany
 } from 'typeorm';
 
 @Entity()
@@ -40,6 +41,9 @@ export class Course extends BaseEntity {
   })
   price: number;
 
+  @Column({ nullable: true })
+  certificate_url: string;
+
   @Column({
     default: 0.0,
   })
@@ -59,11 +63,14 @@ export class Course extends BaseEntity {
   @OneToMany(() => ModuleEntity, (modules) => modules.course)
   modules: ModuleEntity[];
 
-  @OneToMany(() => Material, (materials) => materials.course)
+  @OneToMany(() => Material, (materials) => materials.course, { nullable: true })
   materials: Material[];
 
   @OneToMany(() => Enrollment, (enrollments) => enrollments.course)
   enrollments: Enrollment[];
+
+  @OneToMany(() => Progress, (progress) => progress.course)
+  progress: Progress[];
 
   @ManyToMany(() => Category, (categories) => categories.courses)
   @JoinTable({

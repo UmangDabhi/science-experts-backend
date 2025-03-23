@@ -37,4 +37,18 @@ export const MESSAGES = {
     STANDARD_FETCHED: 'Standard Fethced Successfully',
     STANDARD_UPDATED: 'Standard Updated Successfully',
     STANDARD_DELETED: 'Standard Deleted Successfully',
+
+    ENROLLMENT_CREATED: 'Enrollment Created Successfully',
+    ALL_ENROLLMENT_FETCHED: 'Enrollments Fetched Successfully',
+    ENROLLMENT_FETCHED: 'Enrollment Fethced Successfully',
+    ENROLLMENT_UPDATED: 'Enrollment Updated Successfully',
+    ENROLLMENT_DELETED: 'Enrollment Deleted Successfully',
+
+    PROGRESS_CREATED: 'Progress Created Successfully',
+    PROGRESS_DELETED: 'Progress Deleted Successfully',
+
+    REVIEW_CREATED: 'Review Created Successfully',
+    ALL_REVIEW_FETCHED: 'Reviews Fetched Successfully',
+    REVIEW_UPDATED: 'Review Updated Successfully',
+    REVIEW_DELETED: 'Review Deleted Successfully',
 }

@@ -73,7 +73,7 @@ export class CourseService {
       if (!id)
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const course = await this.courseRepository.findOne({ where: { id: id }, relations: ['modules', 'tutor'] });
+      const course = await this.courseRepository.findOne({ where: { id: id }, relations: ['modules', 'tutor', 'materials', 'categories', 'standards', 'modules.progress'] });
       if (!course)
         throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
 

@@ -19,6 +19,8 @@ import { PaymentModule } from './payment/payment.module';
 import { UserModule } from './user/user.module';
 import { CategoryModule } from './category/category.module';
 import { StandardModule } from './standard/standard.module';
+import { ProgressModule } from './progress/progress.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -56,6 +58,9 @@ import { StandardModule } from './standard/standard.module';
     FileModule,
     CategoryModule,
     StandardModule,
+    CertificateModule,
+    ProgressModule,
+    ReviewsModule
   ],
   controllers: [AppController],
   providers: [

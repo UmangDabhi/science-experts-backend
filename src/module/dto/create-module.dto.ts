@@ -1,4 +1,4 @@
-import { IsBoolean, IsOptional, IsString, Length } from "class-validator";
+import { IsBoolean, IsNumber, IsOptional, IsString, Length } from "class-validator";
 
 export class CreateModuleDto {
     @IsString()
@@ -15,6 +15,9 @@ export class CreateModuleDto {
 
     @IsString()
     video_url: string;
+
+    @IsNumber()
+    duration: Number;
 
     @IsBoolean()
     is_free_to_watch: boolean;

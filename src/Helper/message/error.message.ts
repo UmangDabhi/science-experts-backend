@@ -46,7 +46,6 @@ export const ERRORS = {
 
     ERROR_CATEGORY_ASSIGNED_ALREADY: "Category Already Assigned To Courses",
 
-
     ERROR_CREATING_STANDARD: 'Error Creating Standard',
     ERROR_FETCHING_STANDARDS: 'Error Fetching Standards',
     ERROR_FETCHING_STANDARD: 'Error Fetching Standard',
@@ -54,7 +53,24 @@ export const ERRORS = {
     ERROR_DELETING_STANDARD: 'Error Deleting Standard',
     ERROR_STANDARD_NOT_FOUND: 'Standard Not Found',
     ERROR_STANDARD_ALREADY_EXISTS: "Standard Already Exists",
-
     ERROR_STANDARD_ASSIGNED_ALREADY: "Standards Already Assigned To Courses",
+
+    ERROR_CREATING_ENROLLMENT: 'Error Creating Enrollment',
+    ERROR_FETCHING_ENROLLMENTS: 'Error Fetching Enrollments',
+    ERROR_FETCHING_ENROLLMENT: 'Error Fetching Enrollment',
+    ERROR_UPDATING_ENROLLMENT: 'Error Updating Enrollment',
+    ERROR_DELETING_ENROLLMENT: 'Error Deleting Enrollment',
+    ERROR_ENROLLMENT_ALREADY_EXISTS: "Enrollment Already Exists",
+    ERROR_ENROLLMENT_NOT_FOUND: 'Enrollment Not Found',
+
+    ERROR_CREATING_PROGRESS: 'Error Creating Progress',
+    ERROR_DELETING_PROGRESS: 'Error Deleting Progress',
+    ERROR_PROGRESS_NOT_FOUND: 'Progress Not Found',
+
+    ERROR_CREATING_REVIEW: 'Error Creating Review',
+    ERROR_UPDATING_REVIEW: 'Error Updating Review',
+    ERROR_DELETING_REVIEW: 'Error Deleting Review',
+    ERROR_FETCHING_REVIEWS: 'Error Fetching Reviews',
+    ERROR_REVIEW_NOT_FOUND: 'Review Not Found',
 
 }

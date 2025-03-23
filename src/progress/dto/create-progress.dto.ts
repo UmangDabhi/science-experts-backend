@@ -1,6 +1,9 @@
 import { IsUUID } from "class-validator";
 
-export class CreateEnrollmentDto {
+export class CreateProgressDto {
     @IsUUID()
     course: string;
+
+    @IsUUID()
+    module: string;
 }
