@@ -21,7 +21,7 @@ import { CategoryModule } from './category/category.module';
 import { StandardModule } from './standard/standard.module';
 import { ProgressModule } from './progress/progress.module';
 import { ReviewsModule } from './reviews/reviews.module';
-
+import * as path from 'path';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -29,9 +29,9 @@ import { ReviewsModule } from './reviews/reviews.module';
       serveRoot: '/public/',
       // exclude: ['/api/(.*)'],
     }),
-    
     ConfigModule.forRoot({
-      isGlobal: true,
+      isGlobal: true,  // Makes the config globally available
+      envFilePath: path.resolve(__dirname, '..', '.env'), // Ensure it loads the .env file
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
