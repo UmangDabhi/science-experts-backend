@@ -1,42 +1,31 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { ResponseMessage } from 'src/Helper/constants';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(
+    @InjectRepository(Enrollment)
+    private readonly enrollmentRepository: Repository<Enrollment>,
+    private readonly paymentService: PaymentService) { }
 
-  @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @UseGuards(AuthGuard('jwt'))
+  @Post(API_ENDPOINT.CREATE_PAYMENT)
+  @ResponseMessage(MESSAGES.PAYMENT_CREATED)
+  async createOrder(@Body('amount') amount: number) {
+    return this.paymentService.createOrder(amount);
   }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+  @UseGuards(AuthGuard('jwt'))
+  @Post(API_ENDPOINT.VERIFY_PAYMENT)
+  @ResponseMessage(MESSAGES.PAYMENT_VERIFIED)
+  async verifyPayment(@Body() paymentDetails: any) {
+    return this.paymentService.verifyPayment(paymentDetails);
   }
 }

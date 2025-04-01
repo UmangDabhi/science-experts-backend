@@ -20,7 +20,6 @@ export class Review extends BaseEntity {
   @Column({ type: "double precision", default: 5 })
   rating: number;
 
-
   @Column({ type: 'boolean', default: false })
   show_as_testimonials: Boolean;
 

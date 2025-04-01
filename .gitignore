@@ -2,8 +2,8 @@
 /dist
 /node_modules
 /build
-/public
-
+/public/uploads
+rzp.csv
 # Logs
 logs
 *.log

@@ -29,6 +29,7 @@ import { ReviewsModule } from './reviews/reviews.module';
       serveRoot: '/public/',
       // exclude: ['/api/(.*)'],
     }),
+    
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -61,6 +62,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     CertificateModule,
     ProgressModule,
     ReviewsModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [

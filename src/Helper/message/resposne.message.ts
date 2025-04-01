@@ -47,6 +47,9 @@ export const MESSAGES = {
   PROGRESS_CREATED: 'Progress Created Successfully',
   PROGRESS_DELETED: 'Progress Deleted Successfully',
 
+  PAYMENT_CREATED: 'Payment Created Successfully',
+  PAYMENT_VERIFIED: 'Payment Verified Successfully',
+
   REVIEW_CREATED: 'Review Created Successfully',
   ALL_REVIEW_FETCHED: 'Reviews Fetched Successfully',
   REVIEW_UPDATED: 'Review Updated Successfully',

@@ -49,6 +49,9 @@ export const API_ENDPOINT = {
   CREATE_PROGRESS: 'create_progress',
   DELETE_PROGRESS: 'delete_progress',
 
+  CREATE_PAYMENT: 'create_payment',
+  VERIFY_PAYMENT: 'verify_payment',
+
   CREATE_REVIEW: 'create_review',
   GET_ALL_REVIEW: 'get_all_review',
   UPDATE_REVIEW: 'update_review',
