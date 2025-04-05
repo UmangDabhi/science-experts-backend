@@ -41,6 +41,10 @@ exports.AppModule = AppModule = __decorate([
                 rootPath: (0, path_1.join)(__dirname, '..', 'public'),
                 serveRoot: '/public/',
             }),
+            serve_static_1.ServeStaticModule.forRoot({
+                rootPath: (0, path_1.join)(__dirname, '..', 'build'),
+                exclude: ['/api*', '/public*'],
+            }),
             config_1.ConfigModule.forRoot({
                 isGlobal: true,
                 envFilePath: path.resolve(__dirname, '..', '.env'),
@@ -55,6 +59,14 @@ exports.AppModule = AppModule = __decorate([
                     username: configService.get('DB_USERNAME'),
                     password: configService.get('DB_PASSWORD'),
                     database: configService.get('DB_DATABASE'),
+                    ssl: {
+                        rejectUnauthorized: false,
+                    },
+                    extra: {
+                        ssl: {
+                            rejectUnauthorized: false,
+                        },
+                    },
                     autoLoadEntities: true,
                     synchronize: true,
                 }),

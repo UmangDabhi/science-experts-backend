@@ -27,7 +27,11 @@ import * as path from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public/',
-      // exclude: ['/api/(.*)'],
+    }),
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'build'),
+      exclude: ['/api*', '/public*'],
     }),
     ConfigModule.forRoot({
       isGlobal: true,  // Makes the config globally available
