@@ -35,4 +35,8 @@ export class AppService implements OnModuleInit {
       console.log(`ℹ️ Users already exist (${count}), skipping seeding.`);
     }
   }
+
+  getHello(): string {
+    return 'Hello World!';
+  }
 }
