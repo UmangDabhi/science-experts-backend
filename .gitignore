@@ -1,6 +1,7 @@
 # compiled output
+/dist
 /dist/*
-!/dist/.gitkeep
+
 /node_modules
 /public/uploads
 rzp.csv

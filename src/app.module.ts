@@ -22,6 +22,7 @@ import { StandardModule } from './standard/standard.module';
 import { ProgressModule } from './progress/progress.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import * as path from 'path';
+import { User } from './user/entities/user.entity';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -59,7 +60,7 @@ import * as path from 'path';
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([Log]),
+    TypeOrmModule.forFeature([Log,User]),
     UserModule,
     CourseModule,
     ModuleModule,
