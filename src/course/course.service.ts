@@ -76,11 +76,7 @@ export class CourseService {
         relations
       );
 
-      result.data.forEach((course) => {
-        if (course.thumbnail_url) {
-          course.thumbnail_url = `${process.env.BASE_MEDIA_URL}/${course.thumbnail_url}`;
-        }
-      });
+
 
       return result;
     } catch (error) {
@@ -107,15 +103,7 @@ export class CourseService {
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
 
-      course.thumbnail_url = `${process.env.BASE_MEDIA_URL}/${course.thumbnail_url}`;
-      course.modules.forEach((module) => {
-        if (module.thumbnail_url) {
-          module.thumbnail_url = `${process.env.BASE_MEDIA_URL}/${module.thumbnail_url}`;
-        }
-        if (module.video_url) {
-          module.video_url = `${process.env.BASE_MEDIA_URL}/${module.video_url}`;
-        }
-      });
+   
       return course;
     } catch (error) {
       if (
@@ -129,6 +117,7 @@ export class CourseService {
 
   async update(currUser: User, id: string, updateCourseDto: UpdateCourseDto) {
     try {
+      console.log(updateCourseDto)
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
       const course = await this.courseRepository.findOne({
@@ -146,12 +135,14 @@ export class CourseService {
           id: In(updateCourseDto.standards),
         })
         : [];
-      const updateData: any = { ...updateCourseDto };
-      updateData.tutor = { id: currUser.id };
-      updateData.categories = categoryEntities;
-      updateData.standards = standardEntities;
+      Object.assign(course, {
+        ...updateCourseDto,
+        tutor: { id: currUser.id },
+        categories: categoryEntities,
+        standards: standardEntities,
+      });
 
-      await this.courseRepository.update(id, updateData);
+      await this.courseRepository.save(course);
       return;
     } catch (error) {
       if (
@@ -159,7 +150,7 @@ export class CourseService {
         error instanceof NotFoundException
       )
         throw error;
-
+      console.log(error)
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_COURSE);
     }
   }

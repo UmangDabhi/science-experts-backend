@@ -12,14 +12,16 @@ import { ModuleEntity } from './entities/module.entity';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
+import { Course } from 'src/course/entities/course.entity';
 
 @Injectable()
 export class ModuleService {
   constructor(
     @InjectRepository(ModuleEntity)
     private readonly moduleRepository: Repository<ModuleEntity>,
-  ) {}
-  c;
+    @InjectRepository(Course)
+    private readonly courseRepository: Repository<Course>,
+  ) { }
   async create(createModuleDto: CreateModuleDto) {
     try {
       const newModule = this.moduleRepository.create({
@@ -65,7 +67,7 @@ export class ModuleService {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const module = await this.moduleRepository.findOne({ where: { id } });
+      const module = await this.moduleRepository.findOne({ where: { id }, relations: ["course"] });
       if (!module) throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
 
       return module;
@@ -82,13 +84,31 @@ export class ModuleService {
   async update(id: string, updateModuleDto: UpdateModuleDto) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      const module = await this.moduleRepository.findOne({ where: { id } });
+
+      const module = await this.moduleRepository.findOne({
+        where: { id },
+        relations: ['course'], // include relations if needed
+      });
+
       if (!module) throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
-      const updateData: any = { ...updateModuleDto };
-      if (updateModuleDto.course)
-        updateData.course = { id: updateModuleDto.course };
-      else delete updateData.course;
-      await this.moduleRepository.update(id, updateData);
+
+      // If course ID is provided, fetch the course entity
+      let courseEntity = null;
+      if (updateModuleDto.course) {
+        courseEntity = await this.courseRepository.findOne({
+          where: { id: updateModuleDto.course },
+        });
+
+        if (!courseEntity) throw new NotFoundException("Course not found.");
+      }
+
+      Object.assign(module, {
+        ...updateModuleDto,
+        ...(courseEntity && { course: courseEntity }), // only assign if found
+      });
+
+      await this.moduleRepository.save(module);
+
       return;
     } catch (error) {
       if (
@@ -96,9 +116,12 @@ export class ModuleService {
         error instanceof BadRequestException
       )
         throw error;
+
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MODULE);
     }
   }
+
 
   async remove(id: string) {
     try {

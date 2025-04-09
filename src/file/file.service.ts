@@ -5,7 +5,8 @@ import { join, relative, extname } from 'path';
 import { promises as fsPromises } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { localStoragePath } from 'src/Helper/constants';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 @Injectable()
 export class FileService {
   private s3: AWS.S3;
@@ -16,6 +17,9 @@ export class FileService {
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
       region: process.env.AWS_REGION,
     });
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+      throw new Error('Missing AWS S3 configuration in environment variables');
+    }
   }
 
   private multerStorage = multer.diskStorage({
@@ -39,23 +43,32 @@ export class FileService {
   }
 
   async uploadToS3(file: Express.Multer.File, folder: string): Promise<string> {
-    const fileContent = await fsPromises.readFile(file.path);
+    const fileContent = file.path
+      ? await fsPromises.readFile(file.path)
+      : file.buffer;
+
     const params = {
       Bucket: process.env.AWS_BUCKET_NAME,
-      Key: `${folder}/${this.generateUniqueFilename(file.filename)}`,
+      Key: `${folder}/${this.generateUniqueFilename(file.originalname)}`,
       Body: fileContent,
       ContentType: file.mimetype,
-      ACL: 'public-read',
+      // ACL: 'public-read',
     };
 
     try {
       const uploadResult = await this.s3.upload(params).promise();
-      await fsPromises.unlink(file.path);
+
+      if (file.path) {
+        await fsPromises.unlink(file.path); // Cleanup temp file if saved
+      }
+
       return uploadResult.Location;
     } catch (error) {
+      console.error('S3 upload error:', error);
       throw new InternalServerErrorException('Error uploading file to S3');
     }
   }
+
 
   async uploadLocally(
     file: Express.Multer.File,
@@ -77,10 +90,16 @@ export class FileService {
   async uploadFile(
     file: Express.Multer.File,
     folder: string,
-  ): Promise<{ localPath: string; s3Url: string }> {
-    const localPath = await this.uploadLocally(file, folder);
+  ): Promise<{
+    // localPath: string;
+    s3Url: string
+  }> {
+    // const localPath = await this.uploadLocally(file, folder);
     const s3Url = await this.uploadToS3(file, folder);
-    return { localPath, s3Url };
+    return {
+      // localPath,
+      s3Url
+    };
   }
 
   async deleteFromS3(fileKey: string): Promise<void> {

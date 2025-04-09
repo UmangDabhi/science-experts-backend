@@ -1,6 +1,9 @@
 # compiled output
 /dist
 /dist/*
+dist
+/dist/
+dist/
 
 /node_modules
 /public/uploads

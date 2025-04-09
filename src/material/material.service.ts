@@ -19,7 +19,7 @@ export class MaterialService {
   constructor(
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
-  ) {}
+  ) { }
   async create(currUser: User, createMaterialDto: CreateMaterialDto) {
     try {
       const newMaterial = this.materialRepository.create({
@@ -42,11 +42,7 @@ export class MaterialService {
         paginationDto,
         searchableFields,
       );
-      result.data.forEach((material) => {
-        if (material.material_url) {
-          material.material_url = `${process.env.BASE_MEDIA_URL}/${material.material_url}`;
-        }
-      });
+
       return result;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
@@ -63,7 +59,6 @@ export class MaterialService {
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
 
-      material.material_url = `${process.env.BASE_MEDIA_URL}/${material.material_url}`;
       return material;
     } catch (error) {
       if (
