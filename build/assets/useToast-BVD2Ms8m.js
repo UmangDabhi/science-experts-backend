@@ -1,0 +1,1 @@
+import{r as a}from"./index-pR6HjcrU.js";const f=()=>{const[r,s]=a.useState([]),c=a.useCallback((n,i="info",o=3e3)=>{const e=Date.now();s(t=>[...t,{id:e,message:n,type:i,duration:o}]),setTimeout(()=>{s(t=>t.filter(u=>u.id!==e))},o)},[]);return{toasts:r,showToast:c}};export{f as u};
