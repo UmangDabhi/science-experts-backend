@@ -23,7 +23,7 @@ export class CreateModuleDto {
   video_url: string;
 
   @IsNumber()
-  duration: Number;
+  duration: number;
 
   @IsBoolean()
   is_free_to_watch: boolean;

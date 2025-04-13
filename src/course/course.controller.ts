@@ -15,11 +15,10 @@ import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
 import { CourseFilterDto } from './dto/filter-course.dto';
+import { UpdateCourseDto } from './dto/update-course.dto';
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) { }
@@ -37,8 +36,8 @@ export class CourseController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  findAll(@Query() courseFilterDto: CourseFilterDto, @Query() data: any) {
-    return this.courseService.findAll(courseFilterDto);
+  findAll( @Req() req: RequestWithUser,@Query() courseFilterDto: CourseFilterDto) {
+    return this.courseService.findAll(req.user,courseFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

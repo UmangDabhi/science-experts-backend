@@ -20,8 +20,8 @@ export class ModuleEntity extends BaseEntity {
   @Column({ nullable: true })
   video_url: string;
 
-  @Column({ nullable: true })
-  duration: Number;
+  @Column({ nullable: true, type: 'double precision' })
+  duration: number;
 
   @ManyToOne(() => Course, (course) => course.modules)
   @JoinColumn({ name: 'course_id' })
@@ -32,7 +32,7 @@ export class ModuleEntity extends BaseEntity {
     enum: Is_Free_To_Watch,
     default: Is_Free_To_Watch.NO,
   })
-  is_free_to_watch: Boolean;
+  is_free_to_watch: boolean;
 
   @OneToMany(() => Enrollment, (enrollments) => enrollments.course)
   enrollments: Enrollment[];

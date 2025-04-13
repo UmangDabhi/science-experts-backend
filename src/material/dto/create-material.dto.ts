@@ -1,5 +1,4 @@
 import {
-  IsBoolean,
   IsNumber,
   IsOptional,
   IsString,
@@ -19,8 +18,8 @@ export class CreateMaterialDto {
   material_url: string;
 
   @IsNumber()
-  amount: Number;
+  amount: number;
 
   @IsString()
-  course: string;
+  course?: string;
 }

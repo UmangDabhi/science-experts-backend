@@ -1,28 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
-import { MaterialService } from './material.service';
-import { CreateMaterialDto } from './dto/create-material.dto';
-import { UpdateMaterialDto } from './dto/update-material.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ResponseMessage } from 'src/Helper/constants';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { ResponseMessage } from 'src/Helper/constants';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
-import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { CreateMaterialDto } from './dto/create-material.dto';
+import { UpdateMaterialDto } from './dto/update-material.dto';
+import { MaterialService } from './material.service';
 
 @Controller('material')
 export class MaterialController {
-  constructor(private readonly materialService: MaterialService) {}
+  constructor(private readonly materialService: MaterialService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_MATERIAL)
@@ -37,8 +37,18 @@ export class MaterialController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.materialService.findAll(paginationDto);
+  findAll(
+    @Req() req: RequestWithUser,
+
+    @Query() paginationDto: PaginationDto) {
+    return this.materialService.findAll(req.user, paginationDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(`${API_ENDPOINT.GET_COURSE_MATERIAL}/:courseId`)
+  @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
+  findAllByCourseId(@Param('courseId') courseId: string) {
+    return this.materialService.findAllByCourseId(courseId);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -13,6 +13,7 @@ import { Repository } from 'typeorm';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { Material } from './entities/material.entity';
+import { Role } from 'src/Helper/constants';
 
 @Injectable()
 export class MaterialService {
@@ -24,9 +25,10 @@ export class MaterialService {
     try {
       const newMaterial = this.materialRepository.create({
         ...createMaterialDto,
-        course: { id: createMaterialDto.course },
+        course: createMaterialDto.course ? { id: createMaterialDto.course } : undefined, // Only add course if provided
         tutor: { id: currUser.id },
       });
+
       return await this.materialRepository.save(newMaterial);
     } catch (error) {
       console.log(error);
@@ -34,18 +36,37 @@ export class MaterialService {
     }
   }
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(currUser: User, paginationDto: PaginationDto) {
     try {
       const searchableFields: (keyof Material)[] = ['title'];
+      const queryOptions: any = {};
+      if (currUser.role == Role.TUTOR) {
+        queryOptions.tutor = { id: currUser.id };
+      }
       const result = await pagniateRecords(
         this.materialRepository,
         paginationDto,
         searchableFields,
+        queryOptions,
       );
 
       return result;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
+    }
+  }
+  async findAllByCourseId(courseId: string) {
+    try {
+      const result = await this.materialRepository.find({
+        where: {
+          course: {
+            id: courseId,
+          },
+        },
+      });
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULES);
     }
   }
 
@@ -95,7 +116,6 @@ export class MaterialService {
         error instanceof NotFoundException
       )
         throw error;
-
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MATERIAL);
     }
   }

@@ -37,7 +37,7 @@ export class Course extends BaseEntity {
     enum: Is_Paid,
     default: Is_Paid.NO,
   })
-  is_paid: Boolean;
+  is_paid: boolean;
 
   @Column({
     type: 'bigint',
@@ -64,7 +64,7 @@ export class Course extends BaseEntity {
     enum: Is_Approved,
     default: Is_Approved.NO,
   })
-  is_approved: Boolean;
+  is_approved: boolean;
 
   @ManyToOne(() => User, (tutor) => tutor.courses, { eager: true })
   @JoinColumn({ name: 'tutor_id' })

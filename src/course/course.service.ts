@@ -5,18 +5,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Category } from 'src/category/entities/category.entity';
 import { ERRORS } from 'src/Helper/message/error.message';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
+import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { In, Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto';
+import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
-import { Category } from 'src/category/entities/category.entity';
-import { Standard } from 'src/standard/entities/standard.entity';
-import { CourseFilterDto } from './dto/filter-course.dto';
 
 @Injectable()
 export class CourseService {
@@ -56,11 +55,13 @@ export class CourseService {
   }
 
   async findAll(
+    currUser: User,
     courseFilterDto: CourseFilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
       const searchableFields: (keyof Course)[] = ['title'];
       const queryOptions: any = {};
+
       if (courseFilterDto?.category) {
         queryOptions.categories = { id: courseFilterDto.category };
       }
@@ -75,8 +76,6 @@ export class CourseService {
         queryOptions,
         relations
       );
-
-
 
       return result;
     } catch (error) {
@@ -103,7 +102,7 @@ export class CourseService {
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
 
-   
+
       return course;
     } catch (error) {
       if (

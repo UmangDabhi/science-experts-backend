@@ -14,7 +14,7 @@ export class Material extends BaseEntity {
   @Column()
   material_url: string;
 
-  @ManyToOne(() => Course, (course) => course.materials)
+  @ManyToOne(() => Course, (course) => course.materials, { nullable: true })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
@@ -23,5 +23,5 @@ export class Material extends BaseEntity {
   tutor: User;
 
   @Column()
-  amount: Number;
+  amount: number;
 }
