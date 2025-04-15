@@ -40,6 +40,6 @@ export class ModuleEntity extends BaseEntity {
   @OneToMany(() => Progress, (progress) => progress.module)
   progress: Progress[];
 
-  @OneToMany(() => Review, (review) => review.module)
-  review: Review[];
+  @OneToMany(() => Review, (reviews) => reviews.module)
+  reviews: Review[];
 }

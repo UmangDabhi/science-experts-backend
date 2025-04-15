@@ -1,12 +1,12 @@
 import { Certificate } from 'src/certificate/entities/certificate.entity';
-import { CounterService } from 'src/counter/counter.service';
 import { Course } from 'src/course/entities/course.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Role } from 'src/Helper/constants';
+import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
-import { BeforeInsert, Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class User extends BaseEntity {
@@ -28,6 +28,12 @@ export class User extends BaseEntity {
     default: Role.STUDENT,
   })
   role: Role;
+
+  @Column({ type: "double precision", default: 0.0 })
+  expert_coins: number;
+
+  @Column({ type: "varchar", length: 8, nullable: true, unique: true })
+  referral_code: string;
 
   @Column({ nullable: true })
   phone_no: string;
@@ -65,6 +71,11 @@ export class User extends BaseEntity {
     nullable: true,
   })
   enrollments: Enrollment[];
+
+  @OneToMany(() => MaterialPurchase, (material_purchases) => material_purchases.student, {
+    nullable: true,
+  })
+  material_purchases: MaterialPurchase[];
 
   @OneToMany(() => Progress, (progress) => progress.student, { nullable: true })
   progress: Progress[];

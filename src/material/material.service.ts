@@ -14,6 +14,9 @@ import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { Material } from './entities/material.entity';
 import { Role } from 'src/Helper/constants';
+import { MaterialPublicDto } from './dto/material-public.dto';
+import { plainToInstance } from 'class-transformer';
+import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
 
 @Injectable()
 export class MaterialService {
@@ -43,13 +46,24 @@ export class MaterialService {
       if (currUser.role == Role.TUTOR) {
         queryOptions.tutor = { id: currUser.id };
       }
-      const result = await pagniateRecords(
+      const materials = await pagniateRecords(
         this.materialRepository,
         paginationDto,
         searchableFields,
         queryOptions,
       );
-
+      const result = materials;
+      if (currUser.role === Role.STUDENT) {
+        const studentResult: PaginatedResult<MaterialPublicDto> = {
+          ...materials,
+          data: materials.data.map(material =>
+            plainToInstance(MaterialPublicDto, material, {
+              excludeExtraneousValues: true,
+            }),
+          ),
+        };
+        return studentResult;
+      }
       return result;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
@@ -76,6 +90,10 @@ export class MaterialService {
 
       const material = await this.materialRepository.findOne({
         where: { id: id },
+        relations: [
+          'tutor',
+          'categories',
+        ],
       });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);

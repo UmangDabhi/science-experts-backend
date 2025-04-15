@@ -14,11 +14,8 @@ export class Enrollment extends BaseEntity {
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @Column({ default: 0 })
-  course_progress: number;
-
   @Column({ nullable: true })
-  feedback: String;
+  feedback: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
   enrolled_at: Date;

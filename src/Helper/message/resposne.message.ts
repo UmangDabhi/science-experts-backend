@@ -54,4 +54,6 @@ export const MESSAGES = {
   ALL_REVIEW_FETCHED: 'Reviews Fetched Successfully',
   REVIEW_UPDATED: 'Review Updated Successfully',
   REVIEW_DELETED: 'Review Deleted Successfully',
+
+  MATERIAL_PURCHASE_CREATED: "Material Purchased Successfully"
 };

@@ -23,16 +23,28 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly counterService: CounterService,
-  ) {}
+  ) { }
   async create(createUserDto: CreateUserDto) {
     try {
       const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
       const stu_id = await this.counterService.getNextStudentId();
+      let referral_code: string;
+      let isUnique = false;
+
+      while (!isUnique) {
+        referral_code = this.generateAlphanumericCode();
+        const userExists = await this.userRepository.findOne({ where: { referral_code } });
+        if (!userExists) {
+          isUnique = true;
+        }
+      }
+
 
       const newUser = this.userRepository.create({
         ...createUserDto,
         password: hashedPassword,
         stu_id: stu_id,
+        referral_code: referral_code,
       });
       return await this.userRepository.save(newUser);
     } catch (error) {
@@ -41,6 +53,15 @@ export class UserService {
       }
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_USER);
     }
+  }
+
+  private generateAlphanumericCode(length = 8): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    for (let i = 0; i < length; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   }
 
   async findAll(paginationDto: PaginationDto) {
@@ -81,7 +102,7 @@ export class UserService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const user = await this.userRepository.findOne({ where: { id: id } });
+      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates"] });
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
@@ -106,7 +127,9 @@ export class UserService {
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
-      await this.userRepository.update(id, updateUserDto);
+      Object.assign(user, updateUserDto);
+      await this.userRepository.save(user);
+      // await this.userRepository.update(id, updateUserDto);
       return;
     } catch (error) {
       if (

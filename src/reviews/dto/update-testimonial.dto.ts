@@ -4,5 +4,5 @@ import { IsBoolean } from 'class-validator';
 
 export class UpdateTestimonialDto extends PartialType(CreateReviewDto) {
     @IsBoolean()
-    show_as_testimonials: Boolean
+    show_as_testimonials: boolean
 }

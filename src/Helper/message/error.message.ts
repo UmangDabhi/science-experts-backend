@@ -72,4 +72,7 @@ export const ERRORS = {
   ERROR_DELETING_REVIEW: 'Error Deleting Review',
   ERROR_FETCHING_REVIEWS: 'Error Fetching Reviews',
   ERROR_REVIEW_NOT_FOUND: 'Review Not Found',
+
+  ERROR_MATERIAL_PURCHASE_ALEARDY_EXISTS: "Material Purchase Already Exists",
+  ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase"
 };

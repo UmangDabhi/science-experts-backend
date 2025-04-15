@@ -1,67 +1,92 @@
-// src/file/file.controller.ts
 import {
   Controller,
   Post,
   UploadedFile,
   UseInterceptors,
+  Param,
   Body,
 } from '@nestjs/common';
 import { FileService } from './file.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ResponseMessage } from 'src/Helper/constants';
 
 @Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  // Uploads a file to both local storage and S3 under a specific folder
-  @Post('upload')
+  @Post('upload/:folderPath*')
   @UseInterceptors(FileInterceptor('file'))
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Body('folder') folder: string,
+    @Param('folderPath') folderPath: string,
   ) {
-    const result = await this.fileService.uploadFile(file, folder || 'default');
-    return {
-      message: 'File uploaded successfully',
-      data: result, // { localPath, s3Url }
-    };
+    try {
+      const result = await this.fileService.uploadFile(file, folderPath || 'default');
+      return {
+        message: 'File uploaded successfully',
+        data: result,
+      };
+    } catch (error) {
+      return {
+        message: 'File upload failed',
+        error: error.message,
+      };
+    }
   }
-  @Post('upload_locally')
-  @ResponseMessage('File Uploaded')
+
+  @Post('upload_locally/:folderPath*')
   @UseInterceptors(FileInterceptor('file'))
   async uploadLocally(
     @UploadedFile() file: Express.Multer.File,
-    @Body('folder') folder: string,
+    @Param('folderPath') folderPath: string,
   ) {
-    console.log(file);
-    const result = await this.fileService.uploadLocally(
-      file,
-      folder || 'default',
-    );
-    const responsePath = result.replace(/\\/g, '/');
-    return responsePath;
+    try {
+      const result = await this.fileService.uploadLocally(file, folderPath || 'default');
+      return {
+        message: 'File uploaded locally',
+        path: result,
+      };
+    } catch (error) {
+      return {
+        message: 'Local file upload failed',
+        error: error.message,
+      };
+    }
   }
 
-  @Post('list')
-  async listFiles(@Body('folder') folder: string) {
-    const [localFiles, s3Files] = await Promise.all([
-      this.fileService.listFilesInLocalFolder(folder),
-      this.fileService.listFilesInS3Folder(folder),
-    ]);
-    return {
-      message: 'Files listed successfully',
-      data: { localFiles, s3Files },
-    };
+  @Post('list/:folderPath*')
+  async listFiles(@Param('folderPath') folderPath: string) {
+    try {
+      const [localFiles, s3Files] = await Promise.all([
+        this.fileService.listFilesInLocalFolder(folderPath),
+        this.fileService.listFilesInS3Folder(folderPath),
+      ]);
+      return {
+        message: 'Files listed successfully',
+        data: { localFiles, s3Files },
+      };
+    } catch (error) {
+      return {
+        message: 'Error listing files',
+        error: error.message,
+      };
+    }
   }
 
-  // Delete files from both local and S3
-  @Post('delete')
+  @Post('delete/:folderPath*')
   async deleteFile(
-    @Body('fileKey') fileKey: string,
-    @Body('localFilePath') localFilePath: string,
+    @Param('folderPath') folderPath: string,
+    @Body('filename') filename: string,
   ) {
-    await this.fileService.deleteFile(fileKey, localFilePath);
-    return { message: 'File deleted successfully' };
+    try {
+      const fileKey = `${folderPath}/${filename}`;
+      const localFilePath = `${folderPath}/${filename}`;
+      await this.fileService.deleteFile(fileKey, localFilePath);
+      return { message: 'File deleted successfully' };
+    } catch (error) {
+      return {
+        message: 'File deletion failed',
+        error: error.message,
+      };
+    }
   }
 }

@@ -1,11 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
+import { IsOptional } from 'class-validator';
 import { CreateEnrollmentDto } from './create-enrollment.dto';
-import { IsNumber, IsOptional } from 'class-validator';
 
 export class UpdateEnrollmentDto extends PartialType(CreateEnrollmentDto) {
-  @IsNumber()
-  @IsOptional()
-  course_progress?: number;
 
   @IsOptional()
   feedback?: string;

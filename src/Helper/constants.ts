@@ -7,6 +7,11 @@ export enum Role {
   STUDENT = 'student',
 }
 
+export enum PURCHASE_OF_TYPE {
+  COURSE = 'COURSE',
+  MATERIAL = 'MATERIAL',
+}
+
 export const Is_Paid = {
   YES: true,
   NO: false,

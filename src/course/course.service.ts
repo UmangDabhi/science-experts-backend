@@ -16,6 +16,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
+import { Role } from 'src/Helper/constants';
 
 @Injectable()
 export class CourseService {
@@ -68,7 +69,7 @@ export class CourseService {
       if (courseFilterDto?.standard) {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
-      const relations = ["modules", "enrollments", "review"];
+      const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
         this.courseRepository,
         courseFilterDto,
@@ -79,11 +80,13 @@ export class CourseService {
 
       return result;
     } catch (error) {
+      console.log(error)
+
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
     }
   }
 
-  async findOne(id: string) {
+  async findOne(currUser: User, id: string) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
@@ -96,12 +99,30 @@ export class CourseService {
           'categories',
           'standards',
           'modules.progress',
-          'review',
-          'review.student',
+          'reviews',
+          'reviews.student',
         ],
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
 
+      if (currUser.role == Role.STUDENT) {
+        const isEnrolled = await this.courseRepository.findOne({
+          where: { id: id, enrollments: { id: currUser.id } }
+        })
+        if (!isEnrolled) {
+          return {
+            ...course,
+            modules: course.modules.map((ele) => {
+              if (!ele.is_free_to_watch)
+                return { ...ele, video_url: null };
+              return { ...ele };
+            }),
+            materials: course.materials.map((ele) => {
+              return { ...ele, material_url: null };
+            }),
+          };
+        }
+      }
 
       return course;
     } catch (error) {
@@ -110,6 +131,7 @@ export class CourseService {
         error instanceof BadRequestException
       )
         throw error;
+        console.log(error)
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSE);
     }
   }

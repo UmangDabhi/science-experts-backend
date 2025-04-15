@@ -1,31 +1,28 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { ResponseMessage } from 'src/Helper/constants';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { PaymentService } from './payment.service';
-import { AuthGuard } from '@nestjs/passport';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(
-    @InjectRepository(Enrollment)
-    private readonly enrollmentRepository: Repository<Enrollment>,
-    private readonly paymentService: PaymentService) { }
+  constructor(private readonly paymentService: PaymentService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_PAYMENT)
   @ResponseMessage(MESSAGES.PAYMENT_CREATED)
-  async createOrder(@Body('amount') amount: number) {
-    return this.paymentService.createOrder(amount);
+  async createOrder(@Req() req: RequestWithUser, @Body() createPaymentDto: CreatePaymentDto) {
+    return this.paymentService.createOrder(req.user, createPaymentDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.VERIFY_PAYMENT)
   @ResponseMessage(MESSAGES.PAYMENT_VERIFIED)
-  async verifyPayment(@Body() paymentDetails: any) {
-    return this.paymentService.verifyPayment(paymentDetails);
+  async verifyPayment(@Req() req: RequestWithUser, @Body() verifyPaymentDto: VerifyPaymentDto) {
+    return this.paymentService.verifyPayment(req.user, verifyPaymentDto);
   }
 }

@@ -23,6 +23,7 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { StandardModule } from './standard/standard.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -76,6 +77,7 @@ import { UserModule } from './user/user.module';
     ProgressModule,
     ReviewsModule,
     PaymentModule,
+    MaterialPurchaseModule,
   ],
   controllers: [AppController],
   providers: [

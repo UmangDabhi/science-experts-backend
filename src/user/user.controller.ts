@@ -1,23 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  SetMetadata,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {

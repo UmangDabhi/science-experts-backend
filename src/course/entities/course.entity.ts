@@ -48,6 +48,7 @@ export class Course extends BaseEntity {
   @Column({
     type: 'int',
     default: 0,
+    nullable: true,
   })
   discount: number;
 
@@ -55,7 +56,7 @@ export class Course extends BaseEntity {
   certificate_url: string;
 
   @Column({
-    default: 0.0,
+    default: 5.0,
   })
   rating: number;
 
@@ -84,8 +85,8 @@ export class Course extends BaseEntity {
   @OneToMany(() => Progress, (progress) => progress.course)
   progress: Progress[];
 
-  @OneToMany(() =>Review, (review) => review.course)
-  review: Review[];
+  @OneToMany(() => Review, (reviews) => reviews.course)
+  reviews: Review[];
 
   @ManyToMany(() => Category, (categories) => categories.courses)
   @JoinTable({

@@ -1,0 +1,1 @@
+import{r as e,j as s}from"./index-D92yZQ6n.js";const r=()=>(e.useState(1),e.useRef(null),e.useEffect(()=>{const t=document.createElement("script");t.src="https://checkout.razorpay.com/v1/checkout.js",t.async=!0,document.body.appendChild(t)},[]),s.jsx("div",{}));export{r as default};

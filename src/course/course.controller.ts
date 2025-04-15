@@ -36,15 +36,15 @@ export class CourseController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  findAll( @Req() req: RequestWithUser,@Query() courseFilterDto: CourseFilterDto) {
-    return this.courseService.findAll(req.user,courseFilterDto);
+  findAll(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
+    return this.courseService.findAll(req.user, courseFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
-  findOne(@Param('id') id: string) {
-    return this.courseService.findOne(id);
+  findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.courseService.findOne(req.user,id);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -1,10 +1,9 @@
 import {
-  IsString,
   IsEmail,
   IsEnum,
   IsOptional,
-  IsPhoneNumber,
-  Length,
+  IsString,
+  Length
 } from 'class-validator';
 import { Role } from 'src/Helper/constants';
 

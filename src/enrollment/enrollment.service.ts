@@ -22,11 +22,9 @@ export class EnrollmentService {
   constructor(
     @InjectRepository(Enrollment)
     private readonly enrollmentRepository: Repository<Enrollment>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-  ) {}
+  ) { }
   async create(currUser: User, createEnrollmentDto: CreateEnrollmentDto) {
     try {
       const existingCourse = await this.courseRepository.findOne({
