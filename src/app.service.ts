@@ -4,14 +4,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './user/entities/user.entity'; // adjust path
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Role } from './Helper/constants';
+import { BALANCE_TYPE, COIN_VALUE_TYPE, Role } from './Helper/constants';
+import { Balance_Type } from './user/entities/balance_type.entity';
 
 @Injectable()
 export class AppService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+    @InjectRepository(Balance_Type)
+    private balanceTypeRepository: Repository<Balance_Type>,
+  ) { }
 
   async onModuleInit() {
     const count = await this.userRepository.count();
@@ -34,6 +37,39 @@ export class AppService implements OnModuleInit {
     } else {
       console.log(`ℹ️ Users already exist (${count}), skipping seeding.`);
     }
+
+    const balance_type_count = await this.balanceTypeRepository.count();
+    if (balance_type_count === 0) {
+      await this.balanceTypeRepository.save({
+        type: BALANCE_TYPE.WELCOME_BONUS,
+        value: 50,
+        withdrawable: false,
+        coin_type: COIN_VALUE_TYPE.DIRECT
+      })
+      await this.balanceTypeRepository.save({
+        type: BALANCE_TYPE.REFERRER_SIGNUP_BONUS,
+        value: 20,
+        withdrawable: false,
+        coin_type: COIN_VALUE_TYPE.DIRECT
+      })
+      await this.balanceTypeRepository.save({
+        type: BALANCE_TYPE.REFEREE_SIGNUP_BONUS,
+        value: 10,
+        withdrawable: false,
+        coin_type: COIN_VALUE_TYPE.DIRECT
+      })
+      await this.balanceTypeRepository.save({
+        type: BALANCE_TYPE.REFERRAL_PURCHASE_BONUS,
+        value: 5,
+        withdrawable: true,
+        coin_type: COIN_VALUE_TYPE.PERCENTAGE
+      })
+      console.log('✅ Default Balance Types inserted.');
+
+    } else {
+      console.log(`ℹ️ Balance Type already exist (${balance_type_count}), skipping seeding.`);
+    }
+
   }
 
   getHello(): string {

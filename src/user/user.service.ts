@@ -14,8 +14,9 @@ import { ERRORS } from 'src/Helper/message/error.message';
 import * as bcrypt from 'bcrypt';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
-import { Role } from 'src/Helper/constants';
+import { BALANCE_TYPE, Role } from 'src/Helper/constants';
 import { CounterService } from 'src/counter/counter.service';
+import { UserBalanceService } from './user_balance.service';
 
 @Injectable()
 export class UserService {
@@ -23,9 +24,19 @@ export class UserService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly counterService: CounterService,
+    private readonly userBalanceService: UserBalanceService,
   ) { }
   async create(createUserDto: CreateUserDto) {
     try {
+      const userExists = await this.userRepository.findOne({ where: { referral_code: createUserDto.referral_code } });
+      if (createUserDto.has_referral) {
+        if (!userExists)
+          throw new BadRequestException(ERRORS.ERROR_INVALID_REFERRAL_CODE);
+        else {
+          await this.userBalanceService.addCoins(userExists, BALANCE_TYPE.REFERRER_SIGNUP_BONUS)
+          await this.userRepository.update({ id: userExists.id }, { referral_count: userExists.referral_count + 1 })
+        }
+      }
       const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
       const stu_id = await this.counterService.getNextStudentId();
       let referral_code: string;
@@ -46,14 +57,23 @@ export class UserService {
         stu_id: stu_id,
         referral_code: referral_code,
       });
-      return await this.userRepository.save(newUser);
+      await this.userRepository.save(newUser);
+      await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.WELCOME_BONUS)
+      if (userExists && createUserDto.referral_code) {
+        await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.REFEREE_SIGNUP_BONUS)
+      }
+      return newUser
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(ERRORS.ERROR_USER_ALREADY_EXISTS);
       }
+      if (error instanceof BadRequestException || error instanceof ConflictException) {
+        throw error;
+      }
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_USER);
     }
   }
+
 
   private generateAlphanumericCode(length = 8): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

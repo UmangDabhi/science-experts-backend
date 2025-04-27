@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsOptional,
@@ -25,10 +26,17 @@ export class CreateUserDto {
   role?: Role;
 
   @IsOptional()
+  @IsString()
+  profile_url?: string;
+
+  @IsOptional()
   phone_no?: string;
 
   @IsOptional()
   secondary_phone_no?: string;
+
+  @IsOptional()
+  about_me?: string;
 
   @IsOptional()
   @IsString()
@@ -59,4 +67,13 @@ export class CreateUserDto {
   @IsString()
   @Length(1, 10)
   pincode?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  has_referral?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @Length(1, 10)
+  referral_code?: string;
 }

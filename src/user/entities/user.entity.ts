@@ -7,6 +7,7 @@ import { MaterialPurchase } from 'src/material_purchase/entities/material_purcha
 import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
+import { User_Balance } from './user_balance.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -19,6 +20,12 @@ export class User extends BaseEntity {
   @Column({ type: 'varchar', length: 100, unique: true })
   email: string;
 
+  @Column({ type: 'varchar', length: 1000, nullable: true })
+  about_me: string;
+
+  @Column({ nullable: true })
+  profile_url: string;
+
   @Column()
   password: string;
 
@@ -29,11 +36,12 @@ export class User extends BaseEntity {
   })
   role: Role;
 
-  @Column({ type: "double precision", default: 0.0 })
-  expert_coins: number;
 
   @Column({ type: "varchar", length: 8, nullable: true, unique: true })
   referral_code: string;
+
+  @Column({ default: 0 })
+  referral_count: number;
 
   @Column({ nullable: true })
   phone_no: string;
@@ -61,6 +69,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   courses: Course[];
+
+  @OneToMany(() => User_Balance, (user_balance) => user_balance.user, { nullable: true })
+  user_balance: User_Balance[];
 
   @OneToMany(() => Certificate, (certificates) => certificates.student, {
     nullable: true,

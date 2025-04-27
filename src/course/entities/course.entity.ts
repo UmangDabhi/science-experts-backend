@@ -2,6 +2,7 @@ import { Category } from 'src/category/entities/category.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Is_Approved, Is_Paid } from 'src/Helper/constants';
+import { Language } from 'src/language/entities/language.entity';
 import { Material } from 'src/material/entities/material.entity';
 import { ModuleEntity } from 'src/module/entities/module.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
@@ -71,6 +72,10 @@ export class Course extends BaseEntity {
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
 
+  @ManyToOne(() => Language, (language) => language.courses, { eager: true })
+  @JoinColumn({ name: 'language' })
+  language: Language;
+
   @OneToMany(() => ModuleEntity, (modules) => modules.course)
   modules: ModuleEntity[];
 
@@ -95,6 +100,7 @@ export class Course extends BaseEntity {
     inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
   })
   categories: Category[];
+
 
   @ManyToMany(() => Standard, (standards) => standards.courses)
   @JoinTable({

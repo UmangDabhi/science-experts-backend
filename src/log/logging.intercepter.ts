@@ -1,16 +1,16 @@
 import {
+  CallHandler,
+  ExecutionContext,
   Injectable,
   NestInterceptor,
-  ExecutionContext,
-  CallHandler,
 } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Request, Response } from 'express';
-import { Log } from './log.entity';
+import { Response } from 'express';
+import { Observable } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { Repository } from 'typeorm';
+import { Log } from './log.entity';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {

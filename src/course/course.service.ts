@@ -17,6 +17,7 @@ import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Role } from 'src/Helper/constants';
+import { Language } from 'src/language/entities/language.entity';
 
 @Injectable()
 export class CourseService {
@@ -27,6 +28,8 @@ export class CourseService {
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Standard)
     private readonly standardRepository: Repository<Standard>,
+    @InjectRepository(Language)
+    private readonly languageRepository: Repository<Language>,
   ) { }
   async create(currUser: User, createCourseDto: CreateCourseDto): Promise<any> {
     try {
@@ -42,9 +45,14 @@ export class CourseService {
         })
         : [];
 
+      const langaugeEntity = await this.languageRepository.findOne({
+        where: { id: createCourseDto.language }
+      })
+
       const newCourse = this.courseRepository.create({
         ...createCourseDto,
         tutor: { id: currUser.id },
+        language: langaugeEntity,
         categories: categoryEntities,
         standards: standardEntities,
       });
@@ -70,6 +78,37 @@ export class CourseService {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
       const relations = ["modules", "enrollments", "reviews"];
+      const result = await pagniateRecords(
+        this.courseRepository,
+        courseFilterDto,
+        searchableFields,
+        queryOptions,
+        relations
+      );
+
+      return result;
+    } catch (error) {
+      console.log(error)
+
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
+    }
+  }
+  async findEnrolledCourse(
+    currUser: User,
+    courseFilterDto: CourseFilterDto,
+  ): Promise<PaginatedResult<Course>> {
+    try {
+      const searchableFields: (keyof Course)[] = ['title'];
+      const queryOptions: any = {};
+
+      if (courseFilterDto?.category) {
+        queryOptions.categories = { id: courseFilterDto.category };
+      }
+      if (courseFilterDto?.standard) {
+        queryOptions.standards = { id: courseFilterDto.standard };
+      }
+      queryOptions.enrollments = { student: { id: currUser.id } };
+      const relations = ["modules", "enrollments", "reviews", "progress"];
       const result = await pagniateRecords(
         this.courseRepository,
         courseFilterDto,
@@ -131,14 +170,13 @@ export class CourseService {
         error instanceof BadRequestException
       )
         throw error;
-        console.log(error)
+      console.log(error)
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSE);
     }
   }
 
   async update(currUser: User, id: string, updateCourseDto: UpdateCourseDto) {
     try {
-      console.log(updateCourseDto)
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
       const course = await this.courseRepository.findOne({
@@ -156,10 +194,16 @@ export class CourseService {
           id: In(updateCourseDto.standards),
         })
         : [];
+
+      const langaugeEntity = await this.languageRepository.findOne({
+        where: { id: updateCourseDto.language }
+      })
+
       Object.assign(course, {
         ...updateCourseDto,
         tutor: { id: currUser.id },
         categories: categoryEntities,
+        language: langaugeEntity,
         standards: standardEntities,
       });
 

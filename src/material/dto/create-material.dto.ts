@@ -1,7 +1,9 @@
 import {
+  IsArray,
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Length,
 } from 'class-validator';
 
@@ -22,4 +24,12 @@ export class CreateMaterialDto {
 
   @IsString()
   course?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  categories?: string[];
+
+  @IsString()
+  language?: string;
 }

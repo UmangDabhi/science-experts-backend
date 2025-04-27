@@ -1,5 +1,6 @@
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
+import { Material } from 'src/material/entities/material.entity';
 import { Entity, Column, ManyToMany } from 'typeorm';
 
 @Entity()
@@ -9,4 +10,7 @@ export class Standard extends BaseEntity {
 
   @ManyToMany(() => Course, (course) => course.standards)
   courses: Course[];
+
+  @ManyToMany(() => Material, (materials) => materials.standards)
+  materials: Material[];
 }

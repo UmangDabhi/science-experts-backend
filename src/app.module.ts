@@ -24,13 +24,14 @@ import { StandardModule } from './standard/standard.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
+import { LanguageModule } from './language/language.module';
+import { Balance_Type } from './user/entities/balance_type.entity';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public/',
     }),
-
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'build'),
       exclude: ['/api*', '/public*'],
@@ -61,7 +62,7 @@ import { MaterialPurchaseModule } from './material_purchase/material_purchase.mo
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([Log, User]),
+    TypeOrmModule.forFeature([Log, User,Balance_Type]),
     UserModule,
     CourseModule,
     ModuleModule,
@@ -78,6 +79,7 @@ import { MaterialPurchaseModule } from './material_purchase/material_purchase.mo
     ReviewsModule,
     PaymentModule,
     MaterialPurchaseModule,
+    LanguageModule,
   ],
   controllers: [AppController],
   providers: [

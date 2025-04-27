@@ -3,13 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as crypto from 'crypto';
 import { Course } from 'src/course/entities/course.entity';
+import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { PURCHASE_OF_TYPE } from 'src/Helper/constants';
 import { Material } from 'src/material/entities/material.entity';
+import { MaterialPurchaseService } from 'src/material_purchase/material_purchase.service';
 import { User } from 'src/user/entities/user.entity';
+import { UserBalanceService } from 'src/user/user_balance.service';
 import { Repository } from 'typeorm';
 import { CreatePaymentDto } from './dto/create-payment.dto';
-import { MaterialPurchaseService } from 'src/material_purchase/material_purchase.service';
-import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { Payment } from './entities/payment.entity';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -23,6 +24,7 @@ export class PaymentService {
     private configService: ConfigService,
     private enrollmentService: EnrollmentService,
     private materialPurchaseService: MaterialPurchaseService,
+    private userBalanceService: UserBalanceService,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
     @InjectRepository(User)
@@ -48,15 +50,17 @@ export class PaymentService {
       const existingMaterial = await this.materialRepository.findOne({ where: { id: createPaymentDto.item_id } });
       amount = existingMaterial?.amount || 0;
     }
+    const totalExpertCoins = await this.userBalanceService.getAllCoins(currUser);
+
 
     const coins_to_use = createPaymentDto.use_coins
-      ? Math.min(currUser.expert_coins, amount)
+      ? Math.min(totalExpertCoins, amount)
       : 0;
 
     const remainingAmount = amount - coins_to_use;
 
     if (remainingAmount === 0) {
-      currUser.expert_coins -= coins_to_use;
+      await this.userBalanceService.deductCoins(currUser, coins_to_use);
       await this.userRepository.save(currUser);
       await this.afterSuccessfulPurchase(currUser, createPaymentDto.type, createPaymentDto.item_id);
       return { success: true, collect_payment: false, message: "Fully covered by coins" };
@@ -83,7 +87,7 @@ export class PaymentService {
       const paymentDetails = verifyPaymentDto.paymentDetails;
 
       if (verifyPaymentDto.coins_used && verifyPaymentDto.coins_used > 0) {
-        currUser.expert_coins -= verifyPaymentDto.coins_used;
+        await this.userBalanceService.deductCoins(currUser, verifyPaymentDto.coins_used);
         await this.userRepository.save(currUser);
       }
 

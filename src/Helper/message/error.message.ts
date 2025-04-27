@@ -10,6 +10,7 @@ export const ERRORS = {
   ERROR_FETCHING_TUTOR: 'Error Fetching Tutor',
 
   ERROR_ID_NOT_PROVIDED: 'ID Not Provided',
+  ERROR_INVALID_REFERRAL_CODE: 'Referral Code is Invalid',
 
   ERROR_USER_ALREADY_EXISTS: 'Email Already Exists',
   ERROR_EMAIL_NOT_FOUND: 'Email Must be Provided',
@@ -72,6 +73,13 @@ export const ERRORS = {
   ERROR_DELETING_REVIEW: 'Error Deleting Review',
   ERROR_FETCHING_REVIEWS: 'Error Fetching Reviews',
   ERROR_REVIEW_NOT_FOUND: 'Review Not Found',
+
+  ERROR_CREATING_LANGUAGE: 'Error Creating Language',
+  ERROR_UPDATING_LANGUAGE: 'Error Updating Language',
+  ERROR_DELETING_LANGUAGE: 'Error Deleting Language',
+  ERROR_FETCHING_LANGUAGES: 'Error Fetching Languages',
+  ERROR_LANGUAGE_NOT_FOUND: 'Language Not Found',
+  ERROR_LANGUAGE_ALREADY_EXISTS: 'Language Already Exists',
 
   ERROR_MATERIAL_PURCHASE_ALEARDY_EXISTS: "Material Purchase Already Exists",
   ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase"

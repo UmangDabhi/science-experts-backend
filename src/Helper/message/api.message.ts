@@ -11,6 +11,7 @@ export const API_ENDPOINT = {
   CREATE_COURSE: 'create_course',
   GET_ALL_COURSE: 'get_all_course',
   GET_COURSE: 'get_course',
+  GET_ENROLLED_COURSE: 'get_enrolled_course',
   UPDATE_COURSE: 'update_course',
   DELETE_COURSE: 'delete_course',
 
@@ -59,5 +60,10 @@ export const API_ENDPOINT = {
   CHANGE_TESTIMONIAL: 'change_testimonial',
   DELETE_REVIEW: 'delete_review',
 
-  CREATE_MATERIAL_PURCHASE: "create_material_purchase"
+  CREATE_MATERIAL_PURCHASE: "create_material_purchase",
+
+  CREATE_LANGUAGE: 'create_language',
+  GET_ALL_LANGUAGE: 'get_all_language',
+  UPDATE_LANGUAGE: 'update_language',
+  DELETE_LANGUAGE: 'delete_language',
 };

@@ -55,5 +55,11 @@ export const MESSAGES = {
   REVIEW_UPDATED: 'Review Updated Successfully',
   REVIEW_DELETED: 'Review Deleted Successfully',
 
+  
+  LANGUAGE_CREATED: 'Language Created Successfully',
+  ALL_LANGUAGE_FETCHED: 'Languages Fetched Successfully',
+  LANGUAGE_UPDATED: 'Language Updated Successfully',
+  LANGUAGE_DELETED: 'Language Deleted Successfully',
+
   MATERIAL_PURCHASE_CREATED: "Material Purchased Successfully"
 };

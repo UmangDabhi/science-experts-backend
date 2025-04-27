@@ -52,4 +52,7 @@ export class CreateCourseDto {
   @IsArray()
   @IsUUID('4', { each: true })
   standards?: string[];
+
+  @IsUUID('4')
+  language: string;
 }

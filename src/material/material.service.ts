@@ -9,7 +9,7 @@ import { ERRORS } from 'src/Helper/message/error.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { Material } from './entities/material.entity';
@@ -17,18 +17,31 @@ import { Role } from 'src/Helper/constants';
 import { MaterialPublicDto } from './dto/material-public.dto';
 import { plainToInstance } from 'class-transformer';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
+import { Category } from 'src/category/entities/category.entity';
+import { Language } from 'src/language/entities/language.entity';
 
 @Injectable()
 export class MaterialService {
   constructor(
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Language)
+    private readonly languageRepository: Repository<Language>,
   ) { }
   async create(currUser: User, createMaterialDto: CreateMaterialDto) {
     try {
+      const categoryEntities = createMaterialDto.categories
+        ? await this.categoryRepository.findBy({
+          id: In(createMaterialDto.categories),
+        })
+        : [];
       const newMaterial = this.materialRepository.create({
         ...createMaterialDto,
         course: createMaterialDto.course ? { id: createMaterialDto.course } : undefined, // Only add course if provided
+        language: createMaterialDto.language ? { id: createMaterialDto.language } : undefined, // Only add course if provided
+        categories: categoryEntities,
         tutor: { id: currUser.id },
       });
 
@@ -120,13 +133,28 @@ export class MaterialService {
       const material = await this.materialRepository.findOne({
         where: { id: id, tutor: { id: currUser.id } },
       });
+
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
-
+      const categoryEntities = updateMaterialDto.categories
+        ? await this.categoryRepository.findBy({
+          id: In(updateMaterialDto.categories),
+        })
+        : [];
+      const langaugeEntity = await this.languageRepository.findOne({
+        where: { id: updateMaterialDto.language }
+      })
       const updateData: any = { ...updateMaterialDto };
       updateData.tutor = { id: currUser.id };
 
-      await this.materialRepository.update(id, updateData);
+      Object.assign(material, {
+        ...updateMaterialDto,
+        tutor: { id: currUser.id },
+        categories: categoryEntities,
+        language: langaugeEntity,
+      });
+
+      await this.materialRepository.save( material);
       return;
     } catch (error) {
       if (
@@ -134,6 +162,7 @@ export class MaterialService {
         error instanceof NotFoundException
       )
         throw error;
+      console.log(error)
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MATERIAL);
     }
   }
