@@ -50,14 +50,14 @@ import { Balance_Type } from './user/entities/balance_type.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        ssl: {
-          rejectUnauthorized: false,
-        },
-        extra: {
-          ssl: {
-            rejectUnauthorized: false,
-          },
-        },
+        // ssl: {
+        //   rejectUnauthorized: false,
+        // },
+        // extra: {
+        //   ssl: {
+        //     rejectUnauthorized: false,
+        //   },
+        // },
         autoLoadEntities: true,
         synchronize: true,
       }),
