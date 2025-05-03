@@ -34,6 +34,13 @@ export class CourseController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get(API_ENDPOINT.MANAGE_ALL_COURSE)
+  @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
+  manageAllCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
+    return this.courseService.manageAllCourse(req.user, courseFilterDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
   findAll(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {

@@ -16,7 +16,7 @@ import { CreateCourseDto } from './dto/create-course.dto';
 import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
-import { Role } from 'src/Helper/constants';
+import { Is_Approved, Role } from 'src/Helper/constants';
 import { Language } from 'src/language/entities/language.entity';
 
 @Injectable()
@@ -62,7 +62,39 @@ export class CourseService {
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_COURSE);
     }
   }
+  async manageAllCourse(
+    currUser: User,
+    courseFilterDto: CourseFilterDto,
+  ): Promise<PaginatedResult<Course>> {
+    try {
+      const searchableFields: (keyof Course)[] = ['title'];
+      const queryOptions: any = {};
 
+      if (courseFilterDto?.category) {
+        queryOptions.categories = { id: courseFilterDto.category };
+      }
+      if (courseFilterDto?.standard) {
+        queryOptions.standards = { id: courseFilterDto.standard };
+      }
+      if (currUser.role == Role.TUTOR) {
+        queryOptions.tutor = { id: currUser.id };
+      }
+      const relations = ["modules", "enrollments", "reviews"];
+      const result = await pagniateRecords(
+        this.courseRepository,
+        courseFilterDto,
+        searchableFields,
+        queryOptions,
+        relations
+      );
+
+      return result;
+    } catch (error) {
+      console.log(error)
+
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
+    }
+  }
   async findAll(
     currUser: User,
     courseFilterDto: CourseFilterDto,
@@ -77,6 +109,7 @@ export class CourseService {
       if (courseFilterDto?.standard) {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
+      queryOptions.is_approved = Is_Approved.YES
       const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
         this.courseRepository,

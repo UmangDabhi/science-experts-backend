@@ -30,6 +30,7 @@ export class AppService implements OnModuleInit {
         state: 'Statestan',
         pincode: '123456',
         role: Role.ADMIN,
+        referral_code: "Science"
       });
 
       await this.userRepository.save(user);

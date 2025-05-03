@@ -10,6 +10,7 @@ export const API_ENDPOINT = {
 
   CREATE_COURSE: 'create_course',
   GET_ALL_COURSE: 'get_all_course',
+  MANAGE_ALL_COURSE: 'manage_all_course',
   GET_COURSE: 'get_course',
   GET_ENROLLED_COURSE: 'get_enrolled_course',
   UPDATE_COURSE: 'update_course',
