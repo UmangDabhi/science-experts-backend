@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './Helper/all-exceptions.filter';
 import { ResponseInterceptor } from './interceptors/response.intercepter';
 import { config } from 'dotenv'; // Import dotenv
-
+import * as bodyParser from 'body-parser';
 config(); // Load environment variables
 
 async function bootstrap() {
@@ -17,7 +17,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  const port = process.env.BACKEND_PORT || 3000; // Read from env, fallback to 3000
+  app.use(bodyParser.json({ limit: '500mb' }));
+  app.use(bodyParser.urlencoded({ limit: '500mb', extended: true }));
+
+  const port = process.env.BACKEND_PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }

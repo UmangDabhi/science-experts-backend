@@ -11,10 +11,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('files')
 export class FileController {
-  constructor(private readonly fileService: FileService) {}
+  constructor(private readonly fileService: FileService) { }
 
   @Post('upload/:folderPath*')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: 500 * 1024 * 1024, // 500 MB
+    },
+  }))
+
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Param('folderPath') folderPath: string,
@@ -34,7 +39,12 @@ export class FileController {
   }
 
   @Post('upload_locally/:folderPath*')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      fileSize: 500 * 1024 * 1024, // 500 MB
+    },
+  }))
+
   async uploadLocally(
     @UploadedFile() file: Express.Multer.File,
     @Param('folderPath') folderPath: string,
