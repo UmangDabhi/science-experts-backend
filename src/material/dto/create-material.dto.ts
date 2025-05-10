@@ -30,6 +30,11 @@ export class CreateMaterialDto {
   @IsUUID('4', { each: true })
   categories?: string[];
 
+  @IsOptional()
+  @IsArray()
+  @IsUUID('4', { each: true })
+  standards?: string[];
+
   @IsString()
   language?: string;
 }

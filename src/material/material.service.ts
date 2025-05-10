@@ -19,6 +19,7 @@ import { plainToInstance } from 'class-transformer';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
 import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
+import { Standard } from 'src/standard/entities/standard.entity';
 
 @Injectable()
 export class MaterialService {
@@ -27,6 +28,8 @@ export class MaterialService {
     private readonly materialRepository: Repository<Material>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Standard)
+    private readonly standardRepository: Repository<Standard>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
   ) { }
@@ -37,11 +40,17 @@ export class MaterialService {
           id: In(createMaterialDto.categories),
         })
         : [];
+      const standardEntities = createMaterialDto.standards
+        ? await this.standardRepository.findBy({
+          id: In(createMaterialDto.standards),
+        })
+        : [];
       const newMaterial = this.materialRepository.create({
         ...createMaterialDto,
         course: createMaterialDto.course ? { id: createMaterialDto.course } : undefined, // Only add course if provided
         language: createMaterialDto.language ? { id: createMaterialDto.language } : undefined, // Only add course if provided
         categories: categoryEntities,
+        standards: standardEntities,
         tutor: { id: currUser.id },
       });
 
@@ -106,6 +115,8 @@ export class MaterialService {
         relations: [
           'tutor',
           'categories',
+          'standards',
+          'language',
         ],
       });
       if (!material)
@@ -141,6 +152,11 @@ export class MaterialService {
           id: In(updateMaterialDto.categories),
         })
         : [];
+      const standardEntities = updateMaterialDto.standards
+        ? await this.standardRepository.findBy({
+          id: In(updateMaterialDto.standards),
+        })
+        : [];
       const langaugeEntity = await this.languageRepository.findOne({
         where: { id: updateMaterialDto.language }
       })
@@ -151,10 +167,11 @@ export class MaterialService {
         ...updateMaterialDto,
         tutor: { id: currUser.id },
         categories: categoryEntities,
+        standards: standardEntities,
         language: langaugeEntity,
       });
 
-      await this.materialRepository.save( material);
+      await this.materialRepository.save(material);
       return;
     } catch (error) {
       if (

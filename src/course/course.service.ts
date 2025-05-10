@@ -170,6 +170,7 @@ export class CourseService {
           'materials',
           'categories',
           'standards',
+          'language',
           'modules.progress',
           'reviews',
           'reviews.student',
