@@ -26,6 +26,7 @@ import { UserModule } from './user/user.module';
 import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
 import { LanguageModule } from './language/language.module';
 import { Balance_Type } from './user/entities/balance_type.entity';
+import { BlogsModule } from './blogs/blogs.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -80,6 +81,7 @@ import { Balance_Type } from './user/entities/balance_type.entity';
     PaymentModule,
     MaterialPurchaseModule,
     LanguageModule,
+    BlogsModule,
   ],
   controllers: [AppController],
   providers: [

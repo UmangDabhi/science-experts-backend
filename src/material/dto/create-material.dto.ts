@@ -23,6 +23,7 @@ export class CreateMaterialDto {
   amount: number;
 
   @IsString()
+  @IsOptional()
   course?: string;
 
   @IsOptional()
