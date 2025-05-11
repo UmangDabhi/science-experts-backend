@@ -20,12 +20,15 @@ import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interfac
 import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
+import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
 
 @Injectable()
 export class MaterialService {
   constructor(
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+    @InjectRepository(MaterialPurchase)
+    private readonly materialPurchaseRepository: Repository<MaterialPurchase>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Standard)
@@ -106,7 +109,7 @@ export class MaterialService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(currUser: User, id: string) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
@@ -117,11 +120,28 @@ export class MaterialService {
           'categories',
           'standards',
           'language',
+          'material_purchases',
+          'material_purchases.student',
         ],
       });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
-
+      const material_purchase = await this.materialPurchaseRepository.findOne({
+        where: {
+          material: {
+            id: material.id,
+          },
+          student: {
+            id: currUser.id
+          }
+        }
+      })
+      if (material_purchase) {
+        material["is_purchased"] = true;
+      } else {
+        material["is_purchased"] = false;
+        material.material_url = null;
+      }
       return material;
     } catch (error) {
       if (

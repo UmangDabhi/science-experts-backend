@@ -77,6 +77,7 @@ export class PaymentService {
       const order = await this.razorpay.orders.create(options);
       return { success: true, collect_payment: true, order, coins_to_use };
     } catch (error) {
+      console.log(error)
       throw new Error(`Error creating order: ${error.message}`);
     }
   }
@@ -100,14 +101,21 @@ export class PaymentService {
         .update(body)
         .digest('hex');
 
+      console.log("razorpay_order_id", razorpay_order_id);
+      console.log("razorpay_payment_id", razorpay_payment_id);
+      console.log("razorpay_signature", razorpay_signature);
+      console.log("expectedSignature", expectedSignature);
+
+
       if (expectedSignature === razorpay_signature) {
         await this.afterSuccessfulPurchase(currUser, verifyPaymentDto.type, verifyPaymentDto.item_id)
-        await this.paymentRepository.save({ type: verifyPaymentDto.type as PURCHASE_OF_TYPE, orderId: razorpay_order_id, paymentId: razorpay_payment_id, amount: verifyPaymentDto.amount })
+        await this.paymentRepository.save({ type: verifyPaymentDto.type as PURCHASE_OF_TYPE, orderId: razorpay_order_id, paymentId: razorpay_payment_id, amount: Number(verifyPaymentDto.amount) / 100 })
         return razorpay_payment_id;
       } else {
         throw new Error('Signature Mismatch');
       }
     } catch (error) {
+      console.log(error)
       throw new Error('Signature Mismatch');
     }
   }

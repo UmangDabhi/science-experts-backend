@@ -39,7 +39,6 @@ export class MaterialController {
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   findAll(
     @Req() req: RequestWithUser,
-
     @Query() paginationDto: PaginationDto) {
     return this.materialService.findAll(req.user, paginationDto);
   }
@@ -54,8 +53,8 @@ export class MaterialController {
   @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
-  findOne(@Param('id') id: string) {
-    return this.materialService.findOne(id);
+  findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.materialService.findOne(req.user,id);
   }
 
   @UseGuards(AuthGuard('jwt'))
