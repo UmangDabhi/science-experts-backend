@@ -30,6 +30,13 @@ export const API_ENDPOINT = {
   UPDATE_MATERIAL: 'update_material',
   DELETE_MATERIAL: 'delete_material',
 
+  CREATE_BLOG: "create_blog",
+  GET_ALL_BLOG: "get_all_blog",
+  MANAGE_ALL_BLOG: 'manage_all_blog',
+  GET_BLOG: "get_blog",
+  UPDATE_BLOG: "update_blog",
+  DELETE_BLOG: "delete_blog",
+
   CREATE_CATEGORY: 'create_category',
   GET_ALL_CATEGORY: 'get_all_category',
   GET_CATEGORY: 'get_category',

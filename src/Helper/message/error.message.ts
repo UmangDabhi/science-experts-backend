@@ -37,6 +37,13 @@ export const ERRORS = {
   ERROR_DELETING_MATERIAL: 'Error Deleting Material',
   ERROR_MATERIAL_NOT_FOUND: 'Material Not Found',
 
+  ERROR_CREATING_BLOG: 'Error Creating Blog',
+  ERROR_FETCHING_BLOGS: 'Error Fetching Blogs',
+  ERROR_FETCHING_BLOG: 'Error Fetching Blog',
+  ERROR_UPDATING_BLOG: 'Error Updating Blog',
+  ERROR_DELETING_BLOG: 'Error Deleting Blog',
+  ERROR_BLOG_NOT_FOUND: 'Blog Not Found',
+
   ERROR_CREATING_CATEGORY: 'Error Creating Category',
   ERROR_FETCHING_CATEGORIES: 'Error Fetching Categories',
   ERROR_FETCHING_CATEGORY: 'Error Fetching Category',

@@ -212,9 +212,9 @@ export class CourseService {
   async update(currUser: User, id: string, updateCourseDto: UpdateCourseDto) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-
+      const whereCondition = currUser.role == Role.ADMIN ? { id: id } : { id: id, tutor: { id: currUser.id } }
       const course = await this.courseRepository.findOne({
-        where: { id: id, tutor: { id: currUser.id } },
+        where: whereCondition,
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       const categoryEntities = updateCourseDto.categories

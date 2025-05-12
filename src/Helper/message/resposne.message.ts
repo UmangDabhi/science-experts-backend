@@ -26,6 +26,12 @@ export const MESSAGES = {
   MATERIAL_UPDATED: 'Material Updated Successfully',
   MATERIAL_DELETED: 'Material Deleted Successfully',
 
+  BLOG_CREATED: 'Blog Created Successfully',
+  ALL_BLOG_FETCHED: 'Blogs Fetched Successfully',
+  BLOG_FETCHED: 'Blog Fethced Successfully',
+  BLOG_UPDATED: 'Blog Updated Successfully',
+  BLOG_DELETED: 'Blog Deleted Successfully',
+
   CATEGORY_CREATED: 'Category Created Successfully',
   ALL_CATEGORY_FETCHED: 'Categories Fetched Successfully',
   CATEGORY_FETCHED: 'Category Fethced Successfully',
@@ -55,7 +61,7 @@ export const MESSAGES = {
   REVIEW_UPDATED: 'Review Updated Successfully',
   REVIEW_DELETED: 'Review Deleted Successfully',
 
-  
+
   LANGUAGE_CREATED: 'Language Created Successfully',
   ALL_LANGUAGE_FETCHED: 'Languages Fetched Successfully',
   LANGUAGE_UPDATED: 'Language Updated Successfully',

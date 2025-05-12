@@ -140,7 +140,11 @@ export class MaterialService {
         material["is_purchased"] = true;
       } else {
         material["is_purchased"] = false;
-        material.material_url = null;
+        if (currUser.role == Role.STUDENT) {
+          plainToInstance(MaterialPublicDto, material, {
+            excludeExtraneousValues: true,
+          })
+        }
       }
       return material;
     } catch (error) {
@@ -160,9 +164,9 @@ export class MaterialService {
   ) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-
+      const whereCondition = currUser.role == Role.ADMIN ? { id: id } : { id: id, tutor: { id: currUser.id } }
       const material = await this.materialRepository.findOne({
-        where: { id: id, tutor: { id: currUser.id } },
+        where: whereCondition,
       });
 
       if (!material)
