@@ -29,14 +29,12 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_CATEGORY)
   @ResponseMessage(MESSAGES.ALL_CATEGORY_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.categoryService.findAll(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_CATEGORY}/:id`)
   @ResponseMessage(MESSAGES.CATEGORY_FETCHED)
   findOne(@Param('id') id: string) {

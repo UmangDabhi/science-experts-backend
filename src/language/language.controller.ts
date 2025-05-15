@@ -19,19 +19,15 @@ export class LanguageController {
     return this.languageService.create(createLanguageDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_LANGUAGE)
   @ResponseMessage(MESSAGES.ALL_LANGUAGE_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.languageService.findAll(paginationDto);
   }
 
-
-
   @UseGuards(AuthGuard('jwt'))
   @Patch(`${API_ENDPOINT.UPDATE_LANGUAGE}/:id`)
   @ResponseMessage(MESSAGES.LANGUAGE_UPDATED)
-
   update(@Param('id') id: string, @Body() updateLanguageDto: UpdateLanguageDto) {
     return this.languageService.update(id, updateLanguageDto);
   }

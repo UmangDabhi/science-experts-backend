@@ -29,14 +29,12 @@ export class StandardController {
     return this.standardService.create(createStandardDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_STANDARD)
   @ResponseMessage(MESSAGES.ALL_STANDARD_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.standardService.findAll(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_STANDARD}/:id`)
   @ResponseMessage(MESSAGES.STANDARD_FETCHED)
   findOne(@Param('id') id: string) {

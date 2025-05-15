@@ -34,7 +34,6 @@ export class MaterialController {
     return this.materialService.create(req.user, createMaterialDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   findAll(
@@ -43,14 +42,12 @@ export class MaterialController {
     return this.materialService.findAll(req.user, paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_COURSE_MATERIAL}/:courseId`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
   findAllByCourseId(@Param('courseId') courseId: string) {
     return this.materialService.findAllByCourseId(courseId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {

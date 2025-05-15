@@ -35,13 +35,12 @@ export class ReviewsController {
     return this.reviewsService.create(req.user, createReviewDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_REVIEW)
   @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.reviewsService.findAll(paginationDto);
   }
-  @UseGuards(AuthGuard('jwt'))
+
   @Get(API_ENDPOINT.GET_ALL_TESTIMONIALS)
   @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
   findAllTestimonials(@Query() paginationDto: PaginationDto) {

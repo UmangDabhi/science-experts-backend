@@ -29,21 +29,18 @@ export class ModuleController {
     return this.moduleService.create(createModuleDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_MODULE)
   @ResponseMessage(MESSAGES.ALL_MOUDLE_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.moduleService.findAll(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_COURSE_MODULE}/:courseId`)
   @ResponseMessage(MESSAGES.MODULE_FETCHED)
   findAllByCourseId(@Param('courseId') courseId: string) {
     return this.moduleService.findAllByCourseId(courseId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_MODULE}/:id`)
   @ResponseMessage(MESSAGES.MODULE_FETCHED)
   findOne(@Param('id') id: string) {

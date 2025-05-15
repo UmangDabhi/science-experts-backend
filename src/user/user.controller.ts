@@ -28,14 +28,12 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_USER)
   @ResponseMessage(MESSAGES.ALL_USER_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.userService.findAll(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_TUTOR)
   @ResponseMessage(MESSAGES.ALL_TUTOR_FETCHED)
   findAllTutor(@Query() paginationDto: PaginationDto) {

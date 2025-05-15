@@ -40,7 +40,6 @@ export class CourseController {
     return this.courseService.manageAllCourse(req.user, courseFilterDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
   findAll(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
@@ -54,8 +53,6 @@ export class CourseController {
     return this.courseService.findEnrolledCourse(req.user, courseFilterDto);
   }
 
-
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {

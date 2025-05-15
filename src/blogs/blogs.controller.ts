@@ -24,7 +24,6 @@ export class BlogsController {
     return this.blogsService.create(req.user, createBlogDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ALL_BLOG)
   @ResponseMessage(MESSAGES.ALL_BLOG_FETCHED)
   findAll(@Req() req: RequestWithUser, @Query() blogFilterDto: BlogFilterDto) {
@@ -38,7 +37,6 @@ export class BlogsController {
     return this.blogsService.manageAllBlog(req.user, blogFilterDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
   @Get(`${API_ENDPOINT.GET_BLOG}/:id`)
   @ResponseMessage(MESSAGES.BLOG_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
