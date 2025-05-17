@@ -183,7 +183,6 @@ export class CourseService {
         if (!isEnrolled || !currUser) {
           return {
             ...course,
-            is_enrolled: true,
             modules: course.modules.map((ele) => {
               if (!ele.is_free_to_watch)
                 return { ...ele, video_url: null };
@@ -194,8 +193,10 @@ export class CourseService {
             }),
           };
         }
+        if (isEnrolled) {
+          course["is_enrolled"] = true;
+        }
       }
-
       return course;
     } catch (error) {
       if (
