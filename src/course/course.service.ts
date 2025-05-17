@@ -96,7 +96,6 @@ export class CourseService {
     }
   }
   async findAll(
-    currUser: User,
     courseFilterDto: CourseFilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
@@ -177,14 +176,14 @@ export class CourseService {
         ],
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
-
-      if (currUser.role == Role.STUDENT) {
+      if (!currUser || currUser.role == Role.STUDENT) {
         const isEnrolled = await this.courseRepository.findOne({
-          where: { id: id, enrollments: { id: currUser.id } }
+          where: { id: id, enrollments: { id: currUser?.id } }
         })
-        if (!isEnrolled) {
+        if (!isEnrolled || !currUser) {
           return {
             ...course,
+            is_enrolled: true,
             modules: course.modules.map((ele) => {
               if (!ele.is_free_to_watch)
                 return { ...ele, video_url: null };

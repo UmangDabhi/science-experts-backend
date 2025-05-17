@@ -6,6 +6,7 @@ import { Language } from 'src/language/entities/language.entity';
 import { Material } from 'src/material/entities/material.entity';
 import { ModuleEntity } from 'src/module/entities/module.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
+import { Quiz } from 'src/quiz/entities/quiz.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -109,4 +110,12 @@ export class Course extends BaseEntity {
     inverseJoinColumn: { name: 'standard_id', referencedColumnName: 'id' },
   })
   standards: Standard[];
+
+  @ManyToMany(() => Quiz, (quizzes) => quizzes.courses, { nullable: true })
+  @JoinTable({
+    name: 'course_quiz_mapping',
+    joinColumn: { name: 'course_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'quiz_id', referencedColumnName: 'id' },
+  })
+  quizzes: Quiz[];
 }

@@ -52,7 +52,7 @@ export class PaymentService {
     }
     const totalExpertCoins = await this.userBalanceService.getAllCoins(currUser);
 
-
+    console.log(totalExpertCoins)
     const coins_to_use = createPaymentDto.use_coins
       ? Math.min(totalExpertCoins, amount)
       : 0;

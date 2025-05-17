@@ -58,4 +58,5 @@ export class Material extends BaseEntity {
 
   @OneToMany(() => Review, (reviews) => reviews.material)
   reviews: Review[];
+
 }

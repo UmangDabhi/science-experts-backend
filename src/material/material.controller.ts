@@ -19,6 +19,7 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialService } from './material.service';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 
 @Controller('material')
 export class MaterialController {
@@ -34,24 +35,27 @@ export class MaterialController {
     return this.materialService.create(req.user, createMaterialDto);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   findAll(
     @Req() req: RequestWithUser,
     @Query() paginationDto: PaginationDto) {
-    return this.materialService.findAll(req.user, paginationDto);
+    return this.materialService.findAll(req?.user, paginationDto);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(`${API_ENDPOINT.GET_COURSE_MATERIAL}/:courseId`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
   findAllByCourseId(@Param('courseId') courseId: string) {
     return this.materialService.findAllByCourseId(courseId);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(`${API_ENDPOINT.GET_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
-    return this.materialService.findOne(req.user,id);
+    return this.materialService.findOne(req?.user,id);
   }
 
   @UseGuards(AuthGuard('jwt'))

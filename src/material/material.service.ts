@@ -68,7 +68,7 @@ export class MaterialService {
     try {
       const searchableFields: (keyof Material)[] = ['title'];
       const queryOptions: any = {};
-      if (currUser.role == Role.TUTOR) {
+      if (currUser && currUser.role == Role.TUTOR) {
         queryOptions.tutor = { id: currUser.id };
       }
       const materials = await pagniateRecords(
@@ -78,7 +78,7 @@ export class MaterialService {
         queryOptions,
       );
       const result = materials;
-      if (currUser.role === Role.STUDENT) {
+      if (!currUser || currUser.role === Role.STUDENT) {
         const studentResult: PaginatedResult<MaterialPublicDto> = {
           ...materials,
           data: materials.data.map(material =>
@@ -126,25 +126,26 @@ export class MaterialService {
       });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
-      const material_purchase = await this.materialPurchaseRepository.findOne({
-        where: {
-          material: {
-            id: material.id,
-          },
-          student: {
-            id: currUser.id
+      if (currUser) {
+        const material_purchase = await this.materialPurchaseRepository.findOne({
+          where: {
+            material: {
+              id: material.id,
+            },
+            student: {
+              id: currUser?.id
+            }
           }
-        }
-      })
-      if (material_purchase) {
-        material["is_purchased"] = true;
-      } else {
-        material["is_purchased"] = false;
-        if (currUser.role == Role.STUDENT) {
-          plainToInstance(MaterialPublicDto, material, {
-            excludeExtraneousValues: true,
-          })
-        }
+        })
+        if (material_purchase)
+          material["is_purchased"] = true;
+        else
+          material["is_purchased"] = false;
+      }
+      if (!currUser || currUser.role == Role.STUDENT) {
+        plainToInstance(MaterialPublicDto, material, {
+          excludeExtraneousValues: true,
+        })
       }
       return material;
     } catch (error) {

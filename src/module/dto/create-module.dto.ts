@@ -25,8 +25,9 @@ export class CreateModuleDto {
   @IsNumber()
   duration: number;
 
+  @IsOptional()
   @IsBoolean()
-  is_free_to_watch: boolean;
+  is_free_to_watch?: boolean;
 
   @IsString()
   course: string;

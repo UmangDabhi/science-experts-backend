@@ -8,6 +8,7 @@ import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { BlogFilterDto } from './dto/filter-blog.dto';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -24,10 +25,11 @@ export class BlogsController {
     return this.blogsService.create(req.user, createBlogDto);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_BLOG)
   @ResponseMessage(MESSAGES.ALL_BLOG_FETCHED)
-  findAll(@Req() req: RequestWithUser, @Query() blogFilterDto: BlogFilterDto) {
-    return this.blogsService.findAll(req.user, blogFilterDto);
+  findAll(@Query() blogFilterDto: BlogFilterDto) {
+    return this.blogsService.findAll(blogFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -39,8 +41,8 @@ export class BlogsController {
 
   @Get(`${API_ENDPOINT.GET_BLOG}/:id`)
   @ResponseMessage(MESSAGES.BLOG_FETCHED)
-  findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
-    return this.blogsService.findOne(req.user, id);
+  findOne(@Param('id') id: string) {
+    return this.blogsService.findOne(id);
   }
 
   @UseGuards(AuthGuard('jwt'))

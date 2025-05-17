@@ -8,6 +8,7 @@ import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { User_Balance } from './user_balance.entity';
+import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -93,4 +94,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Review, (review) => review.student, { nullable: true })
   review: Review[];
+
+  @OneToMany(() => QuizAttempts, (quiz_attempts) => quiz_attempts.student, { nullable: true })
+  quiz_attempts: QuizAttempts[];
 }

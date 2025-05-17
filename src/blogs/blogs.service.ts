@@ -60,7 +60,6 @@ export class BlogsService {
   }
 
   async findAll(
-    currUser: User,
     blogFilterDto: BlogFilterDto,
   ): Promise<PaginatedResult<Blog>> {
     try {
@@ -125,7 +124,7 @@ export class BlogsService {
     }
   }
 
-  async findOne(currUser: User, id: string) {
+  async findOne(id: string) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 

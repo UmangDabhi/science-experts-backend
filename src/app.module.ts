@@ -8,25 +8,26 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { BlogsModule } from './blogs/blogs.module';
 import { CategoryModule } from './category/category.module';
 import { CertificateModule } from './certificate/certificate.module';
 import { CourseModule } from './course/course.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { FileModule } from './file/file.module';
+import { LanguageModule } from './language/language.module';
 import { Log } from './log/log.entity';
 import { LoggingInterceptor } from './log/logging.intercepter';
 import { MaterialModule } from './material/material.module';
+import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
 import { ModuleModule } from './module/module.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProgressModule } from './progress/progress.module';
+import { QuizModule } from './quiz/quiz.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { StandardModule } from './standard/standard.module';
+import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
-import { LanguageModule } from './language/language.module';
-import { Balance_Type } from './user/entities/balance_type.entity';
-import { BlogsModule } from './blogs/blogs.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -82,6 +83,7 @@ import { BlogsModule } from './blogs/blogs.module';
     MaterialPurchaseModule,
     LanguageModule,
     BlogsModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [

@@ -19,6 +19,7 @@ import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) { }
@@ -40,10 +41,11 @@ export class CourseController {
     return this.courseService.manageAllCourse(req.user, courseFilterDto);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  findAll(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
-    return this.courseService.findAll(req.user, courseFilterDto);
+  findAll(@Query() courseFilterDto: CourseFilterDto) {
+    return this.courseService.findAll(courseFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -53,10 +55,11 @@ export class CourseController {
     return this.courseService.findEnrolledCourse(req.user, courseFilterDto);
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Get(`${API_ENDPOINT.GET_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
-    return this.courseService.findOne(req.user, id);
+    return this.courseService.findOne(req?.user, id);
   }
 
   @UseGuards(AuthGuard('jwt'))

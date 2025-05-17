@@ -22,6 +22,11 @@ export enum COIN_VALUE_TYPE {
   DIRECT = "DIRECT",
   PERCENTAGE = "PERCENTAGE"
 };
+export enum QUESTION_TYPE {
+  MCQ = "MCQ",
+  TRUE_FALSE = "TRUE_FALSE",
+  MULTI_SELECT = "MULTI_SELECT"
+};
 export const Is_Paid = {
   YES: true,
   NO: false,
