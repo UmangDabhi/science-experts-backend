@@ -16,7 +16,7 @@ export class FileController {
   @Post('upload/:folderPath*')
   @UseInterceptors(FileInterceptor('file', {
     limits: {
-      fileSize: 500 * 1024 * 1024, // 500 MB
+      fileSize: 1500 * 1024 * 1024, // 500 MB
     },
   }))
 
@@ -41,7 +41,7 @@ export class FileController {
   @Post('upload_locally/:folderPath*')
   @UseInterceptors(FileInterceptor('file', {
     limits: {
-      fileSize: 500 * 1024 * 1024, // 500 MB
+      fileSize: 1500 * 1024 * 1024, // 500 MB
     },
   }))
 
