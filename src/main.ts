@@ -17,8 +17,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ResponseInterceptor());
   app.useGlobalFilters(new AllExceptionsFilter());
 
-  app.use(bodyParser.json({ limit: '1500mb' }));
-  app.use(bodyParser.urlencoded({ limit: '1500mb', extended: true }));
+  app.use(bodyParser.json({ limit: '2000mb' }));
+  app.use(bodyParser.urlencoded({ limit: '2000mb', extended: true }));
 
   const port = process.env.BACKEND_PORT || 3000;
   await app.listen(port);

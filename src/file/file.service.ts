@@ -1,27 +1,41 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import * as AWS from 'aws-sdk';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
+  CompleteMultipartUploadCommand,
+  AbortMultipartUploadCommand,
+  CompletedPart,
+} from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as multer from 'multer';
 import { join, relative, extname, normalize } from 'path';
 import { promises as fsPromises } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 import { localStoragePath } from 'src/Helper/constants';
 import * as dotenv from 'dotenv';
+import * as fs from 'fs';
 
 dotenv.config();
 
 @Injectable()
 export class FileService {
-  private s3: AWS.S3;
+  private s3: S3Client;
 
   constructor() {
     if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
       throw new Error('Missing AWS S3 configuration in environment variables');
     }
 
-    this.s3 = new AWS.S3({
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    this.s3 = new S3Client({
       region: process.env.AWS_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
     });
   }
 
@@ -34,27 +48,43 @@ export class FileService {
     return `${uuidv4()}${fileExtension}`;
   }
 
+  // Simple single-part presigned URL (PUT)
+  async getPresignedUploadUrl(folder: string, filename: string, contentType: string): Promise<string> {
+    const key = `${folder}/${Date.now()}-${filename}`;
+
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    try {
+      const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 }); // 5 minutes
+      return uploadUrl;
+    } catch (error) {
+      console.error('Error generating presigned URL:', error);
+      throw new InternalServerErrorException('Could not generate upload URL');
+    }
+  }
+
+  // Upload file using SDK (single part)
   async uploadToS3(file: Express.Multer.File, folder: string): Promise<string> {
     const safeFolder = this.sanitizeFolderPath(folder);
-    const fileContent = file.path
-      ? await fsPromises.readFile(file.path)
-      : file.buffer;
+    const fileStream = fs.createReadStream(file.path);
 
     const key = `${safeFolder}/${this.generateUniqueFilename(file.originalname)}`;
 
-    const params = {
+    const command = new PutObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: key,
-      Body: fileContent,
+      Body: fileStream,
       ContentType: file.mimetype,
-    };
+    });
 
     try {
-      const uploadResult = await this.s3.upload(params).promise();
-      if (file.path) {
-        await fsPromises.unlink(file.path); // Delete temp file if present
-      }
-      return uploadResult.Location;
+      await this.s3.send(command);
+      await fs.promises.unlink(file.path);
+      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
     } catch (error) {
       console.error('S3 upload error:', error);
       throw new InternalServerErrorException('Error uploading file to S3');
@@ -79,24 +109,19 @@ export class FileService {
     }
   }
 
-  async uploadFile(
-    file: Express.Multer.File,
-    folder: string,
-  ): Promise<{
-    s3Url: string;
-  }> {
+  async uploadFile(file: Express.Multer.File, folder: string): Promise<{ s3Url: string }> {
     const s3Url = await this.uploadToS3(file, folder);
     return { s3Url };
   }
 
   async deleteFromS3(fileKey: string): Promise<void> {
-    const params = {
+    const command = new DeleteObjectCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
       Key: fileKey,
-    };
+    });
 
     try {
-      await this.s3.deleteObject(params).promise();
+      await this.s3.send(command);
     } catch (error) {
       console.error('S3 deletion error:', error);
       throw new InternalServerErrorException('Error deleting file from S3');
@@ -134,16 +159,16 @@ export class FileService {
     }
   }
 
-  async listFilesInS3Folder(folder: string): Promise<AWS.S3.ObjectList> {
+  async listFilesInS3Folder(folder: string): Promise<any[]> {
     const safeFolder = this.sanitizeFolderPath(folder);
 
-    const params = {
+    const command = new ListObjectsV2Command({
       Bucket: process.env.AWS_BUCKET_NAME,
       Prefix: safeFolder.endsWith('/') ? safeFolder : safeFolder + '/',
-    };
+    });
 
     try {
-      const result = await this.s3.listObjectsV2(params).promise();
+      const result = await this.s3.send(command);
       return result.Contents || [];
     } catch (error) {
       console.error('S3 list error:', error);
@@ -180,4 +205,98 @@ export class FileService {
       limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
     });
   }
+
+  async initiateMultipartUpload(
+    folder: string,
+    filename: string,
+    contentType: string,
+  ): Promise<{ uploadId: string; key: string }> {
+    const key = `${folder}/${Date.now()}-${filename}`;
+
+    const command = new CreateMultipartUploadCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      ContentType: contentType,
+    });
+
+    try {
+      const response = await this.s3.send(command);
+      if (!response.UploadId) {
+        throw new InternalServerErrorException('Failed to initiate multipart upload');
+      }
+      return { uploadId: response.UploadId, key };
+    } catch (error) {
+      console.error('Error initiating multipart upload:', error);
+      throw new InternalServerErrorException('Could not initiate multipart upload');
+    }
+  }
+
+  async getMultipartUploadPresignedUrls(
+    key: string,
+    uploadId: string,
+    partCount: number,
+  ): Promise<string[]> {
+    try {
+      const presignedUrls: string[] = [];
+
+      for (let partNumber = 1; partNumber <= partCount; partNumber++) {
+        const command = new UploadPartCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: key,
+          UploadId: uploadId,
+          PartNumber: partNumber,
+        });
+
+        const url = await getSignedUrl(this.s3, command, { expiresIn: 3000 });
+        presignedUrls.push(url);
+      }
+
+      return presignedUrls;
+    } catch (error) {
+      console.error('Error generating presigned URLs:', error);
+      throw new InternalServerErrorException('Could not generate presigned URLs for parts');
+    }
+  }
+
+  async completeMultipartUpload(
+    key: string,
+    uploadId: string,
+    parts: { ETag: string; PartNumber: number }[],
+  ): Promise<string> {
+    const completedParts: CompletedPart[] = parts.map(({ ETag, PartNumber }) => ({
+      ETag,
+      PartNumber,
+    }));
+
+    const command = new CompleteMultipartUploadCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      UploadId: uploadId,
+      MultipartUpload: { Parts: completedParts },
+    });
+
+    try {
+      await this.s3.send(command);
+      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    } catch (error) {
+      console.error('Error completing multipart upload:', error);
+      throw new InternalServerErrorException('Could not complete multipart upload');
+    }
+  }
+
+  async abortMultipartUpload(key: string, uploadId: string): Promise<void> {
+    const command = new AbortMultipartUploadCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      UploadId: uploadId,
+    });
+
+    try {
+      await this.s3.send(command);
+    } catch (error) {
+      console.error('Error aborting multipart upload:', error);
+      // Optional: fail silently or rethrow
+    }
+  }
+
 }
