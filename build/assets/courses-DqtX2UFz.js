@@ -1,0 +1,1 @@
+import{j as r}from"./index-JjPhpDDT.js";import{P as o}from"./index-Ccuc8Vlq.js";import"./usePagination-DyUZ14cW.js";import"./NoteComponent-DmWbg05b.js";import"./index-DgDsAf6e.js";import"./index-CLWyamHD.js";import"./courseComponent-DkHcvSq1.js";import"./SearchOutlined-DIu3R5qk.js";const a=()=>r.jsx(o,{isCourse:!0});export{a as default};

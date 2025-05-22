@@ -1,0 +1,1 @@
+import{L as s}from"./index-JjPhpDDT.js";const O="/assets/hero-GTOcvFJ1.png",t="/assets/hero2-CUlqYjVd.png",o="/assets/hero3-Du6mrsRh.png",E="/assets/bottom-Dkq8IhBR.png",a={LOGO:{src:s,alt:"Logo"},HERO1:{src:O,alt:"HERO1"},HERO2:{src:t,alt:"HERO2"},HERO3:{src:o,alt:"HERO3"},BOTTOM_IMAGE:{src:E,alt:"BOTTOM_IMAGE"}};export{a as I};
