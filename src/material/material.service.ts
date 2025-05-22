@@ -87,8 +87,8 @@ export class MaterialService {
 
       const sortOptions = {
         "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "price", direction: "ASC" },
-        "Price:High to Low": { field: "price", direction: "DESC" },
+        "Price:Low to High": { field: "amount", direction: "ASC" },
+        "Price:High to Low": { field: "amount", direction: "DESC" },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
@@ -146,8 +146,8 @@ export class MaterialService {
 
       const sortOptions = {
         "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "price", direction: "ASC" },
-        "Price:High to Low": { field: "price", direction: "DESC" },
+        "Price:Low to High": { field: "amount", direction: "ASC" },
+        "Price:High to Low": { field: "amount", direction: "DESC" },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
