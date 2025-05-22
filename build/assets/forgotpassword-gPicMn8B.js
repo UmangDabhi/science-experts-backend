@@ -1,0 +1,1 @@
+import{r as t,j as s}from"./index-Bqc3ENFI.js";const u=()=>{let[r,a]=t.useState(""),[e,o]=t.useState(0);const n=20;return t.useEffect(()=>{a("123")},[e]),s.jsxs("div",{className:"bg-red-500 w-52",id:"displayName",children:[r,"- ",n," - ",e,s.jsxs("button",{onClick:()=>{o(e++)},children:[" ","CLICK ME"," "]})]})};export{u as default};
