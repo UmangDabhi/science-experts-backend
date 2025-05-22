@@ -11,15 +11,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) { }
@@ -37,21 +37,21 @@ export class CourseController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  manageAllCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
+  manageAllCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: FilterDto) {
     return this.courseService.manageAllCourse(req.user, courseFilterDto);
   }
 
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  findAll(@Query() courseFilterDto: CourseFilterDto) {
+  findAll(@Query() courseFilterDto: FilterDto) {
     return this.courseService.findAll(courseFilterDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ENROLLED_COURSE)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
-  findEnrolledCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: CourseFilterDto) {
+  findEnrolledCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: FilterDto) {
     return this.courseService.findEnrolledCourse(req.user, courseFilterDto);
   }
 

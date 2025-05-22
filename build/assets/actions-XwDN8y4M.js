@@ -1,1 +1,0 @@
-import{aq as a,as as E,at as r,ax as t}from"./index-BHaB7y-4.js";const R=a(E.CREATE_PROGRESS,r,E.CREATE_PROGRESS);a(E.DELETE_ENROLLMENT,t,e=>E.DELETE_PROGRESS+"/"+e.id);const T=a(E.CREATE_PAYMENT,r,e=>E.CREATE_PAYMENT),P=a(E.VERIFY_PAYMENT,r,e=>E.VERIFY_PAYMENT);export{T as a,R as c,P as v};

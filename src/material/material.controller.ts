@@ -11,15 +11,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialService } from './material.service';
-import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 
 @Controller('material')
 export class MaterialController {
@@ -35,13 +35,21 @@ export class MaterialController {
     return this.materialService.create(req.user, createMaterialDto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
+  @Get(API_ENDPOINT.MANAGE_ALL_MATERIAL)
+  @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
+  manageAllCourse(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
+    return this.materialService.manageAllMaterial(req.user, filterDto);
+  }
+
+
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   findAll(
     @Req() req: RequestWithUser,
-    @Query() paginationDto: PaginationDto) {
-    return this.materialService.findAll(req?.user, paginationDto);
+    @Query() filterDto: FilterDto) {
+    return this.materialService.findAll(req?.user, filterDto);
   }
 
   @UseGuards(OptionalAuthGuard)
@@ -55,7 +63,7 @@ export class MaterialController {
   @Get(`${API_ENDPOINT.GET_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
-    return this.materialService.findOne(req?.user,id);
+    return this.materialService.findOne(req?.user, id);
   }
 
   @UseGuards(AuthGuard('jwt'))

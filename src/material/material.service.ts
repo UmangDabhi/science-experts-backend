@@ -5,22 +5,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToInstance } from 'class-transformer';
+import { Role } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { ERRORS } from 'src/Helper/message/error.message';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
+import { Category } from 'src/category/entities/category.entity';
+import { Language } from 'src/language/entities/language.entity';
+import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
+import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { In, Repository } from 'typeorm';
 import { CreateMaterialDto } from './dto/create-material.dto';
+import { MaterialPublicDto } from './dto/material-public.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { Material } from './entities/material.entity';
-import { Role } from 'src/Helper/constants';
-import { MaterialPublicDto } from './dto/material-public.dto';
-import { plainToInstance } from 'class-transformer';
-import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
-import { Category } from 'src/category/entities/category.entity';
-import { Language } from 'src/language/entities/language.entity';
-import { Standard } from 'src/standard/entities/standard.entity';
-import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
 
 @Injectable()
 export class MaterialService {
@@ -64,20 +64,108 @@ export class MaterialService {
     }
   }
 
-  async findAll(currUser: User, paginationDto: PaginationDto) {
+  async manageAllMaterial(currUser: User, filterDto: FilterDto) {
     try {
       const searchableFields: (keyof Material)[] = ['title'];
       const queryOptions: any = {};
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
+
       if (currUser && currUser.role == Role.TUTOR) {
         queryOptions.tutor = { id: currUser.id };
       }
+
+      if (filterDto?.category) {
+        queryOptions.categories = { id: filterDto.category };
+      }
+
+      if (filterDto?.standard) {
+        queryOptions.standards = { id: filterDto.standard };
+      }
+
+      const sortOptions = {
+        "Most Populer": { field: "created_at", direction: 'DESC', },
+        "Price:Low to High": { field: "price", direction: "ASC" },
+        "Price:High to Low": { field: "price", direction: "DESC" },
+      };
+
+      const selectedSort = sortOptions[filterDto?.sortby] || {};
+      orderBy.field = selectedSort.field || "";
+      orderBy.direction = selectedSort.direction;
+
+
       const materials = await pagniateRecords(
         this.materialRepository,
-        paginationDto,
+        filterDto,
         searchableFields,
         queryOptions,
+        [],
+        orderBy,
       );
       const result = materials;
+
+
+      if (!currUser || currUser.role === Role.STUDENT) {
+        const studentResult: PaginatedResult<MaterialPublicDto> = {
+          ...materials,
+          data: materials.data.map(material =>
+            plainToInstance(MaterialPublicDto, material, {
+              excludeExtraneousValues: true,
+            }),
+          ),
+        };
+        return studentResult;
+      }
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
+    }
+  }
+  async findAll(currUser: User, filterDto: FilterDto) {
+    try {
+      const searchableFields: (keyof Material)[] = ['title'];
+      const queryOptions: any = {};
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
+
+      if (currUser && currUser.role == Role.TUTOR) {
+        queryOptions.tutor = { id: currUser.id };
+      }
+
+      if (filterDto?.category) {
+        queryOptions.categories = { id: filterDto.category };
+      }
+
+      if (filterDto?.standard) {
+        queryOptions.standards = { id: filterDto.standard };
+      }
+
+      const sortOptions = {
+        "Most Populer": { field: "created_at", direction: 'DESC', },
+        "Price:Low to High": { field: "price", direction: "ASC" },
+        "Price:High to Low": { field: "price", direction: "DESC" },
+      };
+
+      const selectedSort = sortOptions[filterDto?.sortby] || {};
+      orderBy.field = selectedSort.field || "";
+      orderBy.direction = selectedSort.direction;
+
+
+      const materials = await pagniateRecords(
+        this.materialRepository,
+        filterDto,
+        searchableFields,
+        queryOptions,
+        [],
+        orderBy,
+      );
+      const result = materials;
+
+
       if (!currUser || currUser.role === Role.STUDENT) {
         const studentResult: PaginatedResult<MaterialPublicDto> = {
           ...materials,

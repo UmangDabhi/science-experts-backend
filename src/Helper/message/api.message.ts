@@ -25,6 +25,7 @@ export const API_ENDPOINT = {
 
   CREATE_MATERIAL: 'create_material',
   GET_ALL_MATERIAL: 'get_all_material',
+  MANAGE_ALL_MATERIAL: 'manage_all_material',
   GET_COURSE_MATERIAL: 'get_course_material',
   GET_MATERIAL: 'get_material',
   UPDATE_MATERIAL: 'update_material',

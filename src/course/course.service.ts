@@ -13,11 +13,11 @@ import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { In, Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { CourseFilterDto } from './dto/filter-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { Course } from './entities/course.entity';
 import { Is_Approved, Role } from 'src/Helper/constants';
 import { Language } from 'src/language/entities/language.entity';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
 
 @Injectable()
 export class CourseService {
@@ -64,12 +64,15 @@ export class CourseService {
   }
   async manageAllCourse(
     currUser: User,
-    courseFilterDto: CourseFilterDto,
+    courseFilterDto: FilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
       const searchableFields: (keyof Course)[] = ['title'];
       const queryOptions: any = {};
-
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
       if (courseFilterDto?.category) {
         queryOptions.categories = { id: courseFilterDto.category };
       }
@@ -79,13 +82,24 @@ export class CourseService {
       if (currUser.role == Role.TUTOR) {
         queryOptions.tutor = { id: currUser.id };
       }
+      const sortOptions = {
+        "Most Populer": { field: "created_at", direction: 'DESC', },
+        "Price:Low to High": { field: "price", direction: "ASC" },
+        "Price:High to Low": { field: "price", direction: "DESC" },
+      };
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
+
+      orderBy.field = selectedSort.field || "";
+      orderBy.direction = selectedSort.direction;
+
       const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
         this.courseRepository,
         courseFilterDto,
         searchableFields,
         queryOptions,
-        relations
+        relations,
+        orderBy
       );
 
       return result;
@@ -96,11 +110,15 @@ export class CourseService {
     }
   }
   async findAll(
-    courseFilterDto: CourseFilterDto,
+    courseFilterDto: FilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
       const searchableFields: (keyof Course)[] = ['title'];
       const queryOptions: any = {};
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
 
       if (courseFilterDto?.category) {
         queryOptions.categories = { id: courseFilterDto.category };
@@ -108,6 +126,17 @@ export class CourseService {
       if (courseFilterDto?.standard) {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
+
+      const sortOptions = {
+        "Most Populer": { field: "created_at", direction: 'DESC', },
+        "Price:Low to High": { field: "price", direction: "ASC" },
+        "Price:High to Low": { field: "price", direction: "DESC" },
+      };
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
+
+      orderBy.field = selectedSort.field || "";
+      orderBy.direction = selectedSort.direction;
+
       queryOptions.is_approved = Is_Approved.YES
       const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
@@ -115,7 +144,8 @@ export class CourseService {
         courseFilterDto,
         searchableFields,
         queryOptions,
-        relations
+        relations,
+        orderBy,
       );
 
       return result;
@@ -127,18 +157,31 @@ export class CourseService {
   }
   async findEnrolledCourse(
     currUser: User,
-    courseFilterDto: CourseFilterDto,
+    courseFilterDto: FilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
       const searchableFields: (keyof Course)[] = ['title'];
       const queryOptions: any = {};
-
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
       if (courseFilterDto?.category) {
         queryOptions.categories = { id: courseFilterDto.category };
       }
       if (courseFilterDto?.standard) {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
+      const sortOptions = {
+        "Most Populer": { field: "created_at", direction: 'DESC', },
+        "Price:Low to High": { field: "price", direction: "ASC" },
+        "Price:High to Low": { field: "price", direction: "DESC" },
+      };
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
+
+      orderBy.field = selectedSort.field || "";
+      orderBy.direction = selectedSort.direction;
+
       queryOptions.enrollments = { student: { id: currUser.id } };
       const relations = ["modules", "enrollments", "reviews", "progress"];
       const result = await pagniateRecords(
@@ -146,7 +189,8 @@ export class CourseService {
         courseFilterDto,
         searchableFields,
         queryOptions,
-        relations
+        relations,
+        orderBy
       );
 
       return result;
