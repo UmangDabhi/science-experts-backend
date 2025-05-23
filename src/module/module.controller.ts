@@ -17,10 +17,11 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { ResponseMessage } from 'src/Helper/constants';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { UpdateModuleOrderDto } from './dto/update-module-order.dto';
 
 @Controller('module')
 export class ModuleController {
-  constructor(private readonly moduleService: ModuleService) {}
+  constructor(private readonly moduleService: ModuleService) { }
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_MODULE)
@@ -45,6 +46,13 @@ export class ModuleController {
   @ResponseMessage(MESSAGES.MODULE_FETCHED)
   findOne(@Param('id') id: string) {
     return this.moduleService.findOne(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(`${API_ENDPOINT.UPDATE_MODULE_ORDER}`)
+  @ResponseMessage(MESSAGES.MODULE_UPDATED)
+  updateOrder(@Body() updateModuleOrderDto: UpdateModuleOrderDto) {
+    return this.moduleService.updateOrder(updateModuleOrderDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

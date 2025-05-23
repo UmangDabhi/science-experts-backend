@@ -9,10 +9,11 @@ import { UpdateModuleDto } from './dto/update-module.dto';
 import { ERRORS } from 'src/Helper/message/error.message';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ModuleEntity } from './entities/module.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { Course } from 'src/course/entities/course.entity';
+import { UpdateModuleOrderDto } from './dto/update-module-order.dto';
 
 @Injectable()
 export class ModuleService {
@@ -21,11 +22,22 @@ export class ModuleService {
     private readonly moduleRepository: Repository<ModuleEntity>,
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
+    private readonly dataSource: DataSource
   ) { }
   async create(createModuleDto: CreateModuleDto) {
     try {
+      const maxOrderModule = await this.moduleRepository.findOne({
+        where: {
+          course: { id: createModuleDto.course }
+        },
+        order: {
+          order: "DESC"
+        }
+      })
+      const order = maxOrderModule ? maxOrderModule.order + 1 : 1
       const newModule = this.moduleRepository.create({
         ...createModuleDto,
+        order: order,
         course: { id: createModuleDto.course },
       });
       return await this.moduleRepository.save(newModule);
@@ -56,6 +68,7 @@ export class ModuleService {
             id: courseId,
           },
         },
+        order: { order: "ASC" }
       });
       return result;
     } catch (error) {
@@ -119,6 +132,32 @@ export class ModuleService {
 
       console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MODULE);
+    }
+  }
+  async updateOrder(updateModuleOrderDto: UpdateModuleOrderDto) {
+    const { modules } = updateModuleOrderDto;
+    const orders = modules.map(d => d.order);
+    const hasDuplicates = new Set(orders).size !== orders.length;
+    if (hasDuplicates) {
+      throw new BadRequestException('Duplicate order values are not allowed.');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      for (const { id, order } of modules) {
+        await queryRunner.manager.update(ModuleEntity, { id }, { order });
+      }
+      await queryRunner.commitTransaction();
+      return { message: 'Module orders updated successfully' };
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      console.error(error);
+      throw new InternalServerErrorException(ERRORS.ERROR_CREATING_MODULE);
+    } finally {
+      await queryRunner.release();
     }
   }
 

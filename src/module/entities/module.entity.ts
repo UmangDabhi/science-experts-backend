@@ -23,6 +23,9 @@ export class ModuleEntity extends BaseEntity {
   @Column({ nullable: true, type: 'double precision' })
   duration: number;
 
+  @Column({ nullable: true, type: 'int' })
+  order: number;
+
   @ManyToOne(() => Course, (course) => course.modules)
   @JoinColumn({ name: 'course_id' })
   course: Course;

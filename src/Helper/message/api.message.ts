@@ -21,6 +21,7 @@ export const API_ENDPOINT = {
   GET_COURSE_MODULE: 'get_course_module',
   GET_MODULE: 'get_module',
   UPDATE_MODULE: 'update_module',
+  UPDATE_MODULE_ORDER: 'update_module_order',
   DELETE_MODULE: 'delete_module',
 
   CREATE_MATERIAL: 'create_material',
