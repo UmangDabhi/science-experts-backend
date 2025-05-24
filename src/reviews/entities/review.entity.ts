@@ -1,3 +1,4 @@
+import { Book } from 'src/books/entities/book.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Material } from 'src/material/entities/material.entity';
@@ -32,6 +33,10 @@ export class Review extends BaseEntity {
   @ManyToOne(() => Material, (material) => material.reviews, { nullable: true })
   @JoinColumn({ name: 'material_id' })
   material: Material;
+
+  @ManyToOne(() => Book, (book) => book.reviews, { nullable: true })
+  @JoinColumn({ name: 'book_id' })
+  book: Book;
 
   @ManyToOne(() => ModuleEntity, (module) => module.reviews, { nullable: true })
   @JoinColumn({ name: 'module_id' })

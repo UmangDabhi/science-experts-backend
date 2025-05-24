@@ -1,3 +1,4 @@
+import { Book } from 'src/books/entities/book.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Material } from 'src/material/entities/material.entity';
@@ -13,4 +14,7 @@ export class Standard extends BaseEntity {
 
   @ManyToMany(() => Material, (materials) => materials.standards)
   materials: Material[];
+
+  @ManyToMany(() => Book, (book) => book.standards)
+  books: Book[];
 }

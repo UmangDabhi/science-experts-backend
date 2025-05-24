@@ -9,6 +9,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { BlogsModule } from './blogs/blogs.module';
+import { BooksModule } from './books/books.module';
 import { CategoryModule } from './category/category.module';
 import { CertificateModule } from './certificate/certificate.module';
 import { CourseModule } from './course/course.module';
@@ -18,7 +19,6 @@ import { LanguageModule } from './language/language.module';
 import { Log } from './log/log.entity';
 import { LoggingInterceptor } from './log/logging.intercepter';
 import { MaterialModule } from './material/material.module';
-import { MaterialPurchaseModule } from './material_purchase/material_purchase.module';
 import { ModuleModule } from './module/module.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProgressModule } from './progress/progress.module';
@@ -80,10 +80,10 @@ import { UserModule } from './user/user.module';
     ProgressModule,
     ReviewsModule,
     PaymentModule,
-    MaterialPurchaseModule,
     LanguageModule,
     BlogsModule,
     QuizModule,
+    BooksModule,
   ],
   controllers: [AppController],
   providers: [

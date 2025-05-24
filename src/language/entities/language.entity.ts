@@ -1,3 +1,4 @@
+import { Book } from "src/books/entities/book.entity";
 import { Course } from "src/course/entities/course.entity";
 import { BaseEntity } from "src/Helper/base.entity";
 import { Material } from "src/material/entities/material.entity";
@@ -13,4 +14,7 @@ export class Language extends BaseEntity {
 
     @OneToMany(() => Material, (material) => material.language)
     materials: Material[];
+
+    @OneToMany(() => Book, (book) => book.language)
+    books: Book[];
 }

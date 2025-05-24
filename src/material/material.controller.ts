@@ -37,7 +37,7 @@ export class MaterialController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_MATERIAL)
-  @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
+  @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   manageAllCourse(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
     return this.materialService.manageAllMaterial(req.user, filterDto);
   }

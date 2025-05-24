@@ -37,6 +37,13 @@ export const ERRORS = {
   ERROR_DELETING_MATERIAL: 'Error Deleting Material',
   ERROR_MATERIAL_NOT_FOUND: 'Material Not Found',
 
+  ERROR_CREATING_BOOK: 'Error Creating Book',
+  ERROR_FETCHING_BOOKS: 'Error Fetching Books',
+  ERROR_FETCHING_BOOK: 'Error Fetching Book',
+  ERROR_UPDATING_BOOK: 'Error Updating Book',
+  ERROR_DELETING_BOOK: 'Error Deleting Book',
+  ERROR_BOOK_NOT_FOUND: 'Book Not Found',
+
   ERROR_CREATING_BLOG: 'Error Creating Blog',
   ERROR_FETCHING_BLOGS: 'Error Fetching Blogs',
   ERROR_FETCHING_BLOG: 'Error Fetching Blog',

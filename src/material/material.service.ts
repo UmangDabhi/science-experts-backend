@@ -13,7 +13,7 @@ import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interfac
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
-import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
+import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { In, Repository } from 'typeorm';
@@ -208,8 +208,6 @@ export class MaterialService {
           'categories',
           'standards',
           'language',
-          'material_purchases',
-          'material_purchases.student',
         ],
       });
       if (!material)

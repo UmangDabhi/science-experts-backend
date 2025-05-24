@@ -6,7 +6,7 @@ import { Course } from 'src/course/entities/course.entity';
 import { EnrollmentService } from 'src/enrollment/enrollment.service';
 import { PURCHASE_OF_TYPE } from 'src/Helper/constants';
 import { Material } from 'src/material/entities/material.entity';
-import { MaterialPurchaseService } from 'src/material_purchase/material_purchase.service';
+import { MaterialPurchaseService } from 'src/material/material_purchase.service';
 import { User } from 'src/user/entities/user.entity';
 import { UserBalanceService } from 'src/user/user_balance.service';
 import { Repository } from 'typeorm';

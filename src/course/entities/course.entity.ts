@@ -69,7 +69,7 @@ export class Course extends BaseEntity {
   })
   is_approved: boolean;
 
-  @ManyToOne(() => User, (tutor) => tutor.courses, { eager: true })
+  @ManyToOne(() => User, (tutor) => tutor.tutor_courses, { eager: true })
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
 

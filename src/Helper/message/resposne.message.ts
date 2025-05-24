@@ -26,6 +26,12 @@ export const MESSAGES = {
   MATERIAL_UPDATED: 'Material Updated Successfully',
   MATERIAL_DELETED: 'Material Deleted Successfully',
 
+  ALL_BOOK_FETCHED: 'Books Fetched Successfully',
+  BOOK_CREATED: 'Book Created Successfully',
+  BOOK_FETCHED: 'Book Fethced Successfully',
+  BOOK_UPDATED: 'Book Updated Successfully',
+  BOOK_DELETED: 'Book Deleted Successfully',
+
   BLOG_CREATED: 'Blog Created Successfully',
   ALL_BLOG_FETCHED: 'Blogs Fetched Successfully',
   BLOG_FETCHED: 'Blog Fethced Successfully',

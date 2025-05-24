@@ -2,7 +2,7 @@ import { Category } from 'src/category/entities/category.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Language } from 'src/language/entities/language.entity';
-import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
+import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -26,7 +26,7 @@ export class Material extends BaseEntity {
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
-  @ManyToOne(() => User, (tutor) => tutor.courses)
+  @ManyToOne(() => User, (tutor) => tutor.tutor_materials)
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
 
@@ -37,7 +37,7 @@ export class Material extends BaseEntity {
   @Column()
   amount: number;
 
-  @ManyToMany(() => Category, (categories) => categories.courses)
+  @ManyToMany(() => Category, (categories) => categories.materials)
   @JoinTable({
     name: 'material_category_mapping',
     joinColumn: { name: 'material_id', referencedColumnName: 'id', },
@@ -45,7 +45,7 @@ export class Material extends BaseEntity {
   })
   categories: Category[];
 
-  @ManyToMany(() => Standard, (standards) => standards.courses)
+  @ManyToMany(() => Standard, (standards) => standards.materials)
   @JoinTable({
     name: 'material_standard_mapping',
     joinColumn: { name: 'material_id', referencedColumnName: 'id' },

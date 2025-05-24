@@ -3,12 +3,15 @@ import { Course } from 'src/course/entities/course.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Role } from 'src/Helper/constants';
-import { MaterialPurchase } from 'src/material_purchase/entities/material_purchase.entity';
+import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { User_Balance } from './user_balance.entity';
 import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
+import { BookPurchase } from 'src/books/entities/book_purchase.entity';
+import { Book } from 'src/books/entities/book.entity';
+import { Material } from 'src/material/entities/material.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -69,6 +72,15 @@ export class User extends BaseEntity {
   pincode: string;
 
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
+  tutor_courses: Course[];
+
+  @OneToMany(() => Material, (tutor_materials) => tutor_materials.tutor, { nullable: true })
+  tutor_materials: Material[];
+
+  @OneToMany(() => Book, (tutor_books) => tutor_books.tutor, { nullable: true })
+  tutor_books: Book[];
+
+  @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   courses: Course[];
 
   @OneToMany(() => User_Balance, (user_balance) => user_balance.user, { nullable: true })
@@ -88,6 +100,11 @@ export class User extends BaseEntity {
     nullable: true,
   })
   material_purchases: MaterialPurchase[];
+
+  @OneToMany(() => BookPurchase, (book_purchases) => book_purchases.student, {
+    nullable: true,
+  })
+  book_purchases: BookPurchase[];
 
   @OneToMany(() => Progress, (progress) => progress.student, { nullable: true })
   progress: Progress[];

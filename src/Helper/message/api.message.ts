@@ -32,6 +32,16 @@ export const API_ENDPOINT = {
   UPDATE_MATERIAL: 'update_material',
   DELETE_MATERIAL: 'delete_material',
 
+
+  CREATE_BOOK: 'create_book',
+  GET_ALL_BOOK: 'get_all_book',
+  MANAGE_ALL_BOOK: 'manage_all_book',
+  GET_COURSE_BOOK: 'get_course_book',
+  GET_BOOK: 'get_book',
+  UPDATE_BOOK: 'update_book',
+  DELETE_BOOK: 'delete_book',
+
+
   CREATE_BLOG: "create_blog",
   GET_ALL_BLOG: "get_all_blog",
   MANAGE_ALL_BLOG: 'manage_all_blog',
