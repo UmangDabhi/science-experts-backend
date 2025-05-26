@@ -10,6 +10,7 @@ export enum Role {
 export enum PURCHASE_OF_TYPE {
   COURSE = 'COURSE',
   MATERIAL = 'MATERIAL',
+  BOOK = "BOOK",
 }
 export enum BALANCE_TYPE {
   WELCOME_BONUS = "WELCOME_BONUS",

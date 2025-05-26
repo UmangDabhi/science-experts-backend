@@ -13,6 +13,8 @@ import { Repository } from 'typeorm';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { Payment } from './entities/payment.entity';
+import { BookPurchaseService } from 'src/books/book_purchase.service';
+import { Book } from 'src/books/entities/book.entity';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Razorpay = require('razorpay');
 
@@ -24,6 +26,7 @@ export class PaymentService {
     private configService: ConfigService,
     private enrollmentService: EnrollmentService,
     private materialPurchaseService: MaterialPurchaseService,
+    private bookPurchaseService: BookPurchaseService,
     private userBalanceService: UserBalanceService,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
@@ -33,6 +36,8 @@ export class PaymentService {
     private readonly courseRepository: Repository<Course>,
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+    @InjectRepository(Book)
+    private readonly bookRepository: Repository<Book>,
   ) {
     this.razorpay = new Razorpay({
       key_id: this.configService.get<string>('RAZORPAY_KEY_ID'),
@@ -46,9 +51,12 @@ export class PaymentService {
     if (createPaymentDto.type === PURCHASE_OF_TYPE.COURSE) {
       const existingCourse = await this.courseRepository.findOne({ where: { id: createPaymentDto.item_id } });
       amount = (existingCourse?.price * (100 - existingCourse?.discount)) / 100;
-    } else {
+    } else if (createPaymentDto.type === PURCHASE_OF_TYPE.MATERIAL) {
       const existingMaterial = await this.materialRepository.findOne({ where: { id: createPaymentDto.item_id } });
       amount = existingMaterial?.amount || 0;
+    } else if (createPaymentDto.type === PURCHASE_OF_TYPE.BOOK) {
+      const existingBook = await this.bookRepository.findOne({ where: { id: createPaymentDto.item_id } });
+      amount = existingBook?.amount || 0;
     }
     const totalExpertCoins = await this.userBalanceService.getAllCoins(currUser);
 
@@ -123,8 +131,10 @@ export class PaymentService {
   private async afterSuccessfulPurchase(currUser: User, type: string, item_id: string) {
     if (type === PURCHASE_OF_TYPE.COURSE) {
       await this.enrollmentService.create(currUser, { course: item_id })
-    } else {
+    } else if (type === PURCHASE_OF_TYPE.MATERIAL) {
       await this.materialPurchaseService.create(currUser, { material: item_id })
+    } else if (type === PURCHASE_OF_TYPE.BOOK) {
+      await this.bookPurchaseService.create(currUser, { book: item_id })
     }
   }
 }

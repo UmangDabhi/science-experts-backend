@@ -7,10 +7,12 @@ import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { BookPurchase } from './entities/book_purchase.entity';
+import { BookPurchaseService } from './book_purchase.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Book, BookPurchase, Category, Language, Standard])],
   controllers: [BooksController],
-  providers: [BooksService],
+  providers: [BooksService, BookPurchaseService],
+  exports: [BooksService, BookPurchaseService],
 })
 export class BooksModule { }

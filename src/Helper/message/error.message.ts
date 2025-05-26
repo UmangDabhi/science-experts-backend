@@ -96,5 +96,8 @@ export const ERRORS = {
   ERROR_LANGUAGE_ALREADY_EXISTS: 'Language Already Exists',
 
   ERROR_MATERIAL_PURCHASE_ALEARDY_EXISTS: "Material Purchase Already Exists",
-  ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase"
+  ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase",
+
+  ERROR_BOOK_PURCHASE_ALEARDY_EXISTS: "Book Purchase Already Exists",
+  ERROR_CREATING_BOOK_PURCHASE: "Error Creating Book Purchase"
 };

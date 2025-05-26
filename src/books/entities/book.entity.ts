@@ -6,6 +6,7 @@ import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { BookPurchase } from './book_purchase.entity';
+import { Is_Paid } from 'src/Helper/constants';
 
 @Entity()
 export class Book extends BaseEntity {
@@ -29,7 +30,16 @@ export class Book extends BaseEntity {
     @JoinColumn({ name: 'language_id' })
     language: Language;
 
-    @Column()
+    @Column({
+        type: 'boolean',
+        enum: Is_Paid,
+        default: Is_Paid.NO,
+    })
+    is_paid: boolean;
+
+    @Column({
+        nullable: true
+    })
     amount: number;
 
     @ManyToMany(() => Category, (categories) => categories.courses)

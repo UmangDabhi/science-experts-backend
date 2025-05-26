@@ -23,11 +23,11 @@ export class MaterialPurchaseService {
       if (!existingMaterial) {
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
       }
-      const newEnrollment = await this.materialPurchaseRepository.save({
+      const newMaterial = await this.materialPurchaseRepository.save({
         material: existingMaterial,
         student: { id: currUser.id },
       });
-      return newEnrollment;
+      return newMaterial;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       if (error.code === '23505') {
