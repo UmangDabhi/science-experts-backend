@@ -227,11 +227,13 @@ export class CourseService {
         if (!isEnrolled || !currUser) {
           return {
             ...course,
-            modules: course.modules.map((ele) => {
-              if (!ele.is_free_to_watch)
-                return { ...ele, video_url: null };
-              return { ...ele };
-            }),
+            modules: course.modules
+              .sort((a, b) => a?.order - b?.order)
+              .map((ele) => ({
+                ...ele,
+                video_url: ele.is_free_to_watch ? ele.video_url : null, // Hide video_url if not free
+              })),
+
             materials: course.materials.map((ele) => {
               return { ...ele, material_url: null };
             }),
