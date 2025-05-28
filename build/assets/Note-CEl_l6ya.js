@@ -1,1 +1,0 @@
-import{j as t}from"./index-CiS2rZVo.js";import{P as o}from"./index-TWOxKRhe.js";import"./BookComponent-BdURoJe_.js";import"./index-BbNBm2qd.js";import"./index-CNjqP6xu.js";import"./index-DXjLC6H7.js";import"./courseComponent-DQ9Kmk1x.js";import"./SearchOutlined-B_NAMMkW.js";const u=()=>t.jsx(o,{isNote:!0});export{u as default};
