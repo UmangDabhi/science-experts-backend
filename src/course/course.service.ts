@@ -228,7 +228,6 @@ export class CourseService {
           return {
             ...course,
             modules: course.modules
-              .sort((a, b) => a?.order - b?.order)
               .map((ele) => ({
                 ...ele,
                 video_url: ele.is_free_to_watch ? ele.video_url : null, // Hide video_url if not free
@@ -243,7 +242,11 @@ export class CourseService {
           course["is_enrolled"] = true;
         }
       }
-      return course;
+      return {
+        ...course,
+        modules: course?.modules
+          .sort((a, b) => a?.order - b?.order),
+      }
     } catch (error) {
       if (
         error instanceof NotFoundException ||
