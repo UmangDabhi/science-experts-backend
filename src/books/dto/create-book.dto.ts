@@ -19,8 +19,13 @@ export class CreateBookDto {
     @IsString()
     book_url: string;
 
+    @IsOptional()
+    @IsString()
+    thumbnail_url?: string;
+    
+    @IsOptional()
     @IsNumber()
-    amount: number;
+    amount?: number;
 
     @IsOptional()
     @IsArray()
