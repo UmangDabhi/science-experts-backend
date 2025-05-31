@@ -18,12 +18,16 @@ import { Course } from './entities/course.entity';
 import { Is_Approved, Role } from 'src/Helper/constants';
 import { Language } from 'src/language/entities/language.entity';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
+import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
+import { Material } from 'src/material/entities/material.entity';
 
 @Injectable()
 export class CourseService {
   constructor(
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
+    @InjectRepository(Material)
+    private readonly materialRepository: Repository<Material>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     @InjectRepository(Standard)
@@ -257,6 +261,40 @@ export class CourseService {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSE);
     }
   }
+
+
+  async attachMaterial(currUser: User, attachCourseMaterialDto: AttachCourseMaterialDto) {
+    try {
+      if (!attachCourseMaterialDto.course) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+
+      const course = await this.courseRepository.findOne({
+        where: { id: attachCourseMaterialDto.course, tutor: { id: currUser.id } },
+      });
+      if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
+
+      const materialEntites = attachCourseMaterialDto.material
+        ? await this.materialRepository.findBy({
+          id: In(attachCourseMaterialDto.material),
+        })
+        : [];
+
+      await this.courseRepository.save({
+        ...course,
+        materials: materialEntites
+      });
+
+      return {}
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
+        throw error;
+      console.log(error)
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSE);
+    }
+  }
+
 
   async update(currUser: User, id: string, updateCourseDto: UpdateCourseDto) {
     try {

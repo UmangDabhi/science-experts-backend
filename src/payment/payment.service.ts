@@ -15,6 +15,8 @@ import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { Payment } from './entities/payment.entity';
 import { BookPurchaseService } from 'src/books/book_purchase.service';
 import { Book } from 'src/books/entities/book.entity';
+import { PaperPurchaseService } from 'src/papers/paper_purchase.service';
+import { Paper } from 'src/papers/entities/paper.entity';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const Razorpay = require('razorpay');
 
@@ -27,6 +29,7 @@ export class PaymentService {
     private enrollmentService: EnrollmentService,
     private materialPurchaseService: MaterialPurchaseService,
     private bookPurchaseService: BookPurchaseService,
+    private paperPurchaseService: PaperPurchaseService,
     private userBalanceService: UserBalanceService,
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
@@ -38,6 +41,8 @@ export class PaymentService {
     private readonly materialRepository: Repository<Material>,
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
+    @InjectRepository(Paper)
+    private readonly paperRepository: Repository<Paper>,
   ) {
     this.razorpay = new Razorpay({
       key_id: this.configService.get<string>('RAZORPAY_KEY_ID'),
@@ -57,6 +62,9 @@ export class PaymentService {
     } else if (createPaymentDto.type === PURCHASE_OF_TYPE.BOOK) {
       const existingBook = await this.bookRepository.findOne({ where: { id: createPaymentDto.item_id } });
       amount = existingBook?.amount || 0;
+    } else if (createPaymentDto.type === PURCHASE_OF_TYPE.PAPER) {
+      const existingPaper = await this.paperRepository.findOne({ where: { id: createPaymentDto.item_id } });
+      amount = existingPaper?.amount || 0;
     }
     const totalExpertCoins = await this.userBalanceService.getAllCoins(currUser);
 
@@ -135,6 +143,8 @@ export class PaymentService {
       await this.materialPurchaseService.create(currUser, { material: item_id })
     } else if (type === PURCHASE_OF_TYPE.BOOK) {
       await this.bookPurchaseService.create(currUser, { book: item_id })
+    } else if (type === PURCHASE_OF_TYPE.PAPER) {
+      await this.paperPurchaseService.create(currUser, { paper: item_id })
     }
   }
 }

@@ -28,6 +28,7 @@ import { StandardModule } from './standard/standard.module';
 import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { PapersModule } from './papers/papers.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -84,6 +85,7 @@ import { UserModule } from './user/user.module';
     BlogsModule,
     QuizModule,
     BooksModule,
+    PapersModule,
   ],
   controllers: [AppController],
   providers: [

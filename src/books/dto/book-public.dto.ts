@@ -14,6 +14,9 @@ export class BookPublicDto {
   thumbnail_url?: string;
 
   @Expose()
+  is_paid: boolean;
+
+  @Expose()
   amount: number;
 
   @Expose()

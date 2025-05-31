@@ -20,6 +20,7 @@ import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
 @Controller('course')
 export class CourseController {
   constructor(private readonly courseService: CourseService) { }
@@ -60,6 +61,13 @@ export class CourseController {
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
   findOne(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.courseService.findOne(req?.user, id);
+  }
+
+  @UseGuards(OptionalAuthGuard)
+  @Patch(`${API_ENDPOINT.ATTACH_COURSE_MATERIAL}/:id`)
+  @ResponseMessage(MESSAGES.COURSE_MATERIAL_ATTACHED)
+  attachMaterial(@Req() req: RequestWithUser, @Body() attachCourseMaterialDto: AttachCourseMaterialDto) {
+    return this.courseService.attachMaterial(req?.user, attachCourseMaterialDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

@@ -6,10 +6,11 @@ import { Course } from './entities/course.entity';
 import { Category } from 'src/category/entities/category.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { Language } from 'src/language/entities/language.entity';
+import { Material } from 'src/material/entities/material.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, Category, Standard,Language])],
+  imports: [TypeOrmModule.forFeature([Course, Material, Category, Standard, Language])],
   controllers: [CourseController],
   providers: [CourseService],
 })
-export class CourseModule {}
+export class CourseModule { }

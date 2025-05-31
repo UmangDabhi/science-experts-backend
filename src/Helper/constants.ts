@@ -11,6 +11,7 @@ export enum PURCHASE_OF_TYPE {
   COURSE = 'COURSE',
   MATERIAL = 'MATERIAL',
   BOOK = "BOOK",
+  PAPER = "PAPER",
 }
 export enum BALANCE_TYPE {
   WELCOME_BONUS = "WELCOME_BONUS",

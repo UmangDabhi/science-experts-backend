@@ -12,6 +12,7 @@ export const API_ENDPOINT = {
   GET_ALL_COURSE: 'get_all_course',
   MANAGE_ALL_COURSE: 'manage_all_course',
   GET_COURSE: 'get_course',
+  ATTACH_COURSE_MATERIAL: 'attach_course_material',
   GET_ENROLLED_COURSE: 'get_enrolled_course',
   UPDATE_COURSE: 'update_course',
   DELETE_COURSE: 'delete_course',
@@ -40,6 +41,14 @@ export const API_ENDPOINT = {
   GET_BOOK: 'get_book',
   UPDATE_BOOK: 'update_book',
   DELETE_BOOK: 'delete_book',
+
+  CREATE_PAPER: 'create_paper',
+  GET_ALL_PAPER: 'get_all_paper',
+  MANAGE_ALL_PAPER: 'manage_all_paper',
+  GET_COURSE_PAPER: 'get_course_paper',
+  GET_PAPER: 'get_paper',
+  UPDATE_PAPER: 'update_paper',
+  DELETE_PAPER: 'delete_paper',
 
 
   CREATE_BLOG: "create_blog",

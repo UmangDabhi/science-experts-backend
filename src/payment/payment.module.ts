@@ -16,10 +16,13 @@ import { Balance_Type } from 'src/user/entities/balance_type.entity';
 import { BookPurchase } from 'src/books/entities/book_purchase.entity';
 import { BookPurchaseService } from 'src/books/book_purchase.service';
 import { Book } from 'src/books/entities/book.entity';
+import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
+import { PaperPurchaseService } from 'src/papers/paper_purchase.service';
+import { Paper } from 'src/papers/entities/paper.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment, MaterialPurchase, Book, BookPurchase, Enrollment, Course, Material, User, User_Balance, Balance_Type])],
+  imports: [TypeOrmModule.forFeature([Payment, MaterialPurchase, Book, BookPurchase, Paper, PaperPurchase, Enrollment, Course, Material, User, User_Balance, Balance_Type])],
   controllers: [PaymentController],
-  providers: [PaymentService, MaterialPurchaseService, BookPurchaseService, EnrollmentService, UserBalanceService],
+  providers: [PaymentService, MaterialPurchaseService, BookPurchaseService, PaperPurchaseService, EnrollmentService, UserBalanceService],
 })
 export class PaymentModule { }

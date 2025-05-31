@@ -12,6 +12,8 @@ import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
 import { BookPurchase } from 'src/books/entities/book_purchase.entity';
 import { Book } from 'src/books/entities/book.entity';
 import { Material } from 'src/material/entities/material.entity';
+import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
+import { Paper } from 'src/papers/entities/paper.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -80,6 +82,9 @@ export class User extends BaseEntity {
   @OneToMany(() => Book, (tutor_books) => tutor_books.tutor, { nullable: true })
   tutor_books: Book[];
 
+  @OneToMany(() => Paper, (tutor_papers) => tutor_papers.tutor, { nullable: true })
+  tutor_papers: Paper[];
+
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   courses: Course[];
 
@@ -105,6 +110,11 @@ export class User extends BaseEntity {
     nullable: true,
   })
   book_purchases: BookPurchase[];
+
+  @OneToMany(() => PaperPurchase, (paper_purchases) => paper_purchases.student, {
+    nullable: true,
+  })
+  paper_purchases: PaperPurchase[];
 
   @OneToMany(() => Progress, (progress) => progress.student, { nullable: true })
   progress: Progress[];

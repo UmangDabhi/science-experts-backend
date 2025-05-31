@@ -44,6 +44,13 @@ export const ERRORS = {
   ERROR_DELETING_BOOK: 'Error Deleting Book',
   ERROR_BOOK_NOT_FOUND: 'Book Not Found',
 
+  ERROR_CREATING_PAPER: 'Error Creating Paper',
+  ERROR_FETCHING_PAPERS: 'Error Fetching Papers',
+  ERROR_FETCHING_PAPER: 'Error Fetching Paper',
+  ERROR_UPDATING_PAPER: 'Error Updating Paper',
+  ERROR_DELETING_PAPER: 'Error Deleting Paper',
+  ERROR_PAPER_NOT_FOUND: 'Paper Not Found',
+
   ERROR_CREATING_BLOG: 'Error Creating Blog',
   ERROR_FETCHING_BLOGS: 'Error Fetching Blogs',
   ERROR_FETCHING_BLOG: 'Error Fetching Blog',
@@ -99,5 +106,8 @@ export const ERRORS = {
   ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase",
 
   ERROR_BOOK_PURCHASE_ALEARDY_EXISTS: "Book Purchase Already Exists",
-  ERROR_CREATING_BOOK_PURCHASE: "Error Creating Book Purchase"
+  ERROR_CREATING_BOOK_PURCHASE: "Error Creating Book Purchase",
+
+  ERROR_PAPER_PURCHASE_ALEARDY_EXISTS: "Paper Purchase Already Exists",
+  ERROR_CREATING_PAPER_PURCHASE: "Error Creating Paper Purchase"
 };

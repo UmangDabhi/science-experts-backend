@@ -1,0 +1,1 @@
+import{aq as a,A as E,as as r,aw as s}from"./index-DVTEx8d8.js";const R=a(E.CREATE_PROGRESS,r,E.CREATE_PROGRESS);a(E.DELETE_ENROLLMENT,s,e=>E.DELETE_PROGRESS+"/"+e.id);const T=a(E.CREATE_PAYMENT,r,e=>E.CREATE_PAYMENT),P=a(E.VERIFY_PAYMENT,r,e=>E.VERIFY_PAYMENT);export{T as a,R as c,P as v};

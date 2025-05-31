@@ -1,5 +1,6 @@
 import {
     IsArray,
+    IsBoolean,
     IsNumber,
     IsOptional,
     IsString,
@@ -22,7 +23,10 @@ export class CreateBookDto {
     @IsOptional()
     @IsString()
     thumbnail_url?: string;
-    
+
+    @IsBoolean()
+    is_paid: boolean;
+
     @IsOptional()
     @IsNumber()
     amount?: number;

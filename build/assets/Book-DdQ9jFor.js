@@ -1,1 +1,0 @@
-import{j as o}from"./index-BjzhHNWB.js";import{P as r}from"./index-B_TBy7Tp.js";import"./BookComponent-DbF6aLP2.js";import"./index-BrAdIzSo.js";import"./index-D62oXebL.js";import"./index-BWe-oDl7.js";import"./courseComponent-BmM10so-.js";import"./SearchOutlined-DgCxFSr-.js";const u=()=>o.jsx(r,{isBook:!0});export{u as default};

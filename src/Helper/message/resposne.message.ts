@@ -11,6 +11,7 @@ export const MESSAGES = {
   COURSE_CREATED: 'Course Created Successfully',
   ALL_COURSE_FETCHED: 'Courses Fetched Successfully',
   COURSE_FETCHED: 'Course Fethced Successfully',
+  COURSE_MATERIAL_ATTACHED: 'Course Material Attached Successfully',
   COURSE_UPDATED: 'Course Updated Successfully',
   COURSE_DELETED: 'Course Deleted Successfully',
 
@@ -31,6 +32,12 @@ export const MESSAGES = {
   BOOK_FETCHED: 'Book Fethced Successfully',
   BOOK_UPDATED: 'Book Updated Successfully',
   BOOK_DELETED: 'Book Deleted Successfully',
+
+  ALL_PAPER_FETCHED: 'Papers Fetched Successfully',
+  PAPER_CREATED: 'Paper Created Successfully',
+  PAPER_FETCHED: 'Paper Fethced Successfully',
+  PAPER_UPDATED: 'Paper Updated Successfully',
+  PAPER_DELETED: 'Paper Deleted Successfully',
 
   BLOG_CREATED: 'Blog Created Successfully',
   ALL_BLOG_FETCHED: 'Blogs Fetched Successfully',
