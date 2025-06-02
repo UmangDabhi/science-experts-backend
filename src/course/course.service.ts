@@ -93,8 +93,8 @@ export class CourseService {
       };
       const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
 
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      orderBy.field = selectedSort.field || "created_at";
+      orderBy.direction = selectedSort.direction || "DESC";
 
       const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
