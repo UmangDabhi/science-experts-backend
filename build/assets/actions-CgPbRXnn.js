@@ -1,1 +1,0 @@
-import{aq as a,A as E,as as r,aw as s}from"./index-eS-IgJE9.js";const A=a(E.CREATE_PROGRESS,r,E.CREATE_PROGRESS);a(E.DELETE_ENROLLMENT,s,e=>E.DELETE_PROGRESS+"/"+e.id);const R=a(E.CREATE_PAYMENT,r,e=>E.CREATE_PAYMENT),n=a(E.VERIFY_PAYMENT,r,e=>E.VERIFY_PAYMENT),T=a(E.CREATE_ADMISSION,r,e=>E.CREATE_ADMISSION);export{R as a,T as b,A as c,n as v};
