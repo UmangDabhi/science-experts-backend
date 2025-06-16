@@ -29,6 +29,9 @@ import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 import { PapersModule } from './papers/papers.module';
+import { AdmissionModule } from './admission/admission.module';
+import { CollegeModule } from './college/college.module';
+import { CollegeCoursesModule } from './college-courses/college-courses.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -86,6 +89,9 @@ import { PapersModule } from './papers/papers.module';
     QuizModule,
     BooksModule,
     PapersModule,
+    AdmissionModule,
+    CollegeModule,
+    CollegeCoursesModule,
   ],
   controllers: [AppController],
   providers: [

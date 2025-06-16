@@ -4,6 +4,7 @@ export const API_ENDPOINT = {
   GET_USER: 'get_user',
   UPDATE_USER: 'update_user',
   DELETE_USER: 'delete_user',
+  DASHBOARD_DETAILS: 'dashboard_details',
 
   GET_ALL_TUTOR: 'get_all_tutor',
   GET_TUTOR: 'get_tutor',
@@ -95,4 +96,24 @@ export const API_ENDPOINT = {
   GET_ALL_LANGUAGE: 'get_all_language',
   UPDATE_LANGUAGE: 'update_language',
   DELETE_LANGUAGE: 'delete_language',
+
+
+  CREATE_COLLEGE: 'create_college',
+  GET_ALL_COLLEGE: 'get_all_college',
+  GET_COLLEGE: 'get_college',
+  UPDATE_COLLEGE: 'update_college',
+  DELETE_COLLEGE: 'delete_college',
+
+  CREATE_ADMISSION: 'create_admission',
+  GET_ALL_ADMISSION: 'get_all_admission',
+  GET_ADMISSION: 'get_admission',
+  UPDATE_ADMISSION: 'update_admission',
+  DELETE_ADMISSION: 'delete_admission',
+
+  CREATE_COLLEGE_COURSE: 'create_college_course',
+  GET_ALL_COLLEGE_COURSE: 'get_all_college_course',
+  GET_COLLEGE_COURSE: 'get_college_course',
+  UPDATE_COLLEGE_COURSE: 'update_college_course',
+  DELETE_COLLEGE_COURSE: 'delete_college_course',
+
 };

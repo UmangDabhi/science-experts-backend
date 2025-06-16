@@ -5,7 +5,9 @@ export const ERRORS = {
   ERROR_UPDATING_USER: 'Error Updating User',
   ERROR_DELETING_USER: 'Error Deleting User',
   ERROR_USER_NOT_FOUND: 'User Not Found',
-
+  
+  ERROR_FETCHING_DASHBOARD_DETAILS: 'Error Fetching Dashboard Details',
+  
   ERROR_FETCHING_TUTORS: 'Error Fetching Tutors',
   ERROR_FETCHING_TUTOR: 'Error Fetching Tutor',
 
@@ -109,5 +111,26 @@ export const ERRORS = {
   ERROR_CREATING_BOOK_PURCHASE: "Error Creating Book Purchase",
 
   ERROR_PAPER_PURCHASE_ALEARDY_EXISTS: "Paper Purchase Already Exists",
-  ERROR_CREATING_PAPER_PURCHASE: "Error Creating Paper Purchase"
+  ERROR_CREATING_PAPER_PURCHASE: "Error Creating Paper Purchase",
+
+  ERROR_CREATING_COLLEGE: 'Error Creating College',
+  ERROR_FETCHING_COLLEGE: 'Error Fetching Colleges',
+  ERROR_FETCHING_COLLEGES: 'Error Fetching College',
+  ERROR_UPDATING_COLLEGE: 'Error Updating College',
+  ERROR_DELETING_COLLEGE: 'Error Deleting College',
+  ERROR_COLLEGE_NOT_FOUND: 'College Not Found',
+
+  ERROR_CREATING_COLLEGE_COURSE: 'Error Creating College Course',
+  ERROR_FETCHING_COLLEGE_COURSE: 'Error Fetching College Courses',
+  ERROR_FETCHING_COLLEGE_COURSES: 'Error Fetching College Course',
+  ERROR_UPDATING_COLLEGE_COURSE: 'Error Updating College Course',
+  ERROR_DELETING_COLLEGE_COURSE: 'Error Deleting College Course',
+  ERROR_COLLEGE_COURSE_NOT_FOUND: 'College Course Not Found',
+
+  ERROR_CREATING_ADMISSION: 'Error Creating Admission',
+  ERROR_FETCHING_ADMISSIONS: 'Error Fetching Admissions',
+  ERROR_FETCHING_ADMISSION: 'Error Fetching Admission',
+  ERROR_UPDATING_ADMISSION: 'Error Updating Admission',
+  ERROR_DELETING_ADMISSION: 'Error Deleting Admission',
+  ERROR_ADMISSION_NOT_FOUND: 'Admission Not Found',
 };

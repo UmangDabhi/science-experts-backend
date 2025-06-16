@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -17,10 +18,11 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post(API_ENDPOINT.CREATE_USER)
   @ResponseMessage(MESSAGES.USER_CREATED)
@@ -59,5 +61,12 @@ export class UserController {
   @ResponseMessage(MESSAGES.USER_DELETED)
   remove(@Param('id') id: string) {
     return this.userService.remove(id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(API_ENDPOINT.DASHBOARD_DETAILS)
+  @ResponseMessage(MESSAGES.DASHBOARD_DETAILS_FETCHED)
+  dashboardDetails(@Req() req: RequestWithUser) {
+    return this.userService.dashboardDetails(req.user);
   }
 }

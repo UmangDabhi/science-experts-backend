@@ -5,6 +5,8 @@ export const MESSAGES = {
   USER_UPDATED: 'User Updated Successfully',
   USER_DELETED: 'User Deleted Successfully',
 
+  DASHBOARD_DETAILS_FETCHED: 'Dashboard Details Successfully',
+
   ALL_TUTOR_FETCHED: 'Tutors Fetched Successfully',
   TUTOR_FETCHED: 'Tutor Fethced Successfully',
 
@@ -80,5 +82,23 @@ export const MESSAGES = {
   LANGUAGE_UPDATED: 'Language Updated Successfully',
   LANGUAGE_DELETED: 'Language Deleted Successfully',
 
-  MATERIAL_PURCHASE_CREATED: "Material Purchased Successfully"
+  MATERIAL_PURCHASE_CREATED: "Material Purchased Successfully",
+
+  COLLEGE_CREATED: 'College Created Successfully',
+  ALL_COLLEGE_FETCHED: 'Colleges Fetched Successfully',
+  COLLEGE_FETCHED: 'College Fethced Successfully',
+  COLLEGE_UPDATED: 'College Updated Successfully',
+  COLLEGE_DELETED: 'College Deleted Successfully',
+
+  COLLEGE_COURSE_CREATED: 'College Course Created Successfully',
+  ALL_COLLEGE_COURSE_FETCHED: 'College Courses Fetched Successfully',
+  COLLEGE_COURSE_FETCHED: 'College Courses Fethced Successfully',
+  COLLEGE_COURSE_UPDATED: 'College Courses Updated Successfully',
+  COLLEGE_COURSE_DELETED: 'College Courses Deleted Successfully',
+
+  ADMISSION_CREATED: 'Admission Created Successfully',
+  ALL_ADMISSION_FETCHED: 'Admissions Fetched Successfully',
+  ADMISSION_FETCHED: 'Admission Fethced Successfully',
+  ADMISSION_UPDATED: 'Admission Updated Successfully',
+  ADMISSION_DELETED: 'Admission Deleted Successfully',
 };

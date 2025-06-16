@@ -14,6 +14,7 @@ import { Book } from 'src/books/entities/book.entity';
 import { Material } from 'src/material/entities/material.entity';
 import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
 import { Paper } from 'src/papers/entities/paper.entity';
+import { Blog } from 'src/blogs/entities/blog.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -87,6 +88,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   courses: Course[];
+
+  @OneToMany(() => Blog, (blog) => blog.tutor, { nullable: true })
+  blogs: Blog[];
 
   @OneToMany(() => User_Balance, (user_balance) => user_balance.user, { nullable: true })
   user_balance: User_Balance[];

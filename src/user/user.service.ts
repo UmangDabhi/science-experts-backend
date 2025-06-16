@@ -17,12 +17,27 @@ import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { BALANCE_TYPE, Role } from 'src/Helper/constants';
 import { CounterService } from 'src/counter/counter.service';
 import { UserBalanceService } from './user_balance.service';
+import { Standard } from 'src/standard/entities/standard.entity';
+import { Category } from 'src/category/entities/category.entity';
+import { Language } from 'src/language/entities/language.entity';
+import { College } from 'src/college/entities/college.entity';
+import { CollegeCourse } from 'src/college-courses/entities/college-course.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Standard)
+    private readonly standardRepository: Repository<Standard>,
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Language)
+    private readonly languageRepository: Repository<Language>,
+    @InjectRepository(College)
+    private readonly collegeRepository: Repository<College>,
+    @InjectRepository(CollegeCourse)
+    private readonly collegeCourseRepository: Repository<CollegeCourse>,
     private readonly counterService: CounterService,
     private readonly userBalanceService: UserBalanceService,
   ) { }
@@ -74,7 +89,6 @@ export class UserService {
     }
   }
 
-
   private generateAlphanumericCode(length = 8): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let code = '';
@@ -122,7 +136,7 @@ export class UserService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates","user_balance"] });
+      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates", "user_balance"] });
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
@@ -206,6 +220,62 @@ export class UserService {
       }
       throw new InternalServerErrorException(
         ERRORS.ERROR_FETCHING_USER_BY_EMAIL,
+      );
+    }
+  }
+
+  async dashboardDetails(user: User) {
+    try {
+      if (!user) {
+        throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
+      }
+      const counts = await this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.tutor_courses', 'course')
+        .leftJoin('user.tutor_materials', 'material')
+        .leftJoin('user.tutor_books', 'book')
+        .leftJoin('user.tutor_papers', 'paper')
+        .leftJoin('user.blogs', 'blogs')
+        .where('user.id = :id', { id: user.id })
+        .select('user.id', 'userId')
+        .addSelect('COUNT(DISTINCT course.id)', 'courseCount')
+        .addSelect('COUNT(DISTINCT material.id)', 'materialsCount')
+        .addSelect('COUNT(DISTINCT book.id)', 'booksCount')
+        .addSelect('COUNT(DISTINCT paper.id)', 'papersCount')
+        .addSelect('COUNT(DISTINCT blogs.id)', 'blogsCount')
+        .addSelect(`SUM(CASE WHEN user.role = 'tutor' THEN 1 ELSE 0 END)`, 'tutorCount')
+        .groupBy('user.id')
+        .getRawOne();
+      const categoryCount = await this.categoryRepository.count();
+      const standardCount = await this.standardRepository.count();
+      const languageCount = await this.languageRepository.count();
+      const collegeCount = await this.collegeRepository.count();
+      const collegeCourseCount = await this.collegeCourseRepository.count();
+
+      return {
+        courseCount: Number(counts.courseCount),
+        materialsCount: Number(counts.materialsCount),
+        booksCount: Number(counts.booksCount),
+        papersCount: Number(counts.papersCount),
+        blogsCount: Number(counts.blogsCount),
+        tutorCount: Number(counts.tutorCount),
+        categoryCount: Number(categoryCount),
+        standardCount: Number(standardCount),
+        collegeCount: Number(collegeCount),
+        languageCount: Number(languageCount),
+        collegeCourseCount: Number(collegeCourseCount),
+      };
+
+    } catch (error) {
+      console.log(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        ERRORS.ERROR_FETCHING_DASHBOARD_DETAILS,
       );
     }
   }

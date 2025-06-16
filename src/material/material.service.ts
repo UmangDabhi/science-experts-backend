@@ -91,9 +91,11 @@ export class MaterialService {
         "Price:High to Low": { field: "amount", direction: "DESC" },
       };
 
-      const selectedSort = sortOptions[filterDto?.sortby] || {};
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      const selectedSort = sortOptions[filterDto?.sortby] || undefined;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
 
 
       const materials = await pagniateRecords(
@@ -150,9 +152,11 @@ export class MaterialService {
         "Price:High to Low": { field: "amount", direction: "DESC" },
       };
 
-      const selectedSort = sortOptions[filterDto?.sortby] || {};
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      const selectedSort = sortOptions[filterDto?.sortby] || undefined;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field;
+        orderBy.direction = selectedSort.direction;
+      }
 
 
       const materials = await pagniateRecords(

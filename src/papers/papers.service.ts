@@ -85,8 +85,10 @@ export class PapersService {
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
 
 
       const papers = await pagniateRecords(
@@ -145,8 +147,10 @@ export class PapersService {
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
 
 
       const papers = await pagniateRecords(

@@ -91,10 +91,12 @@ export class CourseService {
         "Price:Low to High": { field: "price", direction: "ASC" },
         "Price:High to Low": { field: "price", direction: "DESC" },
       };
-      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
 
-      orderBy.field = selectedSort.field || "created_at";
-      orderBy.direction = selectedSort.direction || "DESC";
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || undefined;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
 
       const relations = ["modules", "enrollments", "reviews"];
       const result = await pagniateRecords(
@@ -136,10 +138,12 @@ export class CourseService {
         "Price:Low to High": { field: "price", direction: "ASC" },
         "Price:High to Low": { field: "price", direction: "DESC" },
       };
-      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
 
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || undefined;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
 
       queryOptions.is_approved = Is_Approved.YES
       const relations = ["modules", "enrollments", "reviews"];
@@ -181,11 +185,13 @@ export class CourseService {
         "Price:Low to High": { field: "price", direction: "ASC" },
         "Price:High to Low": { field: "price", direction: "DESC" },
       };
-      const selectedSort = sortOptions[courseFilterDto?.sortby] || {};
 
-      orderBy.field = selectedSort.field || "";
-      orderBy.direction = selectedSort.direction;
-
+      const selectedSort = sortOptions[courseFilterDto?.sortby] || undefined;
+      if (selectedSort) {
+        orderBy.field = selectedSort.field || "";
+        orderBy.direction = selectedSort.direction;
+      }
+      
       queryOptions.enrollments = { student: { id: currUser.id } };
       const relations = ["modules", "enrollments", "reviews", "progress"];
       const result = await pagniateRecords(
