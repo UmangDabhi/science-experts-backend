@@ -50,24 +50,44 @@ export class CreateAdmissionDto {
     dob: string;
 
     @IsNotEmpty()
+    @IsString()
+    last_qualification: string;
+
+    @IsNotEmpty()
+    @IsString()
+    school_name: string;
+
+    @IsNotEmpty()
+    @IsString()
+    passing_year: string;
+
+    @IsNotEmpty()
+    @IsString()
+    percentage: string;
+
+    @IsNotEmpty()
     @IsEnum(AdmissionType, { message: 'Type must be NIOS, COLLEGE, or MBBS' })
     type: AdmissionType;
 
     @IsOptional()
-    @IsEnum(NiosClassType, { message: 'NIOS Class Type must be 10TH_CLASS or 12TH_CLASS' })
+    @IsEnum(NiosClassType, { message: 'NIOS Class Type must be from List' })
     nios_class_type?: NiosClassType;
+
+    @IsOptional()
+    @IsString()
+    nios_other?: NiosClassType;
 
     @IsOptional()
     @IsEnum(MbbsLocation, { message: 'MBBS Location must be INDIA or ABROAD' })
     mbbs_location?: MbbsLocation;
 
     @IsOptional()
-    @IsString()
-    course_list?: string;
-
-    @IsOptional()
     @IsUUID()
     college_id?: string;
+
+    @IsOptional()
+    @IsString()
+    college_course?: string;
 
     @IsOptional()
     @IsString()

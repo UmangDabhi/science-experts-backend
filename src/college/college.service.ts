@@ -9,6 +9,7 @@ import { CreateCollegeDto } from './dto/create-college.dto';
 import { UpdateCollegeDto } from './dto/update-college.dto';
 import { College } from './entities/college.entity';
 import { CollegeCourse } from 'src/college-courses/entities/college-course.entity';
+import { GetCollegeCoursesDto } from './dto/get-college-courses.dto';
 
 @Injectable()
 export class CollegeService {
@@ -35,6 +36,17 @@ export class CollegeService {
     }
   }
 
+  async findAllCollegeCourses(getCollegeCoursesDto: GetCollegeCoursesDto) {
+    try {
+      const courses = await this.collegeRepository.find({ where: { id: getCollegeCoursesDto.collegeCourse }, relations: ['collegeCourses'] });
+      const result = courses.length > 0 ? courses.flatMap(college => college.collegeCourses) : [];
+      return result;
+    } catch (error) {
+      console.log(error)
+
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COLLEGES);
+    }
+  }
   async findAll(filterDto: FilterDto) {
     try {
       const searchableFields: (keyof College)[] = ['name', 'address'];

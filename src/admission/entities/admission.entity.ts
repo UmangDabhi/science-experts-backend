@@ -15,9 +15,13 @@ export enum AdmissionType {
 }
 
 export enum NiosClassType {
-    TENTH = '10TH_CLASS',
-    TWELFTH = '12TH_CLASS',
-}
+    UNDER_TENTH = "UNDER_10TH",
+    TENTH_PASS = "10TH_PASS",
+    TENTH_FAIL = "10TH_FAIL",
+    TWELFTH_PASS = "12TH_PASS",
+    TWELFTH_FAIL = "12TH_FAIL",
+    OTHER = "OTHER",
+};
 
 export enum MbbsLocation {
     INDIA = 'INDIA',
@@ -50,17 +54,32 @@ export class Admission extends BaseEntity {
     @Column()
     dob: string;
 
+    @Column()
+    last_qualification: string;
+
+    @Column()
+    school_name: string;
+
+    @Column()
+    passing_year: string;
+
+    @Column()
+    percentage: string;
+
     @Column({ type: 'enum', enum: AdmissionType })
     type: AdmissionType;
 
     @Column({ type: 'enum', enum: NiosClassType, nullable: true })
     nios_class_type?: NiosClassType;
 
+    @Column({ nullable: true })
+    nios_other?: string;
+
     @Column({ type: 'enum', enum: MbbsLocation, nullable: true })
     mbbs_location?: MbbsLocation;
 
-    @Column({ type: 'text', nullable: true })
-    course_list?: string;
+    @Column({ nullable: true })
+    college_course?: string;
 
     @ManyToOne(() => College, (college) => college.admissions, {
         nullable: true,

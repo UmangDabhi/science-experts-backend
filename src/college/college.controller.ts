@@ -8,6 +8,7 @@ import { CreateCollegeDto } from './dto/create-college.dto';
 import { UpdateCollegeDto } from './dto/update-college.dto';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { GetCollegeCoursesDto } from './dto/get-college-courses.dto';
 
 @Controller('college')
 export class CollegeController {
@@ -24,6 +25,11 @@ export class CollegeController {
   @Get(API_ENDPOINT.GET_ALL_COLLEGE)
   findAll(@Query() filterDto: FilterDto) {
     return this.collegeService.findAll(filterDto);
+  }
+  @ResponseMessage(MESSAGES.ALL_COLLEGE_COURSE_FETCHED)
+  @Get(API_ENDPOINT.GET_COLLEGE_SPECIFIC_COURSE)
+  findAllCollegeCourses(@Query() getCollegeCoursesDto: GetCollegeCoursesDto) {
+    return this.collegeService.findAllCollegeCourses(getCollegeCoursesDto);
   }
 
   @Get(`${API_ENDPOINT.GET_COLLEGE}/:id`)

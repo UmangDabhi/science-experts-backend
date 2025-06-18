@@ -1,0 +1,1 @@
+const s="/assets/5-CnGrU4Cg.gif",t="/assets/4-BnhG0Iou.gif",a={NIOS:{src:s,alt:"NIOS GIF"},TRUSTED_BY:{src:t,alt:"TRUSTED BY GIF"},SUCCESS:{src:"https://media.giphy.com/media/3o7aD2saq1d6z4b0gk/giphy.gif",alt:"Success GIF"}};export{a as G};

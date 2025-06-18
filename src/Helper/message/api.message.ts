@@ -112,6 +112,7 @@ export const API_ENDPOINT = {
 
   CREATE_COLLEGE_COURSE: 'create_college_course',
   GET_ALL_COLLEGE_COURSE: 'get_all_college_course',
+  GET_COLLEGE_SPECIFIC_COURSE: 'get_college_specific_course',
   GET_COLLEGE_COURSE: 'get_college_course',
   UPDATE_COLLEGE_COURSE: 'update_college_course',
   DELETE_COLLEGE_COURSE: 'delete_college_course',
