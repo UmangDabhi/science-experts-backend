@@ -1,0 +1,1 @@
+const s="/assets/5-DJkvfav2.gif",t="/assets/4-BE2cAHO5.gif",a="/assets/3-CkL_xtVq.gif",c="/assets/2-DL8-hYDH.gif",I="/assets/1-D0tC1Oas.gif",D={NIOS:{src:s,alt:"NIOS GIF"},NIOS_2:{src:I,alt:"NIOS GIF"},TRUSTED_BY:{src:t,alt:"TRUSTED BY GIF"},PAPER:{src:a,alt:"PAPER GIF"},DREAM:{src:c,alt:"DREAM GIF"}};export{D as G};

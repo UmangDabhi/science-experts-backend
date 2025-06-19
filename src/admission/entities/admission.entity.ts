@@ -33,6 +33,13 @@ type RemarkEntry = {
     time: string;
 };
 
+export enum InquiryStatus {
+    Pending = "Pending",
+    Rejected = "Rejected",
+    InProgress = "In Progress",
+    Completed = "Completed"
+};
+
 
 @Entity()
 export class Admission extends BaseEntity {
@@ -68,6 +75,9 @@ export class Admission extends BaseEntity {
 
     @Column({ type: 'enum', enum: AdmissionType })
     type: AdmissionType;
+
+    @Column({ type: 'enum', enum: InquiryStatus, default: InquiryStatus.Pending })
+    inquiry_status: InquiryStatus;
 
     @Column({ type: 'enum', enum: NiosClassType, nullable: true })
     nios_class_type?: NiosClassType;
