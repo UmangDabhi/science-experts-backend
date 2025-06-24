@@ -49,7 +49,7 @@ export class Admission extends BaseEntity {
     @Column()
     last_name: string;
 
-    @Column({ unique: true })
+    @Column()
     email: string;
 
     @Column()

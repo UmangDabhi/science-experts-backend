@@ -108,6 +108,7 @@ export const API_ENDPOINT = {
   GET_ALL_ADMISSION: 'get_all_admission',
   GET_ADMISSION: 'get_admission',
   UPDATE_ADMISSION: 'update_admission',
+  APPEND_REMARK: 'append_remark',
   DELETE_ADMISSION: 'delete_admission',
 
   CREATE_COLLEGE_COURSE: 'create_college_course',

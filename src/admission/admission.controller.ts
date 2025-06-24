@@ -8,6 +8,7 @@ import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { AdmissionService } from './admission.service';
 import { CreateAdmissionDto } from './dto/create-admission.dto';
 import { UpdateAdmissionDto } from './dto/update-admission.dto';
+import { RemarkDto } from './dto/remark.dto';
 
 @Controller('admission')
 export class AdmissionController {
@@ -41,6 +42,15 @@ export class AdmissionController {
     @Param('id') id: string,
     @Body() updateAdmissionDto: UpdateAdmissionDto) {
     return this.admissionService.update(id, updateAdmissionDto);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(`${API_ENDPOINT.APPEND_REMARK}/:id`)
+  @ResponseMessage(MESSAGES.ADMISSION_UPDATED)
+  appendRemark(
+    @Param('id') id: string,
+    @Body() remarkDto: RemarkDto) {
+    return this.admissionService.appendRemark(id, remarkDto);
   }
 
   @UseGuards(AuthGuard('jwt'))

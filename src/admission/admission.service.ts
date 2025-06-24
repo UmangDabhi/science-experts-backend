@@ -8,6 +8,7 @@ import { ERRORS } from 'src/Helper/message/error.message';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { College } from 'src/college/entities/college.entity';
+import { RemarkDto } from './dto/remark.dto';
 
 @Injectable()
 export class AdmissionService {
@@ -78,6 +79,7 @@ export class AdmissionService {
 
       const admission = await this.admissionRepository.findOne({
         where: { id: id },
+        relations: ['college']
 
       });
       if (!admission) throw new NotFoundException(ERRORS.ERROR_ADMISSION_NOT_FOUND);
@@ -106,6 +108,33 @@ export class AdmissionService {
         ...updateAdmissionDto,
       });
 
+      await this.admissionRepository.save(admission);
+      return;
+    } catch (error) {
+      if (
+        error instanceof NotFoundException ||
+        error instanceof NotFoundException
+      )
+        throw error;
+      console.log(error)
+      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_ADMISSION);
+    }
+  }
+  async appendRemark(id: string, remarkDto: RemarkDto) {
+    try {
+      if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      const admission = await this.admissionRepository.findOne({
+        where: { id: id },
+      });
+      if (!admission) throw new NotFoundException(ERRORS.ERROR_ADMISSION_NOT_FOUND);
+
+      admission.remarks = [
+        ...(admission.remarks || []),
+        {
+          remark: remarkDto.remark,
+          time: new Date().toISOString(),
+        },
+      ];
       await this.admissionRepository.save(admission);
       return;
     } catch (error) {
