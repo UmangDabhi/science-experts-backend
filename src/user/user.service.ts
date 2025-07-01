@@ -137,9 +137,26 @@ export class UserService {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
       const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates", "user_balance"] });
+
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
+      const groupedBalances = {};
+
+      user.user_balance.forEach((balance) => {
+        const type = balance.type;
+
+        if (!groupedBalances[type]) {
+          groupedBalances[type] = {
+            type,
+            total: 0,
+            withdrawable: balance.balance_type.withdrawable,
+          };
+        }
+
+        groupedBalances[type].total += balance.expert_coins;
+      });
+      user.user_balance = Object.values(groupedBalances);
       return user;
     } catch (error) {
       if (

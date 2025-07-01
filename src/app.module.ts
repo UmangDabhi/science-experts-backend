@@ -68,7 +68,7 @@ import { CollegeCoursesModule } from './college-courses/college-courses.module';
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([Log, User,Balance_Type]),
+    TypeOrmModule.forFeature([Log, User, Balance_Type]),
     UserModule,
     CourseModule,
     ModuleModule,

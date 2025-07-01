@@ -4,7 +4,8 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  Length
+  Length,
+  Matches
 } from 'class-validator';
 import { Role } from 'src/Helper/constants';
 
@@ -19,6 +20,13 @@ export class CreateUserDto {
 
   @IsString()
   @Length(6, 100)
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
+    {
+      message:
+        'Password must include at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character',
+    },
+  )
   password: string;
 
   @IsOptional()

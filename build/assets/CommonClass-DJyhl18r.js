@@ -1,1 +1,0 @@
-const o={COMMON_INPUT:"border border-[#FFA167] focus:outline-none focus:ring-1 focus:ring-[#F68713] focus:border-[#F68713] text-[#333] placeholder-[#888] rounded-xl shadow-md px-4 py-2 transition duration-200 ease-in-out"};export{o as C};
