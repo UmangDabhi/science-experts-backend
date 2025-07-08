@@ -6,7 +6,7 @@ import { Role } from 'src/Helper/constants';
 import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { User_Balance } from './user_balance.entity';
 import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
 import { BookPurchase } from 'src/books/entities/book_purchase.entity';
@@ -50,6 +50,8 @@ export class User extends BaseEntity {
   @Column({ default: 0 })
   referral_count: number;
 
+
+
   @Column({ nullable: true })
   phone_no: string;
 
@@ -73,6 +75,10 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   pincode: string;
+
+  @OneToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'referred_by_id' })
+  referred_by: User;
 
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   tutor_courses: Course[];

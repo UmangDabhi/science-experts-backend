@@ -68,15 +68,16 @@ export class PaymentService {
     }
     const totalExpertCoins = await this.userBalanceService.getAllCoins(currUser);
 
-    console.log(totalExpertCoins)
     const coins_to_use = createPaymentDto.use_coins
       ? Math.min(totalExpertCoins, amount)
       : 0;
-
     const remainingAmount = amount - coins_to_use;
 
     if (remainingAmount === 0) {
-      await this.userBalanceService.deductCoins(currUser, coins_to_use);
+      const coinsSuccessfullyDeducted = await this.userBalanceService.deductCoins(currUser, coins_to_use);
+      if (!coinsSuccessfullyDeducted) {
+        return { success: false, collect_payment: false, message: "Failed to deduct coins" };
+      }
       await this.userRepository.save(currUser);
       await this.afterSuccessfulPurchase(currUser, createPaymentDto.type, createPaymentDto.item_id);
       return { success: true, collect_payment: false, message: "Fully covered by coins" };
@@ -104,7 +105,10 @@ export class PaymentService {
       const paymentDetails = verifyPaymentDto.paymentDetails;
 
       if (verifyPaymentDto.coins_used && verifyPaymentDto.coins_used > 0) {
-        await this.userBalanceService.deductCoins(currUser, verifyPaymentDto.coins_used);
+        const coinsSuccessfullyDeducted = await this.userBalanceService.deductCoins(currUser, verifyPaymentDto.coins_used);
+        if (!coinsSuccessfullyDeducted) {
+          return { success: false, collect_payment: false, message: "Failed to deduct coins" };
+        }
         await this.userRepository.save(currUser);
       }
 

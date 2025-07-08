@@ -43,19 +43,19 @@ export class AppService implements OnModuleInit {
     if (balance_type_count === 0) {
       await this.balanceTypeRepository.save({
         type: BALANCE_TYPE.WELCOME_BONUS,
-        value: 50,
-        withdrawable: false,
-        coin_type: COIN_VALUE_TYPE.DIRECT
-      })
-      await this.balanceTypeRepository.save({
-        type: BALANCE_TYPE.REFERRER_SIGNUP_BONUS,
         value: 20,
         withdrawable: false,
         coin_type: COIN_VALUE_TYPE.DIRECT
       })
       await this.balanceTypeRepository.save({
-        type: BALANCE_TYPE.REFEREE_SIGNUP_BONUS,
+        type: BALANCE_TYPE.REFERRER_SIGNUP_BONUS,
         value: 10,
+        withdrawable: false,
+        coin_type: COIN_VALUE_TYPE.DIRECT
+      })
+      await this.balanceTypeRepository.save({
+        type: BALANCE_TYPE.REFEREE_SIGNUP_BONUS,
+        value: 5,
         withdrawable: false,
         coin_type: COIN_VALUE_TYPE.DIRECT
       })

@@ -64,14 +64,15 @@ export class UserService {
           isUnique = true;
         }
       }
-
-
       const newUser = this.userRepository.create({
         ...createUserDto,
         password: hashedPassword,
         stu_id: stu_id,
         referral_code: referral_code,
       });
+      if (userExists && createUserDto.referral_code) {
+        newUser.referred_by = userExists;
+      }
       await this.userRepository.save(newUser);
       await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.WELCOME_BONUS)
       if (userExists && createUserDto.referral_code) {

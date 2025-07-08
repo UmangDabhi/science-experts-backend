@@ -2,7 +2,7 @@ import {
   Injectable
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { User_Balance } from './entities/user_balance.entity';
 import { BALANCE_TYPE, COIN_VALUE_TYPE } from 'src/Helper/constants';
@@ -15,6 +15,7 @@ export class UserBalanceService {
     private readonly userBalanceRepository: Repository<User_Balance>,
     @InjectRepository(Balance_Type)
     private readonly balanceTypeRepository: Repository<Balance_Type>,
+    private dataSource: DataSource
   ) { }
 
   async addCoins(currUser: User, type: BALANCE_TYPE, description: string = null, amount: number = 0) {
@@ -63,25 +64,31 @@ export class UserBalanceService {
       return 0;
     }
   }
-  async deductCoins(currUser: User, amount: number) {
+  async deductCoins(currUser: User, amount: number): Promise<boolean> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       let remainingAmount = amount;
 
-      const nonWithdrawableBalances = await this.userBalanceRepository.find({
-        where: {
-          user: currUser,
-          balance_type: { withdrawable: false }
-        },
-        order: { expert_coins: 'DESC' },
-      });
+      const nonWithdrawableBalances = await queryRunner.manager
+        .getRepository(User_Balance)
+        .createQueryBuilder('ub')
+        .leftJoinAndSelect('ub.balance_type', 'bt')
+        .where('ub.user_id = :userId', { userId: currUser.id })
+        .andWhere('bt.withdrawable = false')
+        .orderBy('ub.expert_coins', 'DESC')
+        .getMany();
 
-      const withdrawableBalances = await this.userBalanceRepository.find({
-        where: {
-          user: currUser,
-          balance_type: { withdrawable: true }
-        },
-        order: { expert_coins: 'DESC' },
-      });
+      const withdrawableBalances = await queryRunner.manager
+        .getRepository(User_Balance)
+        .createQueryBuilder('ub')
+        .leftJoinAndSelect('ub.balance_type', 'bt')
+        .where('ub.user_id = :userId', { userId: currUser.id })
+        .andWhere('bt.withdrawable = true')
+        .orderBy('ub.expert_coins', 'DESC')
+        .getMany();
 
       const allBalances = [...nonWithdrawableBalances, ...withdrawableBalances];
 
@@ -96,18 +103,24 @@ export class UserBalanceService {
           balance.expert_coins = 0;
         }
 
-        await this.userBalanceRepository.save(balance);
+        await queryRunner.manager.save(User_Balance, balance);
       }
 
       if (remainingAmount > 0) {
         throw new Error('Insufficient balance');
       }
 
+      await queryRunner.commitTransaction();
       return true;
+
     } catch (error) {
-      console.log(error);
+      await queryRunner.rollbackTransaction();
+      console.error('Deduct Coins Error:', error);
       return false;
+    } finally {
+      await queryRunner.release();
     }
   }
+
 
 }
