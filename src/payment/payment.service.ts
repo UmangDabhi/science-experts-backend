@@ -129,9 +129,10 @@ export class PaymentService {
 
       if (expectedSignature === razorpay_signature) {
         await this.afterSuccessfulPurchase(currUser, verifyPaymentDto.type, verifyPaymentDto.item_id)
-        await this.paymentRepository.save({ type: verifyPaymentDto.type as PURCHASE_OF_TYPE, orderId: razorpay_order_id, paymentId: razorpay_payment_id, amount: Number(verifyPaymentDto.amount) / 100 })
+        await this.paymentRepository.save({ status: "SUCCESS", type: verifyPaymentDto.type as PURCHASE_OF_TYPE, orderId: razorpay_order_id, paymentId: razorpay_payment_id, amount: Number(verifyPaymentDto.amount) / 100 })
         return razorpay_payment_id;
       } else {
+        await this.paymentRepository.save({ status: "FAILURE", type: verifyPaymentDto.type as PURCHASE_OF_TYPE, orderId: razorpay_order_id, paymentId: razorpay_payment_id, amount: Number(verifyPaymentDto.amount) / 100 })
         throw new Error('Signature Mismatch');
       }
     } catch (error) {
