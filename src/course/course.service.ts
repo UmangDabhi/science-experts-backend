@@ -191,7 +191,7 @@ export class CourseService {
         orderBy.field = selectedSort.field || "";
         orderBy.direction = selectedSort.direction;
       }
-      
+
       queryOptions.enrollments = { student: { id: currUser.id } };
       const relations = ["modules", "enrollments", "reviews", "progress"];
       const result = await pagniateRecords(
@@ -251,6 +251,11 @@ export class CourseService {
         if (isEnrolled) {
           course["is_enrolled"] = true;
         }
+      }
+      if (currUser && currUser.role == Role.TUTOR && course.tutor.id == currUser.id) {
+        course["is_enrolled"] = true;
+      } if (currUser && currUser.role == Role.ADMIN) {
+        course["is_enrolled"] = true;
       }
       return {
         ...course,

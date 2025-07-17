@@ -32,6 +32,7 @@ import { PapersModule } from './papers/papers.module';
 import { AdmissionModule } from './admission/admission.module';
 import { CollegeModule } from './college/college.module';
 import { CollegeCoursesModule } from './college-courses/college-courses.module';
+import { TutorReqModule } from './tutor_req/tutor_req.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -92,6 +93,7 @@ import { CollegeCoursesModule } from './college-courses/college-courses.module';
     AdmissionModule,
     CollegeModule,
     CollegeCoursesModule,
+    TutorReqModule,
   ],
   controllers: [AppController],
   providers: [

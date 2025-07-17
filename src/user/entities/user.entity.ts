@@ -80,6 +80,9 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'referred_by_id' })
   referred_by: User;
 
+  @OneToMany(() => User, (user) => user.referred_by)
+  referrals: User[];
+
   @OneToMany(() => Course, (course) => course.tutor, { nullable: true })
   tutor_courses: Course[];
 

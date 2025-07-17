@@ -35,23 +35,27 @@ export class MaterialService {
     private readonly standardRepository: Repository<Standard>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
-  ) { }
+  ) {}
   async create(currUser: User, createMaterialDto: CreateMaterialDto) {
     try {
       const categoryEntities = createMaterialDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(createMaterialDto.categories),
-        })
+            id: In(createMaterialDto.categories),
+          })
         : [];
       const standardEntities = createMaterialDto.standards
         ? await this.standardRepository.findBy({
-          id: In(createMaterialDto.standards),
-        })
+            id: In(createMaterialDto.standards),
+          })
         : [];
       const newMaterial = this.materialRepository.create({
         ...createMaterialDto,
-        course: createMaterialDto.course ? { id: createMaterialDto.course } : undefined, // Only add course if provided
-        language: createMaterialDto.language ? { id: createMaterialDto.language } : undefined, // Only add course if provided
+        course: createMaterialDto.course
+          ? { id: createMaterialDto.course }
+          : undefined, // Only add course if provided
+        language: createMaterialDto.language
+          ? { id: createMaterialDto.language }
+          : undefined, // Only add course if provided
         categories: categoryEntities,
         standards: standardEntities,
         tutor: { id: currUser.id },
@@ -86,17 +90,16 @@ export class MaterialService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || undefined;
       if (selectedSort) {
-        orderBy.field = selectedSort.field || "";
+        orderBy.field = selectedSort.field || '';
         orderBy.direction = selectedSort.direction;
       }
-
 
       const materials = await pagniateRecords(
         this.materialRepository,
@@ -108,11 +111,10 @@ export class MaterialService {
       );
       const result = materials;
 
-
       if (!currUser || currUser.role === Role.STUDENT) {
         const studentResult: PaginatedResult<MaterialPublicDto> = {
           ...materials,
-          data: materials.data.map(material =>
+          data: materials.data.map((material) =>
             plainToInstance(MaterialPublicDto, material, {
               excludeExtraneousValues: true,
             }),
@@ -147,9 +149,9 @@ export class MaterialService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || undefined;
@@ -157,7 +159,6 @@ export class MaterialService {
         orderBy.field = selectedSort.field;
         orderBy.direction = selectedSort.direction;
       }
-
 
       const materials = await pagniateRecords(
         this.materialRepository,
@@ -169,11 +170,10 @@ export class MaterialService {
       );
       const result = materials;
 
-
-      if (!currUser || currUser.role === Role.STUDENT) {
+      if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<MaterialPublicDto> = {
           ...materials,
-          data: materials.data.map(material =>
+          data: materials.data.map((material) =>
             plainToInstance(MaterialPublicDto, material, {
               excludeExtraneousValues: true,
             }),
@@ -207,35 +207,44 @@ export class MaterialService {
 
       const material = await this.materialRepository.findOne({
         where: { id: id },
-        relations: [
-          'tutor',
-          'categories',
-          'standards',
-          'language',
-        ],
+        relations: ['tutor', 'categories', 'standards', 'language'],
       });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
       if (currUser) {
-        const material_purchase = await this.materialPurchaseRepository.findOne({
-          where: {
-            material: {
-              id: material.id,
+        const material_purchase = await this.materialPurchaseRepository.findOne(
+          {
+            where: {
+              material: {
+                id: material.id,
+              },
+              student: {
+                id: currUser?.id,
+              },
             },
-            student: {
-              id: currUser?.id
-            }
-          }
-        })
-        if (material_purchase)
-          material["is_purchased"] = true;
-        else
-          material["is_purchased"] = false;
+          },
+        );
+        if (material_purchase) material['is_purchased'] = true;
+        else material['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(MaterialPublicDto, material, {
           excludeExtraneousValues: true,
-        })
+        });
+      }
+      if (
+        currUser &&
+        currUser.role == Role.TUTOR &&
+        material.tutor.id == currUser.id
+      ) {
+        material['is_purchased'] = true;
+      } else {
+        plainToInstance(MaterialPublicDto, material, {
+          excludeExtraneousValues: true,
+        });
+      }
+      if (currUser && currUser.role == Role.ADMIN) {
+        material['is_purchased'] = true;
       }
       return material;
     } catch (error) {
@@ -255,7 +264,10 @@ export class MaterialService {
   ) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      const whereCondition = currUser.role == Role.ADMIN ? { id: id } : { id: id, tutor: { id: currUser.id } }
+      const whereCondition =
+        currUser.role == Role.ADMIN
+          ? { id: id }
+          : { id: id, tutor: { id: currUser.id } };
       const material = await this.materialRepository.findOne({
         where: whereCondition,
       });
@@ -264,17 +276,17 @@ export class MaterialService {
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
       const categoryEntities = updateMaterialDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(updateMaterialDto.categories),
-        })
+            id: In(updateMaterialDto.categories),
+          })
         : [];
       const standardEntities = updateMaterialDto.standards
         ? await this.standardRepository.findBy({
-          id: In(updateMaterialDto.standards),
-        })
+            id: In(updateMaterialDto.standards),
+          })
         : [];
       const langaugeEntity = await this.languageRepository.findOne({
-        where: { id: updateMaterialDto.language }
-      })
+        where: { id: updateMaterialDto.language },
+      });
       const updateData: any = { ...updateMaterialDto };
       updateData.tutor = { id: currUser.id };
 
@@ -294,7 +306,7 @@ export class MaterialService {
         error instanceof NotFoundException
       )
         throw error;
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_MATERIAL);
     }
   }

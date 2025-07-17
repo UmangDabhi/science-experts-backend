@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { Book } from './entities/book.entity';
@@ -30,22 +35,24 @@ export class BooksService {
     private readonly standardRepository: Repository<Standard>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
-  ) { }
+  ) {}
   async create(currUser: User, createBookDto: CreateBookDto) {
     try {
       const categoryEntities = createBookDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(createBookDto.categories),
-        })
+            id: In(createBookDto.categories),
+          })
         : [];
       const standardEntities = createBookDto.standards
         ? await this.standardRepository.findBy({
-          id: In(createBookDto.standards),
-        })
+            id: In(createBookDto.standards),
+          })
         : [];
       const newBook = this.bookRepository.create({
         ...createBookDto,
-        language: createBookDto.language ? { id: createBookDto.language } : undefined, // Only add course if provided
+        language: createBookDto.language
+          ? { id: createBookDto.language }
+          : undefined, // Only add course if provided
         categories: categoryEntities,
         standards: standardEntities,
         tutor: { id: currUser.id },
@@ -79,17 +86,16 @@ export class BooksService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || undefined;
       if (selectedSort) {
-        orderBy.field = selectedSort.field || "";
+        orderBy.field = selectedSort.field || '';
         orderBy.direction = selectedSort.direction;
       }
-
 
       const books = await pagniateRecords(
         this.bookRepository,
@@ -101,11 +107,10 @@ export class BooksService {
       );
       const result = books;
 
-
       if (!currUser || currUser.role === Role.STUDENT) {
         const studentResult: PaginatedResult<BookPublicDto> = {
           ...books,
-          data: books.data.map(book =>
+          data: books.data.map((book) =>
             plainToInstance(BookPublicDto, book, {
               excludeExtraneousValues: true,
             }),
@@ -141,15 +146,14 @@ export class BooksService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
-
 
       const selectedSort = sortOptions[filterDto?.sortby] || undefined;
       if (selectedSort) {
-        orderBy.field = selectedSort.field || "";
+        orderBy.field = selectedSort.field || '';
         orderBy.direction = selectedSort.direction;
       }
 
@@ -163,11 +167,10 @@ export class BooksService {
       );
       const result = books;
 
-
-      if (!currUser || currUser.role === Role.STUDENT) {
+      if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<BookPublicDto> = {
           ...books,
-          data: books.data.map(book =>
+          data: books.data.map((book) =>
             plainToInstance(BookPublicDto, book, {
               excludeExtraneousValues: true,
             }),
@@ -175,12 +178,12 @@ export class BooksService {
         };
         return studentResult;
       }
+
       return result;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_BOOKS);
     }
   }
-
 
   async findOne(currUser: User, id: string) {
     try {
@@ -188,15 +191,9 @@ export class BooksService {
 
       const book = await this.bookRepository.findOne({
         where: { id: id },
-        relations: [
-          'tutor',
-          'categories',
-          'standards',
-          'language',
-        ],
+        relations: ['tutor', 'categories', 'standards', 'language'],
       });
-      if (!book)
-        throw new NotFoundException(ERRORS.ERROR_BOOK_NOT_FOUND);
+      if (!book) throw new NotFoundException(ERRORS.ERROR_BOOK_NOT_FOUND);
       if (currUser) {
         const book_purchase = await this.bookPurchaseRepository.findOne({
           where: {
@@ -204,19 +201,31 @@ export class BooksService {
               id: book.id,
             },
             student: {
-              id: currUser?.id
-            }
-          }
-        })
-        if (book_purchase)
-          book["is_purchased"] = true;
-        else
-          book["is_purchased"] = false;
+              id: currUser?.id,
+            },
+          },
+        });
+        if (book_purchase) book['is_purchased'] = true;
+        else book['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(BookPublicDto, book, {
           excludeExtraneousValues: true,
-        })
+        });
+      }
+      if (
+        currUser &&
+        currUser.role == Role.TUTOR &&
+        book.tutor.id == currUser.id
+      ) {
+        book['is_purchased'] = true;
+      } else {
+        plainToInstance(BookPublicDto, book, {
+          excludeExtraneousValues: true,
+        });
+      }
+      if (currUser && currUser.role == Role.ADMIN) {
+        book['is_purchased'] = true;
       }
       return book;
     } catch (error) {
@@ -229,33 +238,31 @@ export class BooksService {
     }
   }
 
-  async update(
-    currUser: User,
-    id: string,
-    updateBookDto: UpdateBookDto,
-  ) {
+  async update(currUser: User, id: string, updateBookDto: UpdateBookDto) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      const whereCondition = currUser.role == Role.ADMIN ? { id: id } : { id: id, tutor: { id: currUser.id } }
+      const whereCondition =
+        currUser.role == Role.ADMIN
+          ? { id: id }
+          : { id: id, tutor: { id: currUser.id } };
       const book = await this.bookRepository.findOne({
         where: whereCondition,
       });
 
-      if (!book)
-        throw new NotFoundException(ERRORS.ERROR_BOOK_NOT_FOUND);
+      if (!book) throw new NotFoundException(ERRORS.ERROR_BOOK_NOT_FOUND);
       const categoryEntities = updateBookDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(updateBookDto.categories),
-        })
+            id: In(updateBookDto.categories),
+          })
         : [];
       const standardEntities = updateBookDto.standards
         ? await this.standardRepository.findBy({
-          id: In(updateBookDto.standards),
-        })
+            id: In(updateBookDto.standards),
+          })
         : [];
       const langaugeEntity = await this.languageRepository.findOne({
-        where: { id: updateBookDto.language }
-      })
+        where: { id: updateBookDto.language },
+      });
       const updateData: any = { ...updateBookDto };
       updateData.tutor = { id: currUser.id };
 
@@ -275,7 +282,7 @@ export class BooksService {
         error instanceof NotFoundException
       )
         throw error;
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_BOOK);
     }
   }

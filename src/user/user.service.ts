@@ -137,7 +137,7 @@ export class UserService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates", "user_balance"] });
+      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates", "user_balance", 'referrals'] });
 
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
@@ -158,7 +158,13 @@ export class UserService {
         groupedBalances[type].total += balance.expert_coins;
       });
       user.user_balance = Object.values(groupedBalances);
-      return user;
+      return {
+        ...user,
+        user_balance: Object.values(groupedBalances),
+        referrals: user.referrals.map((ref) => ({
+          name: ref.name,
+        })),
+      };
     } catch (error) {
       if (
         error instanceof BadRequestException ||

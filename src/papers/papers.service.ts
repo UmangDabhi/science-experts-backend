@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePaperDto } from './dto/create-paper.dto';
 import { UpdatePaperDto } from './dto/update-paper.dto';
 import { Paper } from './entities/paper.entity';
@@ -30,22 +35,24 @@ export class PapersService {
     private readonly standardRepository: Repository<Standard>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
-  ) { }
+  ) {}
   async create(currUser: User, createPaperDto: CreatePaperDto) {
     try {
       const categoryEntities = createPaperDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(createPaperDto.categories),
-        })
+            id: In(createPaperDto.categories),
+          })
         : [];
       const standardEntities = createPaperDto.standards
         ? await this.standardRepository.findBy({
-          id: In(createPaperDto.standards),
-        })
+            id: In(createPaperDto.standards),
+          })
         : [];
       const newPaper = this.paperRepository.create({
         ...createPaperDto,
-        language: createPaperDto.language ? { id: createPaperDto.language } : undefined,
+        language: createPaperDto.language
+          ? { id: createPaperDto.language }
+          : undefined,
         categories: categoryEntities,
         standards: standardEntities,
         tutor: { id: currUser.id },
@@ -79,17 +86,16 @@ export class PapersService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
       if (selectedSort) {
-        orderBy.field = selectedSort.field || "";
+        orderBy.field = selectedSort.field || '';
         orderBy.direction = selectedSort.direction;
       }
-
 
       const papers = await pagniateRecords(
         this.paperRepository,
@@ -101,11 +107,10 @@ export class PapersService {
       );
       const result = papers;
 
-
       if (!currUser || currUser.role === Role.STUDENT) {
         const studentResult: PaginatedResult<PaperPublicDto> = {
           ...papers,
-          data: papers.data.map(paper =>
+          data: papers.data.map((paper) =>
             plainToInstance(PaperPublicDto, paper, {
               excludeExtraneousValues: true,
             }),
@@ -141,17 +146,16 @@ export class PapersService {
       }
 
       const sortOptions = {
-        "Most Populer": { field: "created_at", direction: 'DESC', },
-        "Price:Low to High": { field: "amount", direction: "ASC" },
-        "Price:High to Low": { field: "amount", direction: "DESC" },
+        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Price:Low to High': { field: 'amount', direction: 'ASC' },
+        'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
 
       const selectedSort = sortOptions[filterDto?.sortby] || {};
       if (selectedSort) {
-        orderBy.field = selectedSort.field || "";
+        orderBy.field = selectedSort.field || '';
         orderBy.direction = selectedSort.direction;
       }
-
 
       const papers = await pagniateRecords(
         this.paperRepository,
@@ -163,11 +167,10 @@ export class PapersService {
       );
       const result = papers;
 
-
-      if (!currUser || currUser.role === Role.STUDENT) {
+      if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<PaperPublicDto> = {
           ...papers,
-          data: papers.data.map(paper =>
+          data: papers.data.map((paper) =>
             plainToInstance(PaperPublicDto, paper, {
               excludeExtraneousValues: true,
             }),
@@ -181,22 +184,15 @@ export class PapersService {
     }
   }
 
-
   async findOne(currUser: User, id: string) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
       const paper = await this.paperRepository.findOne({
         where: { id: id },
-        relations: [
-          'tutor',
-          'categories',
-          'standards',
-          'language',
-        ],
+        relations: ['tutor', 'categories', 'standards', 'language'],
       });
-      if (!paper)
-        throw new NotFoundException(ERRORS.ERROR_PAPER_NOT_FOUND);
+      if (!paper) throw new NotFoundException(ERRORS.ERROR_PAPER_NOT_FOUND);
       if (currUser) {
         const paper_purchase = await this.paperPurchaseRepository.findOne({
           where: {
@@ -204,19 +200,31 @@ export class PapersService {
               id: paper.id,
             },
             student: {
-              id: currUser?.id
-            }
-          }
-        })
-        if (paper_purchase)
-          paper["is_purchased"] = true;
-        else
-          paper["is_purchased"] = false;
+              id: currUser?.id,
+            },
+          },
+        });
+        if (paper_purchase) paper['is_purchased'] = true;
+        else paper['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(PaperPublicDto, paper, {
           excludeExtraneousValues: true,
-        })
+        });
+      }
+      if (
+        currUser &&
+        currUser.role == Role.TUTOR &&
+        paper.tutor.id == currUser.id
+      ) {
+        paper['is_purchased'] = true;
+      } else {
+        plainToInstance(PaperPublicDto, paper, {
+          excludeExtraneousValues: true,
+        });
+      }
+      if (currUser && currUser.role == Role.ADMIN) {
+        paper['is_purchased'] = true;
       }
       return paper;
     } catch (error) {
@@ -229,33 +237,31 @@ export class PapersService {
     }
   }
 
-  async update(
-    currUser: User,
-    id: string,
-    updatePaperDto: UpdatePaperDto,
-  ) {
+  async update(currUser: User, id: string, updatePaperDto: UpdatePaperDto) {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
-      const whereCondition = currUser.role == Role.ADMIN ? { id: id } : { id: id, tutor: { id: currUser.id } }
+      const whereCondition =
+        currUser.role == Role.ADMIN
+          ? { id: id }
+          : { id: id, tutor: { id: currUser.id } };
       const paper = await this.paperRepository.findOne({
         where: whereCondition,
       });
 
-      if (!paper)
-        throw new NotFoundException(ERRORS.ERROR_PAPER_NOT_FOUND);
+      if (!paper) throw new NotFoundException(ERRORS.ERROR_PAPER_NOT_FOUND);
       const categoryEntities = updatePaperDto.categories
         ? await this.categoryRepository.findBy({
-          id: In(updatePaperDto.categories),
-        })
+            id: In(updatePaperDto.categories),
+          })
         : [];
       const standardEntities = updatePaperDto.standards
         ? await this.standardRepository.findBy({
-          id: In(updatePaperDto.standards),
-        })
+            id: In(updatePaperDto.standards),
+          })
         : [];
       const langaugeEntity = await this.languageRepository.findOne({
-        where: { id: updatePaperDto.language }
-      })
+        where: { id: updatePaperDto.language },
+      });
       const updateData: any = { ...updatePaperDto };
       updateData.tutor = { id: currUser.id };
 
@@ -275,7 +281,7 @@ export class PapersService {
         error instanceof NotFoundException
       )
         throw error;
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_PAPER);
     }
   }
