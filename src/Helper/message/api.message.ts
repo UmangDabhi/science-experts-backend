@@ -34,7 +34,6 @@ export const API_ENDPOINT = {
   UPDATE_MATERIAL: 'update_material',
   DELETE_MATERIAL: 'delete_material',
 
-
   CREATE_BOOK: 'create_book',
   GET_ALL_BOOK: 'get_all_book',
   MANAGE_ALL_BOOK: 'manage_all_book',
@@ -51,13 +50,12 @@ export const API_ENDPOINT = {
   UPDATE_PAPER: 'update_paper',
   DELETE_PAPER: 'delete_paper',
 
-
-  CREATE_BLOG: "create_blog",
-  GET_ALL_BLOG: "get_all_blog",
+  CREATE_BLOG: 'create_blog',
+  GET_ALL_BLOG: 'get_all_blog',
   MANAGE_ALL_BLOG: 'manage_all_blog',
-  GET_BLOG: "get_blog",
-  UPDATE_BLOG: "update_blog",
-  DELETE_BLOG: "delete_blog",
+  GET_BLOG: 'get_blog',
+  UPDATE_BLOG: 'update_blog',
+  DELETE_BLOG: 'delete_blog',
 
   CREATE_CATEGORY: 'create_category',
   GET_ALL_CATEGORY: 'get_all_category',
@@ -90,13 +88,12 @@ export const API_ENDPOINT = {
   CHANGE_TESTIMONIAL: 'change_testimonial',
   DELETE_REVIEW: 'delete_review',
 
-  CREATE_MATERIAL_PURCHASE: "create_material_purchase",
+  CREATE_MATERIAL_PURCHASE: 'create_material_purchase',
 
   CREATE_LANGUAGE: 'create_language',
   GET_ALL_LANGUAGE: 'get_all_language',
   UPDATE_LANGUAGE: 'update_language',
   DELETE_LANGUAGE: 'delete_language',
-
 
   CREATE_COLLEGE: 'create_college',
   GET_ALL_COLLEGE: 'get_all_college',
@@ -118,4 +115,9 @@ export const API_ENDPOINT = {
   UPDATE_COLLEGE_COURSE: 'update_college_course',
   DELETE_COLLEGE_COURSE: 'delete_college_course',
 
+  CREATE_TUTOR_REQ: 'create_tutor_req',
+  GET_ALL_TUTOR_REQ: 'get_all_tutor_req',
+  GET_TUTOR_REQ: 'get_tutor_req',
+  UPDATE_TUTOR_REQ: 'update_tutor_req',
+  DELETE_TUTOR_REQ: 'delete_tutor_req',
 };

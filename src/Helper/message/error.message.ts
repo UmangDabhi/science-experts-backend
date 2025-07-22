@@ -5,9 +5,9 @@ export const ERRORS = {
   ERROR_UPDATING_USER: 'Error Updating User',
   ERROR_DELETING_USER: 'Error Deleting User',
   ERROR_USER_NOT_FOUND: 'User Not Found',
-  
+
   ERROR_FETCHING_DASHBOARD_DETAILS: 'Error Fetching Dashboard Details',
-  
+
   ERROR_FETCHING_TUTORS: 'Error Fetching Tutors',
   ERROR_FETCHING_TUTOR: 'Error Fetching Tutor',
 
@@ -104,14 +104,14 @@ export const ERRORS = {
   ERROR_LANGUAGE_NOT_FOUND: 'Language Not Found',
   ERROR_LANGUAGE_ALREADY_EXISTS: 'Language Already Exists',
 
-  ERROR_MATERIAL_PURCHASE_ALEARDY_EXISTS: "Material Purchase Already Exists",
-  ERROR_CREATING_MATERIAL_PURCHASE: "Error Creating Material Purchase",
+  ERROR_MATERIAL_PURCHASE_ALEARDY_EXISTS: 'Material Purchase Already Exists',
+  ERROR_CREATING_MATERIAL_PURCHASE: 'Error Creating Material Purchase',
 
-  ERROR_BOOK_PURCHASE_ALEARDY_EXISTS: "Book Purchase Already Exists",
-  ERROR_CREATING_BOOK_PURCHASE: "Error Creating Book Purchase",
+  ERROR_BOOK_PURCHASE_ALEARDY_EXISTS: 'Book Purchase Already Exists',
+  ERROR_CREATING_BOOK_PURCHASE: 'Error Creating Book Purchase',
 
-  ERROR_PAPER_PURCHASE_ALEARDY_EXISTS: "Paper Purchase Already Exists",
-  ERROR_CREATING_PAPER_PURCHASE: "Error Creating Paper Purchase",
+  ERROR_PAPER_PURCHASE_ALEARDY_EXISTS: 'Paper Purchase Already Exists',
+  ERROR_CREATING_PAPER_PURCHASE: 'Error Creating Paper Purchase',
 
   ERROR_CREATING_COLLEGE: 'Error Creating College',
   ERROR_FETCHING_COLLEGE: 'Error Fetching Colleges',
@@ -133,4 +133,11 @@ export const ERRORS = {
   ERROR_UPDATING_ADMISSION: 'Error Updating Admission',
   ERROR_DELETING_ADMISSION: 'Error Deleting Admission',
   ERROR_ADMISSION_NOT_FOUND: 'Admission Not Found',
+
+  ERROR_CREATING_TUTOR_REQ: 'Error Creating Tutor Request',
+  ERROR_FETCHING_TUTOR_REQS: 'Error Fetching Tutor Requests',
+  ERROR_FETCHING_TUTOR_REQ: 'Error Fetching Tutor Request',
+  ERROR_UPDATING_TUTOR_REQ: 'Error Updating Tutor Request',
+  ERROR_DELETING_TUTOR_REQ: 'Error Deleting Tutor Request',
+  ERROR_TUTOR_REQ_NOT_FOUND: 'Tutor Request Not Found',
 };
