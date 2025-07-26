@@ -1,4 +1,3 @@
-import { CacheKey } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -42,7 +41,6 @@ export class LanguageController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.LANGUAGES))
-  @CacheKey(CACHE_KEY.LANGUAGES)
   @Get(API_ENDPOINT.GET_ALL_LANGUAGE)
   @ResponseMessage(MESSAGES.ALL_LANGUAGE_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {

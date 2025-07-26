@@ -18,24 +18,26 @@ class DynamicCacheInterceptor implements NestInterceptor {
     public readonly cacheKeyPrefix: string,
     @Inject(CACHE_MANAGER) public readonly cacheManager: Cache,
   ) {}
-
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
     const request: Request = context.switchToHttp().getRequest();
-
     const { page = 1, limit = 10, search = '' } = request.query;
+
     const key = `${this.cacheKeyPrefix}:page=${page}&limit=${limit}&search=${search}`;
 
-    const cached = await this.cacheManager.get(key);
+    const cached: any = await this.cacheManager.get(key);
+
     if (cached) {
-      return of(cached);
+      return of(JSON.parse(cached));
     }
 
     return next.handle().pipe(
       tap((response) => {
-        this.cacheManager.set(key, response, 60);
+        if (response !== undefined && response !== null) {
+          this.cacheManager.set(key, JSON.stringify(response));
+        }
       }),
     );
   }
