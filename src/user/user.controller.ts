@@ -84,6 +84,7 @@ export class UserController {
     return this.userService.remove(id);
   }
 
+  @UseInterceptors(CacheInterceptor)
   @CacheKey(CACHE_KEY.DASHBOARD_DETAILS)
   @CacheTTL(0)
   @UseGuards(AuthGuard('jwt'))
