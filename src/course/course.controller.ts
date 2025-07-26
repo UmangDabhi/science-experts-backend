@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
@@ -21,9 +22,15 @@ import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 @Controller('course')
 export class CourseController {
-  constructor(private readonly courseService: CourseService) { }
+  constructor(
+    private readonly courseService: CourseService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_COURSE)
@@ -32,16 +39,28 @@ export class CourseController {
     @Req() req: RequestWithUser,
     @Body() createCourseDto: CreateCourseDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.COURSES,
+      CACHE_KEY.MANAGE_COURSES,
+    ]);
     return this.courseService.create(req.user, createCourseDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.MANAGE_COURSES)
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
-  manageAllCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: FilterDto) {
+  manageAllCourse(
+    @Req() req: RequestWithUser,
+    @Query() courseFilterDto: FilterDto,
+  ) {
     return this.courseService.manageAllCourse(req.user, courseFilterDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.COURSES)
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
@@ -52,7 +71,10 @@ export class CourseController {
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.GET_ENROLLED_COURSE)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
-  findEnrolledCourse(@Req() req: RequestWithUser, @Query() courseFilterDto: FilterDto) {
+  findEnrolledCourse(
+    @Req() req: RequestWithUser,
+    @Query() courseFilterDto: FilterDto,
+  ) {
     return this.courseService.findEnrolledCourse(req.user, courseFilterDto);
   }
 
@@ -66,8 +88,14 @@ export class CourseController {
   @UseGuards(OptionalAuthGuard)
   @Patch(`${API_ENDPOINT.ATTACH_COURSE_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.COURSE_MATERIAL_ATTACHED)
-  attachMaterial(@Req() req: RequestWithUser, @Body() attachCourseMaterialDto: AttachCourseMaterialDto) {
-    return this.courseService.attachMaterial(req?.user, attachCourseMaterialDto);
+  attachMaterial(
+    @Req() req: RequestWithUser,
+    @Body() attachCourseMaterialDto: AttachCourseMaterialDto,
+  ) {
+    return this.courseService.attachMaterial(
+      req?.user,
+      attachCourseMaterialDto,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -85,6 +113,11 @@ export class CourseController {
   @Delete(`${API_ENDPOINT.DELETE_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.COURSES,
+      CACHE_KEY.MANAGE_COURSES,
+    ]);
     return this.courseService.remove(req.user, id);
   }
 }

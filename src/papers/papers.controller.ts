@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Query,
+  UseInterceptors,
+} from '@nestjs/common';
 import { PapersService } from './papers.service';
 import { CreatePaperDto } from './dto/create-paper.dto';
 import { UpdatePaperDto } from './dto/update-paper.dto';
@@ -9,21 +21,31 @@ import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('papers')
 export class PapersController {
-  constructor(private readonly papersService: PapersService) { }
+  constructor(
+    private readonly papersService: PapersService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_PAPER)
   @ResponseMessage(MESSAGES.PAPER_CREATED)
-  create(
-    @Req() req: RequestWithUser,
-    @Body() createPaperDto: CreatePaperDto,
-  ) {
+  create(@Req() req: RequestWithUser, @Body() createPaperDto: CreatePaperDto) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.PAPERS,
+      CACHE_KEY.MANAGE_PAPERS,
+    ]);
     return this.papersService.create(req.user, createPaperDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.MANAGE_PAPERS)
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_PAPER)
   @ResponseMessage(MESSAGES.ALL_PAPER_FETCHED)
@@ -31,12 +53,12 @@ export class PapersController {
     return this.papersService.manageAllPaper(req.user, filterDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.PAPERS)
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_PAPER)
   @ResponseMessage(MESSAGES.ALL_PAPER_FETCHED)
-  findAll(
-    @Req() req: RequestWithUser,
-    @Query() filterDto: FilterDto) {
+  findAll(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
     return this.papersService.findAll(req?.user, filterDto);
   }
 
@@ -62,6 +84,11 @@ export class PapersController {
   @Delete(`${API_ENDPOINT.DELETE_PAPER}/:id`)
   @ResponseMessage(MESSAGES.PAPER_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.PAPERS,
+      CACHE_KEY.MANAGE_PAPERS,
+    ]);
     return this.papersService.remove(req.user, id);
   }
 }

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -17,18 +18,30 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { ResponseMessage } from 'src/Helper/constants';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(
+    private readonly categoryService: CategoryService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_CATEGORY)
   @ResponseMessage(MESSAGES.CATEGORY_CREATED)
   create(@Body() createCategoryDto: CreateCategoryDto) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.CATEGORIES,
+    ]);
     return this.categoryService.create(createCategoryDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.CATEGORIES)
   @Get(API_ENDPOINT.GET_ALL_CATEGORY)
   @ResponseMessage(MESSAGES.ALL_CATEGORY_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
@@ -55,6 +68,10 @@ export class CategoryController {
   @Delete(`${API_ENDPOINT.DELETE_CATEGORY}/:id`)
   @ResponseMessage(MESSAGES.CATEGORY_DELETED)
   remove(@Param('id') id: string) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.CATEGORIES,
+    ]);
     return this.categoryService.remove(id);
   }
 }

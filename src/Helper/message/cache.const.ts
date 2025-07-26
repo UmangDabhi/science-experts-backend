@@ -1,0 +1,18 @@
+export const CACHE_KEY = {
+  DASHBOARD_DETAILS: 'dashboardDetails',
+  BOOKS: 'books',
+  MANAGE_BOOKS: 'manageBooks',
+  PAPERS: 'papers',
+  MANAGE_PAPERS: 'managePapers',
+  COURSES: 'courses',
+  MANAGE_COURSES: 'manageCourses',
+  CATEGORIES: 'categories',
+  BLOGS: 'blogs',
+  STANDARDS: 'standards',
+  COLLEGES: 'colleges',
+  MATERIALS: 'materials',
+  MANAGE_MATERIALS: 'managerMaterials',
+  USERS: 'users',
+  TUTORS: 'tutors',
+  LANGUAGES: 'languages',
+};

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { StandardService } from './standard.service';
 import { CreateStandardDto } from './dto/create-standard.dto';
@@ -17,18 +18,30 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { ResponseMessage } from 'src/Helper/constants';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
 
 @Controller('standard')
 export class StandardController {
-  constructor(private readonly standardService: StandardService) {}
+  constructor(
+    private readonly standardService: StandardService,
+    private readonly cacheService: CacheService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post(API_ENDPOINT.CREATE_STANDARD)
   @ResponseMessage(MESSAGES.STANDARD_CREATED)
   create(@Body() createStandardDto: CreateStandardDto) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.STANDARDS,
+    ]);
     return this.standardService.create(createStandardDto);
   }
 
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey(CACHE_KEY.STANDARDS)
   @Get(API_ENDPOINT.GET_ALL_STANDARD)
   @ResponseMessage(MESSAGES.ALL_STANDARD_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
@@ -55,6 +68,10 @@ export class StandardController {
   @Delete(`${API_ENDPOINT.DELETE_STANDARD}/:id`)
   @ResponseMessage(MESSAGES.STANDARD_DELETED)
   remove(@Param('id') id: string) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.STANDARDS,
+    ]);
     return this.standardService.remove(id);
   }
 }

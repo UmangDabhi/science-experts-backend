@@ -1,3 +1,4 @@
+import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -5,6 +6,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
 import { join } from 'path';
+import { AdmissionModule } from './admission/admission.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -12,29 +14,34 @@ import { BlogsModule } from './blogs/blogs.module';
 import { BooksModule } from './books/books.module';
 import { CategoryModule } from './category/category.module';
 import { CertificateModule } from './certificate/certificate.module';
+import { CollegeCoursesModule } from './college-courses/college-courses.module';
+import { CollegeModule } from './college/college.module';
 import { CourseModule } from './course/course.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { FileModule } from './file/file.module';
+import { CommonModule } from './Helper/modules/common.module';
 import { LanguageModule } from './language/language.module';
 import { Log } from './log/log.entity';
 import { LoggingInterceptor } from './log/logging.intercepter';
 import { MaterialModule } from './material/material.module';
 import { ModuleModule } from './module/module.module';
+import { PapersModule } from './papers/papers.module';
 import { PaymentModule } from './payment/payment.module';
 import { ProgressModule } from './progress/progress.module';
 import { QuizModule } from './quiz/quiz.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { StandardModule } from './standard/standard.module';
+import { TutorReqModule } from './tutor_req/tutor_req.module';
 import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { PapersModule } from './papers/papers.module';
-import { AdmissionModule } from './admission/admission.module';
-import { CollegeModule } from './college/college.module';
-import { CollegeCoursesModule } from './college-courses/college-courses.module';
-import { TutorReqModule } from './tutor_req/tutor_req.module';
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+      ttl: 5 * 60,
+      max: 1000,
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public/',
@@ -94,6 +101,7 @@ import { TutorReqModule } from './tutor_req/tutor_req.module';
     CollegeModule,
     CollegeCoursesModule,
     TutorReqModule,
+    CommonModule,
   ],
   controllers: [AppController],
   providers: [
@@ -104,4 +112,4 @@ import { TutorReqModule } from './tutor_req/tutor_req.module';
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
