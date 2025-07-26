@@ -9,6 +9,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
@@ -16,13 +17,13 @@ import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialService } from './material.service';
-import { CacheService } from 'src/Helper/services/cache.service';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheKey } from '@nestjs/cache-manager';
 
 @Controller('material')
 export class MaterialController {
@@ -46,7 +47,7 @@ export class MaterialController {
     return this.materialService.create(req.user, createMaterialDto);
   }
 
-  @CacheKey(CACHE_KEY.MANAGE_MATERIALS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_MATERIALS))
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
@@ -54,7 +55,7 @@ export class MaterialController {
     return this.materialService.manageAllMaterial(req.user, filterDto);
   }
 
-  @CacheKey(CACHE_KEY.MATERIALS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MATERIALS))
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)

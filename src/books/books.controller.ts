@@ -1,29 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
-  Req,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
+import { ResponseMessage } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { ResponseMessage } from 'src/Helper/constants';
-import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
-import { FilterDto } from 'src/Helper/dto/filter.dto';
-import { CacheService } from 'src/Helper/services/cache.service';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('books')
 export class BooksController {
@@ -44,8 +44,7 @@ export class BooksController {
     return this.booksService.create(req.user, createBookDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.MANAGE_BOOKS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_BOOKS))
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_BOOK)
   @ResponseMessage(MESSAGES.ALL_BOOK_FETCHED)
@@ -53,9 +52,7 @@ export class BooksController {
     return this.booksService.manageAllBook(req.user, filterDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.BOOKS)
-  @UseGuards(OptionalAuthGuard)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.BOOKS))
   @Get(API_ENDPOINT.GET_ALL_BOOK)
   @ResponseMessage(MESSAGES.ALL_BOOK_FETCHED)
   findAll(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {

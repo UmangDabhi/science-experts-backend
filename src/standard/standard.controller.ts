@@ -1,26 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { StandardService } from './standard.service';
-import { CreateStandardDto } from './dto/create-standard.dto';
-import { UpdateStandardDto } from './dto/update-standard.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { ResponseMessage } from 'src/Helper/constants';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CacheService } from 'src/Helper/services/cache.service';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { CreateStandardDto } from './dto/create-standard.dto';
+import { UpdateStandardDto } from './dto/update-standard.dto';
+import { StandardService } from './standard.service';
 
 @Controller('standard')
 export class StandardController {
@@ -40,8 +40,7 @@ export class StandardController {
     return this.standardService.create(createStandardDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.STANDARDS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.STANDARDS))
   @Get(API_ENDPOINT.GET_ALL_STANDARD)
   @ResponseMessage(MESSAGES.ALL_STANDARD_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {

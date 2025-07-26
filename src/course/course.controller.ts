@@ -17,14 +17,14 @@ import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { CourseService } from './course.service';
+import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
-import { CacheService } from 'src/Helper/services/cache.service';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 @Controller('course')
 export class CourseController {
   constructor(
@@ -47,8 +47,7 @@ export class CourseController {
     return this.courseService.create(req.user, createCourseDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.MANAGE_COURSES)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_COURSES))
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
@@ -59,8 +58,7 @@ export class CourseController {
     return this.courseService.manageAllCourse(req.user, courseFilterDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.COURSES)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.COURSES))
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)

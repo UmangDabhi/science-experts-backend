@@ -1,26 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ResponseMessage } from 'src/Helper/constants';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { ResponseMessage } from 'src/Helper/constants';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
-import { CacheService } from 'src/Helper/services/cache.service';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @Controller('category')
 export class CategoryController {
@@ -40,8 +40,7 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.CATEGORIES)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.CATEGORIES))
   @Get(API_ENDPOINT.GET_ALL_CATEGORY)
   @ResponseMessage(MESSAGES.ALL_CATEGORY_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {

@@ -22,13 +22,30 @@ export class CacheService {
     await this.cacheManager.del(key);
   }
 
-  async deleteMultiple(keys: string[]): Promise<void> {
-    await Promise.all(keys.map((key) => this.cacheManager.del(key)));
-  }
-
   async reset(): Promise<void> {
     if (typeof (this.cacheManager as any).reset === 'function') {
       await (this.cacheManager as any).reset();
     }
+  }
+
+  async deleteMultiple(prefixes: string[]): Promise<void> {
+    const client = this.getRedisClient();
+
+    const allKeys: string[] = [];
+
+    for (const prefix of prefixes) {
+      const keys = await client.keys(`${prefix}*`);
+      allKeys.push(...keys);
+    }
+
+    if (allKeys.length) {
+      const uniqueKeys = Array.from(new Set(allKeys));
+      await client.del(...uniqueKeys);
+    }
+  }
+
+  private getRedisClient(): any {
+    const store = (this.cacheManager as any).store;
+    return typeof store.getClient === 'function' ? store.getClient() : store;
   }
 }

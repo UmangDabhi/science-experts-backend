@@ -1,3 +1,4 @@
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -13,16 +14,16 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseMessage } from 'src/Helper/constants';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
-import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheService } from 'src/Helper/services/cache.service';
 
 @Controller('user')
 export class UserController {
@@ -42,16 +43,14 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.USERS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.USERS))
   @Get(API_ENDPOINT.GET_ALL_USER)
   @ResponseMessage(MESSAGES.ALL_USER_FETCHED)
   findAll(@Query() paginationDto: PaginationDto) {
     return this.userService.findAll(paginationDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.TUTORS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.TUTORS))
   @Get(API_ENDPOINT.GET_ALL_TUTOR)
   @ResponseMessage(MESSAGES.ALL_TUTOR_FETCHED)
   findAllTutor(@Query() paginationDto: PaginationDto) {

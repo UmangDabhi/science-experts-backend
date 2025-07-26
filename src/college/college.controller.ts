@@ -6,24 +6,24 @@ import {
   Param,
   Patch,
   Post,
-  UseGuards,
   Query,
   Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ResponseMessage } from 'src/Helper/constants';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { CollegeService } from './college.service';
-import { CreateCollegeDto } from './dto/create-college.dto';
-import { UpdateCollegeDto } from './dto/update-college.dto';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
-import { GetCollegeCoursesDto } from './dto/get-college-courses.dto';
-import { CacheService } from 'src/Helper/services/cache.service';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { CollegeService } from './college.service';
+import { CreateCollegeDto } from './dto/create-college.dto';
+import { GetCollegeCoursesDto } from './dto/get-college-courses.dto';
+import { UpdateCollegeDto } from './dto/update-college.dto';
 
 @Controller('college')
 export class CollegeController {
@@ -45,8 +45,8 @@ export class CollegeController {
     ]);
     return this.collegeService.create(req.user, createCollegeDto);
   }
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.COLLEGES)
+
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.COLLEGES))
   @ResponseMessage(MESSAGES.ALL_COLLEGE_FETCHED)
   @Get(API_ENDPOINT.GET_ALL_COLLEGE)
   findAll(@Query() filterDto: FilterDto) {

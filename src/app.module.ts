@@ -35,13 +35,31 @@ import { TutorReqModule } from './tutor_req/tutor_req.module';
 import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import * as redisStore from 'cache-manager-redis-store';
 @Module({
   imports: [
-    CacheModule.register({
+    CacheModule.registerAsync({
       isGlobal: true,
-      ttl: 5 * 60,
-      max: 1000,
+      useFactory: async () => {
+        try {
+          console.log('Connecting to Redis Cache...', redisStore);
+          return {
+            store: redisStore as any,
+            host: 'localhost',
+            port: 6379,
+            ttl: 300,
+            max: 1000,
+          };
+        } catch (err) {
+          console.error('Redis Cache Connection Failed:', err);
+          return {
+            store: 'memory',
+            ttl: 300,
+          };
+        }
+      },
     }),
+
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
       serveRoot: '/public/',

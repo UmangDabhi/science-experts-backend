@@ -1,29 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
-  Req,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  Req,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { PapersService } from './papers.service';
+import { AuthGuard } from '@nestjs/passport';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
+import { ResponseMessage } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
+import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { CACHE_KEY } from 'src/Helper/message/cache.const';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CacheService } from 'src/Helper/services/cache.service';
+import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
 import { CreatePaperDto } from './dto/create-paper.dto';
 import { UpdatePaperDto } from './dto/update-paper.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { ResponseMessage } from 'src/Helper/constants';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
-import { FilterDto } from 'src/Helper/dto/filter.dto';
-import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
-import { CacheService } from 'src/Helper/services/cache.service';
-import { CACHE_KEY } from 'src/Helper/message/cache.const';
-import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { PapersService } from './papers.service';
 
 @Controller('papers')
 export class PapersController {
@@ -44,8 +44,7 @@ export class PapersController {
     return this.papersService.create(req.user, createPaperDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.MANAGE_PAPERS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_PAPERS))
   @UseGuards(AuthGuard('jwt'))
   @Get(API_ENDPOINT.MANAGE_ALL_PAPER)
   @ResponseMessage(MESSAGES.ALL_PAPER_FETCHED)
@@ -53,8 +52,7 @@ export class PapersController {
     return this.papersService.manageAllPaper(req.user, filterDto);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.PAPERS)
+  @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.PAPERS))
   @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_PAPER)
   @ResponseMessage(MESSAGES.ALL_PAPER_FETCHED)
