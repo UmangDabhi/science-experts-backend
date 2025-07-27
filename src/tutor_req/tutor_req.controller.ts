@@ -30,14 +30,14 @@ export class TutorReqController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(API_ENDPOINT.GET_TUTOR_REQ)
+  @Get(API_ENDPOINT.GET_ALL_TUTOR_REQ)
   @ResponseMessage(MESSAGES.ALL_TUTOR_REQ_FETCHED)
   findAll(@Query() filterDto: FilterDto) {
     return this.tutorReqService.findAll(filterDto);
   }
 
   @UseGuards(OptionalAuthGuard)
-  @Get(`${API_ENDPOINT.GET_TUTOR}/:id`)
+  @Get(`${API_ENDPOINT.GET_TUTOR_REQ}/:id`)
   @ResponseMessage(MESSAGES.TUTOR_REQ_FETCHED)
   findOne(@Param('id') id: string) {
     return this.tutorReqService.findOne(id);
