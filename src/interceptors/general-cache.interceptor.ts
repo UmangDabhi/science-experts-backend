@@ -25,11 +25,8 @@ class DynamicCacheInterceptor implements NestInterceptor {
     const request: Request = context.switchToHttp().getRequest();
     const { page = 1, limit = 10, search = '' } = request.query;
 
-    console.log(request.query);
     const key = `${this.cacheKeyPrefix}:page=${page}&limit=${limit}&search=${search}`;
-    console.log(key)
     const cached: any = await this.cacheManager.get(key);
-    console.log(cached)
 
     if (cached) {
       return of(JSON.parse(cached));
