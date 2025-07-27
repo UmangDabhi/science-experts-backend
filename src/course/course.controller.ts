@@ -40,9 +40,9 @@ export class CourseController {
     @Body() createCourseDto: CreateCourseDto,
   ) {
     this.cacheService.deleteMultiple([
-      CACHE_KEY.DASHBOARD_DETAILS,
       CACHE_KEY.COURSES,
       CACHE_KEY.MANAGE_COURSES,
+      CACHE_KEY.DASHBOARD_DETAILS,
     ]);
     return this.courseService.create(req.user, createCourseDto);
   }
@@ -104,6 +104,11 @@ export class CourseController {
     @Param('id') id: string,
     @Body() updateCourseDto: UpdateCourseDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.MANAGE_COURSES,
+      CACHE_KEY.COURSES,
+      CACHE_KEY.DASHBOARD_DETAILS,
+    ]);
     return this.courseService.update(req.user, id, updateCourseDto);
   }
 
@@ -112,9 +117,9 @@ export class CourseController {
   @ResponseMessage(MESSAGES.COURSE_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {
     this.cacheService.deleteMultiple([
-      CACHE_KEY.DASHBOARD_DETAILS,
       CACHE_KEY.COURSES,
       CACHE_KEY.MANAGE_COURSES,
+      CACHE_KEY.DASHBOARD_DETAILS,
     ]);
     return this.courseService.remove(req.user, id);
   }

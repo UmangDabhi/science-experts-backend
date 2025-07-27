@@ -85,6 +85,11 @@ export class MaterialController {
     @Param('id') id: string,
     @Body() updateMaterialDto: UpdateMaterialDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.MATERIALS,
+      CACHE_KEY.MANAGE_MATERIALS,
+    ]);
     return this.materialService.update(req.user, id, updateMaterialDto);
   }
 

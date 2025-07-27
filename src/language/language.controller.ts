@@ -54,6 +54,10 @@ export class LanguageController {
     @Param('id') id: string,
     @Body() updateLanguageDto: UpdateLanguageDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.LANGUAGES,
+    ]);
     return this.languageService.update(id, updateLanguageDto);
   }
 

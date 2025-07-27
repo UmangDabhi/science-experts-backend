@@ -74,6 +74,11 @@ export class BooksController {
     @Param('id') id: string,
     @Body() updateBookDto: UpdateBookDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.BOOKS,
+      CACHE_KEY.MANAGE_BOOKS,
+    ]);
     return this.booksService.update(req.user, id, updateBookDto);
   }
 

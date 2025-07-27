@@ -60,6 +60,10 @@ export class StandardController {
     @Param('id') id: string,
     @Body() updateStandardDto: UpdateStandardDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.STANDARDS,
+    ]);
     return this.standardService.update(id, updateStandardDto);
   }
 

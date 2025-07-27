@@ -73,6 +73,10 @@ export class CollegeController {
     @Param('id') id: string,
     @Body() updateCollegeDto: UpdateCollegeDto,
   ) {
+     this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.COLLEGES,
+    ]);
     return this.collegeService.update(req.user, id, updateCollegeDto);
   }
 

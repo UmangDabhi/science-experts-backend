@@ -68,6 +68,11 @@ export class UserController {
   @Patch(`${API_ENDPOINT.UPDATE_USER}/:id`)
   @ResponseMessage(MESSAGES.USER_UPDATED)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.USERS,
+      CACHE_KEY.TUTORS,
+    ]);
     return this.userService.update(id, updateUserDto);
   }
 

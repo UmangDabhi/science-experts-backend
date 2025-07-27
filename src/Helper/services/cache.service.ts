@@ -1,10 +1,14 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import Redis from 'ioredis';
 
 @Injectable()
 export class CacheService {
-  constructor(@Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
+  constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+    @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
+  ) {}
 
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     if (ttl === 0 || ttl === undefined) {
@@ -29,23 +33,15 @@ export class CacheService {
   }
 
   async deleteMultiple(prefixes: string[]): Promise<void> {
-    const client = this.getRedisClient();
-
     const allKeys: string[] = [];
 
     for (const prefix of prefixes) {
-      const keys = await client.keys(`${prefix}*`);
+      const keys = await this.redisClient.keys(`${prefix}*`);
       allKeys.push(...keys);
     }
-
     if (allKeys.length) {
       const uniqueKeys = Array.from(new Set(allKeys));
-      await client.del(...uniqueKeys);
+      await this.redisClient.del(...uniqueKeys);
     }
-  }
-
-  private getRedisClient(): any {
-    const store = (this.cacheManager as any).store;
-    return typeof store.getClient === 'function' ? store.getClient() : store;
   }
 }

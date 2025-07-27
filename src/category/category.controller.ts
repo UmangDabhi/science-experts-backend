@@ -60,6 +60,10 @@ export class CategoryController {
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.CATEGORIES,
+    ]);
     return this.categoryService.update(id, updateCategoryDto);
   }
 

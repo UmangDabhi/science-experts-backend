@@ -75,6 +75,11 @@ export class PapersController {
     @Param('id') id: string,
     @Body() updatePaperDto: UpdatePaperDto,
   ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.PAPERS,
+      CACHE_KEY.MANAGE_PAPERS,
+    ]);
     return this.papersService.update(req.user, id, updatePaperDto);
   }
 

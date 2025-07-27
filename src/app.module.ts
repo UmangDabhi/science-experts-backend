@@ -1,3 +1,4 @@
+import { createKeyv } from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -35,22 +36,13 @@ import { TutorReqModule } from './tutor_req/tutor_req.module';
 import { Balance_Type } from './user/entities/balance_type.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { createKeyv } from '@keyv/redis';
-import { CacheableMemory } from 'cacheable';
-import { Keyv } from 'keyv';
 @Module({
-  
   imports: [
     CacheModule.registerAsync({
       isGlobal: true,
       useFactory: async () => {
         return {
-          stores: [
-            new Keyv({
-              store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
-            }),
-            createKeyv('redis://localhost:6379'),
-          ],
+          stores: [createKeyv('redis://localhost:6379')],
         };
       },
     }),
