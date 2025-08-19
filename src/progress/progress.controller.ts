@@ -1,22 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Param,
+  Post,
   Req,
+  UseGuards
 } from '@nestjs/common';
-import { ProgressService } from './progress.service';
-import { CreateProgressDto } from './dto/create-progress.dto';
-import { UpdateProgressDto } from './dto/update-progress.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { CreateProgressDto } from './dto/create-progress.dto';
+import { ProgressService } from './progress.service';
 
 @Controller('progress')
 export class ProgressController {

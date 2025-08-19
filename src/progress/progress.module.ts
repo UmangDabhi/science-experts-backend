@@ -6,10 +6,20 @@ import { User } from 'src/user/entities/user.entity';
 import { Progress } from './entities/progress.entity';
 import { ProgressController } from './progress.controller';
 import { ProgressService } from './progress.service';
+import { FileService } from 'src/file/file.service';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Progress, User, Course, ModuleEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Progress,
+      Enrollment,
+      User,
+      Course,
+      ModuleEntity,
+    ]),
+  ],
   controllers: [ProgressController],
-  providers: [ProgressService],
+  providers: [ProgressService, FileService],
 })
 export class ProgressModule {}

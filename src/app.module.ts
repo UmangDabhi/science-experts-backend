@@ -14,7 +14,6 @@ import { AuthModule } from './auth/auth.module';
 import { BlogsModule } from './blogs/blogs.module';
 import { BooksModule } from './books/books.module';
 import { CategoryModule } from './category/category.module';
-import { CertificateModule } from './certificate/certificate.module';
 import { CollegeCoursesModule } from './college-courses/college-courses.module';
 import { CollegeModule } from './college/college.module';
 import { CourseModule } from './course/course.module';
@@ -87,13 +86,11 @@ import { UserModule } from './user/user.module';
     ModuleModule,
     EnrollmentModule,
     PaymentModule,
-    CertificateModule,
     MaterialModule,
     AuthModule,
     FileModule,
     CategoryModule,
     StandardModule,
-    CertificateModule,
     ProgressModule,
     ReviewsModule,
     PaymentModule,

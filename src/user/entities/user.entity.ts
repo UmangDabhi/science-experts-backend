@@ -1,20 +1,19 @@
-import { Certificate } from 'src/certificate/entities/certificate.entity';
+import { Blog } from 'src/blogs/entities/blog.entity';
+import { Book } from 'src/books/entities/book.entity';
+import { BookPurchase } from 'src/books/entities/book_purchase.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Role } from 'src/Helper/constants';
+import { Material } from 'src/material/entities/material.entity';
 import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
+import { Paper } from 'src/papers/entities/paper.entity';
+import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
 import { Progress } from 'src/progress/entities/progress.entity';
+import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { User_Balance } from './user_balance.entity';
-import { QuizAttempts } from 'src/quiz/entities/quiz_attempts.entity';
-import { BookPurchase } from 'src/books/entities/book_purchase.entity';
-import { Book } from 'src/books/entities/book.entity';
-import { Material } from 'src/material/entities/material.entity';
-import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
-import { Paper } from 'src/papers/entities/paper.entity';
-import { Blog } from 'src/blogs/entities/blog.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -103,11 +102,6 @@ export class User extends BaseEntity {
 
   @OneToMany(() => User_Balance, (user_balance) => user_balance.user, { nullable: true })
   user_balance: User_Balance[];
-
-  @OneToMany(() => Certificate, (certificates) => certificates.student, {
-    nullable: true,
-  })
-  certificates: Certificate[];
 
   @OneToMany(() => Enrollment, (enrollments) => enrollments.student, {
     nullable: true,

@@ -15,6 +15,9 @@ export class Enrollment extends BaseEntity {
   course: Course;
 
   @Column({ nullable: true })
+  certificate_url: string;
+
+  @Column({ nullable: true })
   feedback: string;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })

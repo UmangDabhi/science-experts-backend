@@ -26,7 +26,11 @@ export class FileService {
   private s3: S3Client;
 
   constructor() {
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_REGION) {
+    if (
+      !process.env.AWS_ACCESS_KEY_ID ||
+      !process.env.AWS_SECRET_ACCESS_KEY ||
+      !process.env.AWS_REGION
+    ) {
       throw new Error('Missing AWS S3 configuration in environment variables');
     }
 
@@ -49,7 +53,11 @@ export class FileService {
   }
 
   // Simple single-part presigned URL (PUT)
-  async getPresignedUploadUrl(folder: string, filename: string, contentType: string): Promise<string> {
+  async getPresignedUploadUrl(
+    folder: string,
+    filename: string,
+    contentType: string,
+  ): Promise<string> {
     const key = `${folder}/${Date.now()}-${filename}`;
 
     const command = new PutObjectCommand({
@@ -59,7 +67,9 @@ export class FileService {
     });
 
     try {
-      const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 }); // 5 minutes
+      const uploadUrl = await getSignedUrl(this.s3, command, {
+        expiresIn: 300,
+      }); // 5 minutes
       return uploadUrl;
     } catch (error) {
       console.error('Error generating presigned URL:', error);
@@ -91,7 +101,10 @@ export class FileService {
     }
   }
 
-  async uploadLocally(file: Express.Multer.File, folder: string): Promise<string> {
+  async uploadLocally(
+    file: Express.Multer.File,
+    folder: string,
+  ): Promise<string> {
     const safeFolder = this.sanitizeFolderPath(folder);
     const localFolderPath = join(localStoragePath, safeFolder);
     await fsPromises.mkdir(localFolderPath, { recursive: true });
@@ -101,7 +114,10 @@ export class FileService {
 
     try {
       await fsPromises.writeFile(localFilePath, file.buffer);
-      const relativePath = relative(localStoragePath, localFilePath).replace(/\\/g, '/');
+      const relativePath = relative(localStoragePath, localFilePath).replace(
+        /\\/g,
+        '/',
+      );
       return relativePath;
     } catch (error) {
       console.error('Local upload error:', error);
@@ -109,7 +125,27 @@ export class FileService {
     }
   }
 
-  async uploadFile(file: Express.Multer.File, folder: string): Promise<{ s3Url: string }> {
+  async uploadFileBuffer(
+    buffer: Buffer,
+    key: string,
+    contentType: string,
+  ): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    });
+
+    await this.s3.send(command);
+
+    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+  }
+
+  async uploadFile(
+    file: Express.Multer.File,
+    folder: string,
+  ): Promise<{ s3Url: string }> {
     const s3Url = await this.uploadToS3(file, folder);
     return { s3Url };
   }
@@ -185,7 +221,9 @@ export class FileService {
       return files.map((file) => join(folderPath, file).replace(/\\/g, '/'));
     } catch (error) {
       console.error('Local list error:', error);
-      throw new InternalServerErrorException('Error listing files from local folder');
+      throw new InternalServerErrorException(
+        'Error listing files from local folder',
+      );
     }
   }
 
@@ -193,7 +231,9 @@ export class FileService {
     return multer({
       storage: multer.diskStorage({
         destination: (req, file, cb) => {
-          const folderPath = this.sanitizeFolderPath(req.params.folderPath || 'default');
+          const folderPath = this.sanitizeFolderPath(
+            req.params.folderPath || 'default',
+          );
           const uploadPath = join(localStoragePath, folderPath);
           cb(null, uploadPath);
         },
@@ -222,12 +262,16 @@ export class FileService {
     try {
       const response = await this.s3.send(command);
       if (!response.UploadId) {
-        throw new InternalServerErrorException('Failed to initiate multipart upload');
+        throw new InternalServerErrorException(
+          'Failed to initiate multipart upload',
+        );
       }
       return { uploadId: response.UploadId, key };
     } catch (error) {
       console.error('Error initiating multipart upload:', error);
-      throw new InternalServerErrorException('Could not initiate multipart upload');
+      throw new InternalServerErrorException(
+        'Could not initiate multipart upload',
+      );
     }
   }
 
@@ -254,7 +298,9 @@ export class FileService {
       return presignedUrls;
     } catch (error) {
       console.error('Error generating presigned URLs:', error);
-      throw new InternalServerErrorException('Could not generate presigned URLs for parts');
+      throw new InternalServerErrorException(
+        'Could not generate presigned URLs for parts',
+      );
     }
   }
 
@@ -263,10 +309,12 @@ export class FileService {
     uploadId: string,
     parts: { ETag: string; PartNumber: number }[],
   ): Promise<string> {
-    const completedParts: CompletedPart[] = parts.map(({ ETag, PartNumber }) => ({
-      ETag,
-      PartNumber,
-    }));
+    const completedParts: CompletedPart[] = parts.map(
+      ({ ETag, PartNumber }) => ({
+        ETag,
+        PartNumber,
+      }),
+    );
 
     const command = new CompleteMultipartUploadCommand({
       Bucket: process.env.AWS_BUCKET_NAME,
@@ -280,7 +328,9 @@ export class FileService {
       return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
     } catch (error) {
       console.error('Error completing multipart upload:', error);
-      throw new InternalServerErrorException('Could not complete multipart upload');
+      throw new InternalServerErrorException(
+        'Could not complete multipart upload',
+      );
     }
   }
 
@@ -298,5 +348,4 @@ export class FileService {
       // Optional: fail silently or rethrow
     }
   }
-
 }

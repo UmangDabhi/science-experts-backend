@@ -137,7 +137,7 @@ export class UserService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course", "certificates", "user_balance", 'referrals'] });
+      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course",  "user_balance", 'referrals'] });
 
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
@@ -172,6 +172,7 @@ export class UserService {
       ) {
         throw error;
       }
+      console.log(error)
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_USER);
     }
   }
