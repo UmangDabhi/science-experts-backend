@@ -41,6 +41,7 @@ import { UserModule } from './user/user.module';
       isGlobal: true,
       useFactory: async () => {
         return {
+          ttl: 60 * 15, 
           stores: [createKeyv('redis://localhost:6379')],
         };
       },
