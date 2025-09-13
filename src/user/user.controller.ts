@@ -97,4 +97,18 @@ export class UserController {
   dashboardDetails(@Req() req: RequestWithUser) {
     return this.userService.dashboardDetails(req.user);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post(API_ENDPOINT.MARK_TUTORIAL_COMPLETED)
+  @ResponseMessage('Tutorial marked as completed')
+  markTutorialCompleted(@Req() req: RequestWithUser) {
+    return this.userService.markTutorialCompleted(req.user.id);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(API_ENDPOINT.GET_TUTORIAL_STATUS)
+  @ResponseMessage('Tutorial status fetched')
+  getTutorialStatus(@Req() req: RequestWithUser) {
+    return this.userService.getTutorialStatus(req.user.id);
+  }
 }

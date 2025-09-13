@@ -1,55 +1,92 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Science Expert Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A comprehensive NestJS backend application for an educational platform that provides courses, materials, books, papers, and tutorials for students and tutors.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **Authentication & Authorization**: JWT-based authentication with role-based access control
+- **User Management**: Student and tutor profiles with referral system
+- **Educational Content**: Courses, materials, books, papers, and blogs
+- **Payment System**: Integrated payment processing with balance management
+- **Tutorial System**: Interactive joyride tutorials for new users
+- **Progress Tracking**: Student progress monitoring and analytics
+- **File Management**: AWS S3 integration for file storage
+- **Caching**: Redis-based caching for improved performance
+- **Real-time Updates**: Progress tracking and notifications
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📋 Prerequisites
 
-## Installation
+- Node.js (v16 or higher)
+- PostgreSQL database
+- Redis (for caching)
+- AWS S3 bucket (for file storage)
 
+## 🛠️ Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd science-expert-backend
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Environment Configuration**
+   Create a `.env` file in the root directory with the following variables:
+   ```env
+   # Database Configuration
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_USERNAME=your_db_username
+   DB_PASSWORD=your_db_password
+   DB_NAME=science_expert_db
+
+   # JWT Configuration
+   JWT_SECRET=your_jwt_secret_key
+
+   # AWS S3 Configuration
+   AWS_ACCESS_KEY_ID=your_aws_access_key
+   AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+   AWS_REGION=your_aws_region
+   AWS_S3_BUCKET=your_s3_bucket_name
+
+   # Redis Configuration
+   REDIS_HOST=localhost
+   REDIS_PORT=6379
+   ```
+
+4. **Database Setup**
+   ```bash
+   # Run database migrations (if applicable)
+   npm run migration:run
+   ```
+
+## 🏃‍♂️ Running the Application
+
+### Development Mode
 ```bash
-$ npm install
+npm run start:dev
 ```
 
-## Running the app
-
+### Production Mode
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run build
+npm run start:prod
 ```
 
-## Test
+### Debug Mode
+```bash
+npm run start:debug
+```
+
+## 🧪 Testing
 
 ```bash
-# unit tests
-$ npm run test
+# Unit tests
+npm run test
 
 # e2e tests
 $ npm run test:e2e

@@ -254,41 +254,25 @@ export class UserService {
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
-      const counts = await this.userRepository
-        .createQueryBuilder('user')
-        .leftJoin('user.tutor_courses', 'course')
-        .leftJoin('user.tutor_materials', 'material')
-        .leftJoin('user.tutor_books', 'book')
-        .leftJoin('user.tutor_papers', 'paper')
-        .leftJoin('user.blogs', 'blogs')
-        .where('user.id = :id', { id: user.id })
-        .select('user.id', 'userId')
-        .addSelect('COUNT(DISTINCT course.id)', 'courseCount')
-        .addSelect('COUNT(DISTINCT material.id)', 'materialsCount')
-        .addSelect('COUNT(DISTINCT book.id)', 'booksCount')
-        .addSelect('COUNT(DISTINCT paper.id)', 'papersCount')
-        .addSelect('COUNT(DISTINCT blogs.id)', 'blogsCount')
-        .addSelect(`SUM(CASE WHEN user.role = 'tutor' THEN 1 ELSE 0 END)`, 'tutorCount')
-        .groupBy('user.id')
-        .getRawOne();
-      const categoryCount = await this.categoryRepository.count();
-      const standardCount = await this.standardRepository.count();
-      const languageCount = await this.languageRepository.count();
-      const collegeCount = await this.collegeRepository.count();
-      const collegeCourseCount = await this.collegeCourseRepository.count();
+
+      // Execute user-specific counts and static counts in parallel
+      const [userCounts, staticCounts] = await Promise.all([
+        this.getUserSpecificCounts(user.id),
+        this.getStaticCounts()
+      ]);
 
       return {
-        courseCount: Number(counts.courseCount),
-        materialsCount: Number(counts.materialsCount),
-        booksCount: Number(counts.booksCount),
-        papersCount: Number(counts.papersCount),
-        blogsCount: Number(counts.blogsCount),
-        tutorCount: Number(counts.tutorCount),
-        categoryCount: Number(categoryCount),
-        standardCount: Number(standardCount),
-        collegeCount: Number(collegeCount),
-        languageCount: Number(languageCount),
-        collegeCourseCount: Number(collegeCourseCount),
+        courseCount: userCounts.courseCount,
+        materialsCount: userCounts.materialsCount,
+        booksCount: userCounts.booksCount,
+        papersCount: userCounts.papersCount,
+        blogsCount: userCounts.blogsCount,
+        tutorCount: userCounts.tutorCount,
+        categoryCount: staticCounts.categoryCount,
+        standardCount: staticCounts.standardCount,
+        collegeCount: staticCounts.collegeCount,
+        languageCount: staticCounts.languageCount,
+        collegeCourseCount: staticCounts.collegeCourseCount,
       };
 
     } catch (error) {
@@ -302,6 +286,131 @@ export class UserService {
       throw new InternalServerErrorException(
         ERRORS.ERROR_FETCHING_DASHBOARD_DETAILS,
       );
+    }
+  }
+
+  private async getUserSpecificCounts(userId: string) {
+    // Use optimized QueryBuilder for better performance and type safety
+    const [courseCount, materialsCount, booksCount, papersCount, blogsCount, tutorCount] = await Promise.all([
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.tutor_courses', 'course')
+        .where('user.id = :userId', { userId })
+        .select('COUNT(course.id)', 'count')
+        .getRawOne(),
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.tutor_materials', 'material')
+        .where('user.id = :userId', { userId })
+        .select('COUNT(material.id)', 'count')
+        .getRawOne(),
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.tutor_books', 'book')
+        .where('user.id = :userId', { userId })
+        .select('COUNT(book.id)', 'count')
+        .getRawOne(),
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.tutor_papers', 'paper')
+        .where('user.id = :userId', { userId })
+        .select('COUNT(paper.id)', 'count')
+        .getRawOne(),
+      this.userRepository
+        .createQueryBuilder('user')
+        .leftJoin('user.blogs', 'blog')
+        .where('user.id = :userId', { userId })
+        .select('COUNT(blog.id)', 'count')
+        .getRawOne(),
+      this.userRepository
+        .createQueryBuilder('user')
+        .where('user.id = :userId AND user.role = :role', { userId, role: 'tutor' })
+        .select('COUNT(user.id)', 'count')
+        .getRawOne()
+    ]);
+
+    return {
+      courseCount: Number(courseCount?.count || 0),
+      materialsCount: Number(materialsCount?.count || 0),
+      booksCount: Number(booksCount?.count || 0),
+      papersCount: Number(papersCount?.count || 0),
+      blogsCount: Number(blogsCount?.count || 0),
+      tutorCount: Number(tutorCount?.count || 0),
+    };
+  }
+
+  private async getStaticCounts() {  
+
+    // Execute all static counts in parallel using repository methods
+    const [categoryCount, standardCount, languageCount, collegeCount, collegeCourseCount] = await Promise.all([
+      this.categoryRepository.count(),
+      this.standardRepository.count(),
+      this.languageRepository.count(),
+      this.collegeRepository.count(),
+      this.collegeCourseRepository.count()
+    ]);
+
+    const counts = {
+      categoryCount: Number(categoryCount || 0),
+      standardCount: Number(standardCount || 0),
+      languageCount: Number(languageCount || 0),
+      collegeCount: Number(collegeCount || 0),
+      collegeCourseCount: Number(collegeCourseCount || 0),
+    };
+
+    return counts;
+  }
+
+  async markTutorialCompleted(id: string) {
+    try {
+      if (!id) {
+        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      }
+
+      const user = await this.userRepository.findOne({ where: { id: id } });
+      if (!user) {
+        throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
+      }
+
+      await this.userRepository.update(id, { has_completed_tutorial: true });
+      return { message: 'Tutorial marked as completed' };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update tutorial status');
+    }
+  }
+
+  async getTutorialStatus(id: string) {
+    try {
+      if (!id) {
+        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+        select: ['id', 'has_completed_tutorial']
+      });
+
+      if (!user) {
+        throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
+      }
+
+      return {
+        has_completed_tutorial: user.has_completed_tutorial || false
+      };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to get tutorial status');
     }
   }
 }

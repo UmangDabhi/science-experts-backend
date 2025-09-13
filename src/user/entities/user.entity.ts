@@ -49,7 +49,8 @@ export class User extends BaseEntity {
   @Column({ default: 0 })
   referral_count: number;
 
-
+  @Column({ default: false })
+  has_completed_tutorial: boolean;
 
   @Column({ nullable: true })
   phone_no: string;

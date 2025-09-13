@@ -256,7 +256,7 @@ export class CourseService {
             ...course,
             modules: course.modules.map((ele) => ({
               ...ele,
-              video_url: ele.is_free_to_watch ? ele.video_url : null, // Hide video_url if not free
+              video_url: ele.is_free_to_watch ? ele.video_url : null,
             })),
 
             materials: course.materials.map((ele) => {

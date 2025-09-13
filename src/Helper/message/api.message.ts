@@ -5,6 +5,8 @@ export const API_ENDPOINT = {
   UPDATE_USER: 'update_user',
   DELETE_USER: 'delete_user',
   DASHBOARD_DETAILS: 'dashboard_details',
+  MARK_TUTORIAL_COMPLETED: 'tutorial/complete',
+  GET_TUTORIAL_STATUS: 'tutorial/status',
 
   GET_ALL_TUTOR: 'get_all_tutor',
   GET_TUTOR: 'get_tutor',

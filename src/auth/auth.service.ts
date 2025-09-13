@@ -33,4 +33,29 @@ export class AuthService {
       access_token: this.jwtService.sign(payload),
     };
   }
+
+  async validateToken(user: User) {
+    try {
+      if (!user) {
+        throw new UnauthorizedException('Invalid token or user not found');
+      }
+
+      const current_user = await this.userService.findByEmail(user.email);
+      if (!current_user) {
+        throw new UnauthorizedException('User no longer exists');
+      }
+
+      return {
+        valid: true,
+        user: {
+          id: current_user.id,
+          name: current_user.name,
+          role: current_user.role,
+          email: current_user.email,
+        }
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Token validation failed');
+    }
+  }
 }
