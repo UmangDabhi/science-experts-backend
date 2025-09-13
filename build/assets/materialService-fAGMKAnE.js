@@ -1,0 +1,1 @@
+import{F as i,aL as m,aM as p}from"./index-CYgJ5ZTk.js";const M=({data:e,dispatch:s,materialId:o,courseId:t,rowUpdate:l=!1})=>new Promise(async(u,r)=>{const n=i({...e,course:t!=="-"?t:null,amount:parseInt(e.amount),language:e.language});l&&delete n.course;const c=o?m:p;try{s(c(n)).unwrap().then(a=>u(a)).catch(a=>r(a))}catch(a){r(a)}});export{M as s};
