@@ -173,7 +173,6 @@ export class CourseService {
           course['is_enrolled'] = true;
         }
       }
-      console.log('result ', result);
       return result;
     } catch (error) {
       console.log(error);

@@ -162,10 +162,35 @@ export class PapersService {
         filterDto,
         searchableFields,
         queryOptions,
-        [],
+        ['tutor'],
         orderBy,
       );
-      const result = papers;
+
+      // Add purchase status to each paper
+      if (currUser) {
+        const paperIds = papers.data.map(paper => paper.id);
+        const userPurchases = await this.paperPurchaseRepository.find({
+          where: {
+            paper: { id: In(paperIds) },
+            student: { id: currUser.id }
+          },
+          relations: ['paper']
+        });
+        const purchasedPaperIds = new Set(userPurchases.map(purchase => purchase.paper.id));
+
+        papers.data.forEach(paper => {
+          if (currUser.role === Role.ADMIN ||
+              (currUser.role === Role.TUTOR && paper.tutor?.id === currUser.id)) {
+            paper['is_purchased'] = true;
+          } else {
+            paper['is_purchased'] = purchasedPaperIds.has(paper.id);
+          }
+        });
+      } else {
+        papers.data.forEach(paper => {
+          paper['is_purchased'] = false;
+        });
+      }
 
       if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<PaperPublicDto> = {
@@ -178,7 +203,7 @@ export class PapersService {
         };
         return studentResult;
       }
-      return result;
+      return papers;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_PAPERS);
     }

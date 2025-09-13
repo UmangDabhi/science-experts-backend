@@ -12,6 +12,8 @@ export class MaterialPublicDto {
   description: string;
 
   // thumbnail_url removed - use download API instead
+  @Expose()
+  thumbnail_url: string;
 
   @Expose()
   amount: number;
@@ -21,4 +23,7 @@ export class MaterialPublicDto {
 
   @Expose()
   updated_at: Date;
+
+  @Expose()
+  is_purchased?: boolean;
 }

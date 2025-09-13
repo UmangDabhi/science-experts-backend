@@ -9,8 +9,10 @@ export class BookPublicDto {
 
   @Expose()
   description: string;
-
+  
   // thumbnail_url removed - use download API instead
+  @Expose()
+  thumbnail_url: string;
 
   @Expose()
   is_paid: boolean;
@@ -23,4 +25,7 @@ export class BookPublicDto {
 
   @Expose()
   updated_at: Date;
+
+  @Expose()
+  is_purchased?: boolean;
 }

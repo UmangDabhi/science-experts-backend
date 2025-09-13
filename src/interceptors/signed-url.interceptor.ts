@@ -42,6 +42,7 @@ export class SignedUrlInterceptor implements NestInterceptor {
       'image_url', // Still needed for general images
       'file_url', // Still needed for general files
       'document_url', // Still needed for general documents
+      'thumbnail_url', // Still needed for general documents
     ];
 
     if (Array.isArray(data)) {

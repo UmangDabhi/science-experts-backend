@@ -11,6 +11,8 @@ export class PaperPublicDto {
   description: string;
 
   // thumbnail_url removed - use download API instead
+  @Expose()
+  thumbnail_url: string;
 
   @Expose()
   is_paid: boolean;
@@ -23,4 +25,7 @@ export class PaperPublicDto {
 
   @Expose()
   updated_at: Date;
+
+  @Expose()
+  is_purchased?: boolean;
 }

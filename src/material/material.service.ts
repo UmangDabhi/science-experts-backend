@@ -165,10 +165,35 @@ export class MaterialService {
         filterDto,
         searchableFields,
         queryOptions,
-        [],
+        ['tutor'],
         orderBy,
       );
-      const result = materials;
+
+      // Add purchase status to each material
+      if (currUser) {
+        const materialIds = materials.data.map(material => material.id);
+        const userPurchases = await this.materialPurchaseRepository.find({
+          where: {
+            material: { id: In(materialIds) },
+            student: { id: currUser.id }
+          },
+          relations: ['material']
+        });
+        const purchasedMaterialIds = new Set(userPurchases.map(purchase => purchase.material.id));
+
+        materials.data.forEach(material => {
+          if (currUser.role === Role.ADMIN ||
+              (currUser.role === Role.TUTOR && material.tutor?.id === currUser.id)) {
+            material['is_purchased'] = true;
+          } else {
+            material['is_purchased'] = purchasedMaterialIds.has(material.id);
+          }
+        });
+      } else {
+        materials.data.forEach(material => {
+          material['is_purchased'] = false;
+        });
+      }
 
       if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<MaterialPublicDto> = {
@@ -181,7 +206,7 @@ export class MaterialService {
         };
         return studentResult;
       }
-      return result;
+      return materials;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
     }

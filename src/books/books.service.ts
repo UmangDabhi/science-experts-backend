@@ -162,10 +162,38 @@ export class BooksService {
         filterDto,
         searchableFields,
         queryOptions,
-        [],
+        ['tutor'],
         orderBy,
       );
-      const result = books;
+
+      // Add purchase status to each book
+      if (currUser) {
+        const bookIds = books.data.map((book) => book.id);
+        const userPurchases = await this.bookPurchaseRepository.find({
+          where: {
+            book: { id: In(bookIds) },
+            student: { id: currUser.id },
+          },
+          relations: ['book'],
+        });
+        const purchasedBookIds = new Set(
+          userPurchases.map((purchase) => purchase.book.id),
+        );
+        books.data.forEach((book) => {
+          if (
+            currUser.role === Role.ADMIN ||
+            (currUser.role === Role.TUTOR && book.tutor?.id === currUser.id)
+          ) {
+            book['is_purchased'] = true;
+          } else {
+            book['is_purchased'] = purchasedBookIds.has(book.id);
+          }
+        });
+      } else {
+        books.data.forEach((book) => {
+          book['is_purchased'] = false;
+        });
+      }
 
       if (!currUser || currUser.role != Role.ADMIN) {
         const studentResult: PaginatedResult<BookPublicDto> = {
@@ -179,7 +207,7 @@ export class BooksService {
         return studentResult;
       }
 
-      return result;
+      return books;
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_BOOKS);
     }

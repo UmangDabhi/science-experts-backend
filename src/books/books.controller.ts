@@ -57,6 +57,7 @@ export class BooksController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.BOOKS))
+  @UseGuards(OptionalAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_BOOK)
   @ResponseMessage(MESSAGES.ALL_BOOK_FETCHED)
   findAll(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
