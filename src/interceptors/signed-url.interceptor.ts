@@ -37,12 +37,13 @@ export class SignedUrlInterceptor implements NestInterceptor {
     // Define URL fields that should be converted to signed URLs
     // Note: material_url, paper_url, book_url removed since download APIs are used
     const urlFields = [
-      'profile_url', // Still needed for user profiles
-      'certificate_url', // Still needed for certificates
-      'image_url', // Still needed for general images
-      'file_url', // Still needed for general files
-      'document_url', // Still needed for general documents
-      'thumbnail_url', // Still needed for general documents
+      'video_url',
+      'profile_url',
+      'certificate_url',
+      'image_url',
+      'file_url',
+      'document_url',
+      'thumbnail_url',
     ];
 
     if (Array.isArray(data)) {
@@ -80,13 +81,18 @@ export class SignedUrlInterceptor implements NestInterceptor {
     return data;
   }
 
-  private async transformArray(array: any[], urlFields: string[]): Promise<any[]> {
+  private async transformArray(
+    array: any[],
+    urlFields: string[],
+  ): Promise<any[]> {
     if (!Array.isArray(array) || array.length === 0) {
       return array;
     }
 
     try {
-      const transformPromises = array.map(item => this.transformObject(item, urlFields));
+      const transformPromises = array.map((item) =>
+        this.transformObject(item, urlFields),
+      );
       return await Promise.all(transformPromises);
     } catch (error) {
       this.logger.error('Failed to transform array URLs', error);
@@ -104,10 +110,16 @@ export class SignedUrlInterceptor implements NestInterceptor {
 
       // Transform URL fields in the current object
       for (const field of urlFields) {
-        if (transformedObj[field] && typeof transformedObj[field] === 'string') {
-          transformedObj[field] = await this.s3UrlService.convertDirectUrlToSignedUrl(
-            transformedObj[field]
-          );
+        if (
+          transformedObj[field] &&
+          typeof transformedObj[field] === 'string'
+        ) {
+          transformedObj[field] =
+            await this.s3UrlService.convertDirectUrlToSignedUrl(
+              transformedObj[field],
+              undefined,
+              field,
+            );
         }
       }
 
@@ -115,7 +127,11 @@ export class SignedUrlInterceptor implements NestInterceptor {
       for (const [key, value] of Object.entries(transformedObj)) {
         if (Array.isArray(value)) {
           transformedObj[key] = await this.transformArray(value, urlFields);
-        } else if (value && typeof value === 'object' && !(value instanceof Date)) {
+        } else if (
+          value &&
+          typeof value === 'object' &&
+          !(value instanceof Date)
+        ) {
           transformedObj[key] = await this.transformObject(value, urlFields);
         }
       }

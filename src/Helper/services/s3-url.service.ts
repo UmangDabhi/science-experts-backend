@@ -71,8 +71,6 @@ export class S3UrlService {
 
       pathname = decodeURIComponent(pathname).replace(/\+/g, ' ');
 
-      this.logger.debug(`Extracted S3 key: "${pathname}" from URL: ${url}`);
-
       // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
       if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
         return pathname;
@@ -115,17 +113,23 @@ export class S3UrlService {
   /**
    * Generate a signed URL for S3 object download
    */
-  async generateSignedUrl(s3Key: string, expiresIn?: number): Promise<string> {
+  async generateSignedUrl(
+    s3Key: string,
+    expiresIn?: number,
+    fieldName?: string,
+  ): Promise<string> {
     try {
       if (!s3Key) {
         throw new Error('S3 key is required');
       }
+      const isVideoField = fieldName === 'video_url'; // 👈 Based on field name
+      const contentType = isVideoField ? 'video/mp4' : undefined;
 
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
         Key: s3Key,
+        ...(contentType && { ResponseContentType: contentType }),
       });
-
       const signedUrl = await getSignedUrl(this.s3, command, {
         expiresIn: expiresIn || this.defaultExpirationSeconds,
       });
@@ -146,6 +150,7 @@ export class S3UrlService {
   async convertDirectUrlToSignedUrl(
     directUrl: string,
     expiresIn?: number,
+    fieldName?: string,
   ): Promise<string> {
     try {
       if (!this.isS3Url(directUrl)) {
@@ -159,7 +164,7 @@ export class S3UrlService {
         return directUrl; // Fallback to original URL
       }
 
-      return await this.generateSignedUrl(s3Key, expiresIn);
+      return await this.generateSignedUrl(s3Key, expiresIn, fieldName);
     } catch (error) {
       this.logger.error(
         `Failed to convert URL to signed URL: ${directUrl}`,

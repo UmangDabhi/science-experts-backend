@@ -1,1 +1,0 @@
-import{j as s}from"./index-BcRwkSsD.js";const r=({title:e,value:a,className:i="col-span-3"})=>s.jsxs("div",{className:`w-full flex flex-wrap gap-4 justify-between ${i}`,children:[s.jsx("p",{className:"font-semibold whitespace-nowrap",children:e}),s.jsx("p",{className:"italic break-words text-right max-w-[60%]",children:a||"—"})]});export{r as R};

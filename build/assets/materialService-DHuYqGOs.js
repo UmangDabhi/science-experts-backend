@@ -1,1 +1,0 @@
-import{G as i,aP as m,aQ as p}from"./index-BcRwkSsD.js";const f=({data:e,dispatch:s,materialId:o,courseId:t,rowUpdate:l=!1})=>new Promise(async(u,r)=>{const n=i({...e,course:t!=="-"?t:null,amount:parseInt(e.amount),language:e.language});l&&delete n.course;const c=o?m:p;try{s(c(n)).unwrap().then(a=>u(a)).catch(a=>r(a))}catch(a){r(a)}});export{f as s};

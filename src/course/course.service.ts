@@ -231,18 +231,22 @@ export class CourseService {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const course = await this.courseRepository.findOne({
-        where: { id: id },
-        relations: [
-          'modules',
-          'tutor',
-          'materials',
-          'categories',
-          'standards',
-          'language',
+      const course = await this.courseRepository
+        .createQueryBuilder('course')
+        .leftJoinAndSelect('course.tutor', 'tutor')
+        .leftJoinAndSelect('course.materials', 'materials')
+        .leftJoinAndSelect('course.categories', 'categories')
+        .leftJoinAndSelect('course.standards', 'standards')
+        .leftJoinAndSelect('course.language', 'language')
+        .leftJoinAndSelect('course.modules', 'modules')
+        .leftJoinAndSelect(
           'modules.progress',
-        ],
-      });
+          'progress',
+          'progress.student_id = :studentId',
+          { studentId: currUser.id },
+        )
+        .where('course.id = :courseId', { courseId: id })
+        .getOne();
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       if (!currUser || currUser.role == Role.STUDENT) {
         const isEnrolled = await this.courseRepository.findOne({
