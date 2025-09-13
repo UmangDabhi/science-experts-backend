@@ -122,4 +122,6 @@ export const API_ENDPOINT = {
   GET_TUTOR_REQ: 'get_tutor_req',
   UPDATE_TUTOR_REQ: 'update_tutor_req',
   DELETE_TUTOR_REQ: 'delete_tutor_req',
+
+  DONWLOAD_URL: 'download',
 };

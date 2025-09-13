@@ -11,8 +11,7 @@ export class MaterialPublicDto {
   @Expose()
   description: string;
 
-  @Expose()
-  thumbnail_url?: string;
+  // thumbnail_url removed - use download API instead
 
   @Expose()
   amount: number;

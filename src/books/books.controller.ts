@@ -99,7 +99,7 @@ export class BooksController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('download/:id')
+  @Get(`${API_ENDPOINT.DONWLOAD_URL}/:id`)
   @ResponseMessage('Book download URL generated')
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getBookDownloadUrl(id, req.user);

@@ -170,17 +170,14 @@ export class S3UrlService {
     }
 
     // Default URL fields to check
+    // Note: material_url, paper_url, book_url, thumbnail_url removed since download APIs are used
     const defaultUrlFields = [
-      'thumbnail_url',
-      'video_url',
-      'book_url',
-      'material_url',
-      'paper_url',
-      'profile_url',
-      'certificate_url',
-      'image_url',
-      'file_url',
-      'document_url'
+      'video_url', // Still needed for course modules
+      'profile_url', // Still needed for user profiles
+      'certificate_url', // Still needed for certificates
+      'image_url', // Still needed for general images
+      'file_url', // Still needed for general files
+      'document_url' // Still needed for general documents
     ];
 
     const fieldsToCheck = urlFields.length > 0 ? urlFields : defaultUrlFields;

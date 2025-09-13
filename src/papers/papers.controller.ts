@@ -100,7 +100,7 @@ export class PapersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('download/:id')
+  @Get(`${API_ENDPOINT.DONWLOAD_URL}/:id`)
   @ResponseMessage('Paper download URL generated')
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getPaperDownloadUrl(id, req.user);

@@ -110,7 +110,7 @@ export class MaterialController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('download/:id')
+  @Get(`${API_ENDPOINT.DONWLOAD_URL}/:id`)
   @ResponseMessage('Material download URL generated')
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getMaterialDownloadUrl(id, req.user);
