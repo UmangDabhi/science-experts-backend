@@ -1,0 +1,1 @@
+import{u as t,Q as a}from"./useBaseQuery-CiWwScJN.js";import{az as n,aE as o}from"./index-BjdLfJe7.js";function y(e,r){return t(e,a)}const m=({queryKey:e,endpoint:r,params:s={},options:u={}})=>y({queryKey:[e,s],queryFn:async()=>(await n(o(r,s))).data,...u});export{m as u};
