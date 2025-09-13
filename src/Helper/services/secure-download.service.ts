@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/user/entities/user.entity';
@@ -34,22 +39,29 @@ export class SecureDownloadService {
   /**
    * Generate secure download URL for a book
    */
-  async getBookDownloadUrl(bookId: string, user: User, expiresIn: number = 3600): Promise<{ download_url: string; expires_in: number }> {
+  async getBookDownloadUrl(
+    bookId: string,
+    user: User,
+    expiresIn: number = 3600,
+  ): Promise<{ download_url: string; expires_in: number }> {
     try {
       // Find the book
       const book = await this.bookRepository.findOne({
         where: { id: bookId },
-        relations: ['tutor']
+        relations: ['tutor'],
       });
 
       if (!book) {
         throw new NotFoundException('Book not found');
       }
-
-      // Check access permissions
-      const hasAccess = await this.checkBookAccess(bookId, user);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to download this book');
+      // Only check access if the book is paid
+      if (book.is_paid === true) {
+        const hasAccess = await this.checkBookAccess(bookId, user);
+        if (!hasAccess) {
+          throw new ForbiddenException(
+            'You do not have access to download this book',
+          );
+        }
       }
 
       // Generate signed URL
@@ -58,16 +70,24 @@ export class SecureDownloadService {
         throw new Error('Invalid book URL');
       }
 
-      const downloadUrl = await this.fileService.generateDownloadSignedUrl(s3Key, expiresIn);
+      const downloadUrl = await this.fileService.generateDownloadSignedUrl(
+        s3Key,
+        expiresIn,
+      );
 
-      this.logger.log(`Generated download URL for book ${bookId} for user ${user.id}`);
+      this.logger.log(
+        `Generated download URL for book ${bookId} for user ${user.id}`,
+      );
 
       return {
         download_url: downloadUrl,
-        expires_in: expiresIn
+        expires_in: expiresIn,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate book download URL: ${error.message}`, error);
+      this.logger.error(
+        `Failed to generate book download URL: ${error.message}`,
+        error,
+      );
       throw error;
     }
   }
@@ -75,22 +95,31 @@ export class SecureDownloadService {
   /**
    * Generate secure download URL for a material
    */
-  async getMaterialDownloadUrl(materialId: string, user: User, expiresIn: number = 3600): Promise<{ download_url: string; expires_in: number }> {
+  async getMaterialDownloadUrl(
+    materialId: string,
+    user: User,
+    expiresIn: number = 3600,
+  ): Promise<{ download_url: string; expires_in: number }> {
     try {
       // Find the material
       const material = await this.materialRepository.findOne({
         where: { id: materialId },
-        relations: ['tutor']
+        relations: ['tutor'],
       });
 
       if (!material) {
         throw new NotFoundException('Material not found');
       }
 
-      // Check access permissions
-      const hasAccess = await this.checkMaterialAccess(materialId, user);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to download this material');
+      // Only check access if the material is paid
+      if (material.amount && +material.amount > 0) {
+        // Check access permissions
+        const hasAccess = await this.checkMaterialAccess(materialId, user);
+        if (!hasAccess) {
+          throw new ForbiddenException(
+            'You do not have access to download this material',
+          );
+        }
       }
 
       // Generate signed URL
@@ -99,16 +128,24 @@ export class SecureDownloadService {
         throw new Error('Invalid material URL');
       }
 
-      const downloadUrl = await this.fileService.generateDownloadSignedUrl(s3Key, expiresIn);
+      const downloadUrl = await this.fileService.generateDownloadSignedUrl(
+        s3Key,
+        expiresIn,
+      );
 
-      this.logger.log(`Generated download URL for material ${materialId} for user ${user.id}`);
+      this.logger.log(
+        `Generated download URL for material ${materialId} for user ${user.id}`,
+      );
 
       return {
         download_url: downloadUrl,
-        expires_in: expiresIn
+        expires_in: expiresIn,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate material download URL: ${error.message}`, error);
+      this.logger.error(
+        `Failed to generate material download URL: ${error.message}`,
+        error,
+      );
       throw error;
     }
   }
@@ -116,22 +153,30 @@ export class SecureDownloadService {
   /**
    * Generate secure download URL for a paper
    */
-  async getPaperDownloadUrl(paperId: string, user: User, expiresIn: number = 3600): Promise<{ download_url: string; expires_in: number }> {
+  async getPaperDownloadUrl(
+    paperId: string,
+    user: User,
+    expiresIn: number = 3600,
+  ): Promise<{ download_url: string; expires_in: number }> {
     try {
       // Find the paper
       const paper = await this.paperRepository.findOne({
         where: { id: paperId },
-        relations: ['tutor']
+        relations: ['tutor'],
       });
 
       if (!paper) {
         throw new NotFoundException('Paper not found');
       }
-
-      // Check access permissions
-      const hasAccess = await this.checkPaperAccess(paperId, user);
-      if (!hasAccess) {
-        throw new ForbiddenException('You do not have access to download this paper');
+      // Only check access if the paper is paid
+      if (paper.is_paid === true) {
+        // Check access permissions
+        const hasAccess = await this.checkPaperAccess(paperId, user);
+        if (!hasAccess) {
+          throw new ForbiddenException(
+            'You do not have access to download this paper',
+          );
+        }
       }
 
       // Generate signed URL
@@ -140,16 +185,24 @@ export class SecureDownloadService {
         throw new Error('Invalid paper URL');
       }
 
-      const downloadUrl = await this.fileService.generateDownloadSignedUrl(s3Key, expiresIn);
+      const downloadUrl = await this.fileService.generateDownloadSignedUrl(
+        s3Key,
+        expiresIn,
+      );
 
-      this.logger.log(`Generated download URL for paper ${paperId} for user ${user.id}`);
+      this.logger.log(
+        `Generated download URL for paper ${paperId} for user ${user.id}`,
+      );
 
       return {
         download_url: downloadUrl,
-        expires_in: expiresIn
+        expires_in: expiresIn,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate paper download URL: ${error.message}`, error);
+      this.logger.error(
+        `Failed to generate paper download URL: ${error.message}`,
+        error,
+      );
       throw error;
     }
   }
@@ -166,7 +219,7 @@ export class SecureDownloadService {
     // Check if user is the tutor who created the book
     const book = await this.bookRepository.findOne({
       where: { id: bookId },
-      relations: ['tutor']
+      relations: ['tutor'],
     });
 
     if (book && book.tutor && book.tutor.id === user.id) {
@@ -177,8 +230,8 @@ export class SecureDownloadService {
     const purchase = await this.bookPurchaseRepository.findOne({
       where: {
         book: { id: bookId },
-        student: { id: user.id }
-      }
+        student: { id: user.id },
+      },
     });
 
     return !!purchase;
@@ -187,7 +240,10 @@ export class SecureDownloadService {
   /**
    * Check if user has access to download a material
    */
-  private async checkMaterialAccess(materialId: string, user: User): Promise<boolean> {
+  private async checkMaterialAccess(
+    materialId: string,
+    user: User,
+  ): Promise<boolean> {
     // Admin has access to everything
     if (user.role === Role.ADMIN) {
       return true;
@@ -196,7 +252,7 @@ export class SecureDownloadService {
     // Check if user is the tutor who created the material
     const material = await this.materialRepository.findOne({
       where: { id: materialId },
-      relations: ['tutor']
+      relations: ['tutor'],
     });
 
     if (material && material.tutor && material.tutor.id === user.id) {
@@ -207,8 +263,8 @@ export class SecureDownloadService {
     const purchase = await this.materialPurchaseRepository.findOne({
       where: {
         material: { id: materialId },
-        student: { id: user.id }
-      }
+        student: { id: user.id },
+      },
     });
 
     return !!purchase;
@@ -217,7 +273,10 @@ export class SecureDownloadService {
   /**
    * Check if user has access to download a paper
    */
-  private async checkPaperAccess(paperId: string, user: User): Promise<boolean> {
+  private async checkPaperAccess(
+    paperId: string,
+    user: User,
+  ): Promise<boolean> {
     // Admin has access to everything
     if (user.role === Role.ADMIN) {
       return true;
@@ -226,7 +285,7 @@ export class SecureDownloadService {
     // Check if user is the tutor who created the paper
     const paper = await this.paperRepository.findOne({
       where: { id: paperId },
-      relations: ['tutor']
+      relations: ['tutor'],
     });
 
     if (paper && paper.tutor && paper.tutor.id === user.id) {
@@ -237,8 +296,8 @@ export class SecureDownloadService {
     const purchase = await this.paperPurchaseRepository.findOne({
       where: {
         paper: { id: paperId },
-        student: { id: user.id }
-      }
+        student: { id: user.id },
+      },
     });
 
     return !!purchase;
