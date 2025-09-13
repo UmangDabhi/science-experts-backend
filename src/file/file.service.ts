@@ -353,11 +353,15 @@ export class FileService {
   /**
    * Generate a signed URL for downloading/accessing an S3 object
    */
-  async generateDownloadSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+  async generateDownloadSignedUrl(
+    key: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
     try {
       if (!key) {
         throw new Error('S3 key is required');
       }
+      key = decodeURIComponent(key).replace(/\+/g, ' ');
 
       const command = new GetObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -389,7 +393,9 @@ export class FileService {
       // Handle different S3 URL formats
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
-      const pathname = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      const pathname = urlObj.pathname.startsWith('/')
+        ? urlObj.pathname.slice(1)
+        : urlObj.pathname;
 
       // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
       if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
@@ -415,7 +421,10 @@ export class FileService {
   /**
    * Convert a direct S3 URL to a signed URL
    */
-  async convertToSignedUrl(directUrl: string, expiresIn: number = 3600): Promise<string> {
+  async convertToSignedUrl(
+    directUrl: string,
+    expiresIn: number = 3600,
+  ): Promise<string> {
     try {
       if (!directUrl || typeof directUrl !== 'string') {
         return directUrl;
@@ -442,13 +451,18 @@ export class FileService {
   /**
    * Generate signed URLs for multiple S3 URLs in batch
    */
-  async generateSignedUrlsForUrls(urls: string[], expiresIn: number = 3600): Promise<string[]> {
+  async generateSignedUrlsForUrls(
+    urls: string[],
+    expiresIn: number = 3600,
+  ): Promise<string[]> {
     if (!urls || urls.length === 0) {
       return [];
     }
 
     try {
-      const signedUrlPromises = urls.map(url => this.convertToSignedUrl(url, expiresIn));
+      const signedUrlPromises = urls.map((url) =>
+        this.convertToSignedUrl(url, expiresIn),
+      );
       return await Promise.all(signedUrlPromises);
     } catch (error) {
       console.error('Failed to generate signed URLs in batch', error);

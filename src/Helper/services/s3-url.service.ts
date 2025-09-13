@@ -1,4 +1,8 @@
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as dotenv from 'dotenv';
@@ -30,12 +34,18 @@ export class S3UrlService {
       },
     });
 
-    this.bucketName = process.env.AWS_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
+    this.bucketName =
+      process.env.AWS_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
     this.region = process.env.AWS_REGION;
-    this.defaultExpirationSeconds = parseInt(process.env.SIGNED_URL_EXPIRATION_SECONDS || '3600', 10);
+    this.defaultExpirationSeconds = parseInt(
+      process.env.SIGNED_URL_EXPIRATION_SECONDS || '3600',
+      10,
+    );
 
     if (!this.bucketName) {
-      throw new Error('AWS bucket name is required. Set AWS_BUCKET_NAME or AWS_S3_BUCKET_NAME');
+      throw new Error(
+        'AWS bucket name is required. Set AWS_BUCKET_NAME or AWS_S3_BUCKET_NAME',
+      );
     }
   }
 
@@ -55,15 +65,11 @@ export class S3UrlService {
 
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
-      let pathname = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      let pathname = urlObj.pathname.startsWith('/')
+        ? urlObj.pathname.slice(1)
+        : urlObj.pathname;
 
-      // Decode the pathname to get the actual S3 key
-      // This handles encoded characters like %20 (space), %28 ((), %29 ()), etc.
-      pathname = decodeURIComponent(pathname);
-
-      // Handle additional encoding issues: + signs are sometimes used for spaces in URLs
-      // but S3 keys might have actual spaces, so we need to convert + back to spaces
-      pathname = pathname.replace(/\+/g, ' ');
+      pathname = decodeURIComponent(pathname).replace(/\+/g, ' ');
 
       this.logger.debug(`Extracted S3 key: "${pathname}" from URL: ${url}`);
 
@@ -126,7 +132,10 @@ export class S3UrlService {
 
       return signedUrl;
     } catch (error) {
-      this.logger.error(`Failed to generate signed URL for key: ${s3Key}`, error);
+      this.logger.error(
+        `Failed to generate signed URL for key: ${s3Key}`,
+        error,
+      );
       throw new InternalServerErrorException('Failed to generate signed URL');
     }
   }
@@ -134,7 +143,10 @@ export class S3UrlService {
   /**
    * Convert a direct S3 URL to a signed URL
    */
-  async convertDirectUrlToSignedUrl(directUrl: string, expiresIn?: number): Promise<string> {
+  async convertDirectUrlToSignedUrl(
+    directUrl: string,
+    expiresIn?: number,
+  ): Promise<string> {
     try {
       if (!this.isS3Url(directUrl)) {
         // Not an S3 URL, return as-is
@@ -149,7 +161,10 @@ export class S3UrlService {
 
       return await this.generateSignedUrl(s3Key, expiresIn);
     } catch (error) {
-      this.logger.error(`Failed to convert URL to signed URL: ${directUrl}`, error);
+      this.logger.error(
+        `Failed to convert URL to signed URL: ${directUrl}`,
+        error,
+      );
       return directUrl; // Fallback to original URL
     }
   }
@@ -157,13 +172,18 @@ export class S3UrlService {
   /**
    * Generate signed URLs for multiple S3 URLs in batch
    */
-  async generateSignedUrlsForUrls(urls: string[], expiresIn?: number): Promise<string[]> {
+  async generateSignedUrlsForUrls(
+    urls: string[],
+    expiresIn?: number,
+  ): Promise<string[]> {
     if (!urls || urls.length === 0) {
       return [];
     }
 
     try {
-      const signedUrlPromises = urls.map(url => this.convertDirectUrlToSignedUrl(url, expiresIn));
+      const signedUrlPromises = urls.map((url) =>
+        this.convertDirectUrlToSignedUrl(url, expiresIn),
+      );
       return await Promise.all(signedUrlPromises);
     } catch (error) {
       this.logger.error('Failed to generate signed URLs in batch', error);
@@ -174,7 +194,11 @@ export class S3UrlService {
   /**
    * Transform an object by converting S3 URLs to signed URLs
    */
-  async transformObjectUrls(obj: any, urlFields: string[] = [], expiresIn?: number): Promise<any> {
+  async transformObjectUrls(
+    obj: any,
+    urlFields: string[] = [],
+    expiresIn?: number,
+  ): Promise<any> {
     if (!obj || typeof obj !== 'object') {
       return obj;
     }
@@ -187,7 +211,7 @@ export class S3UrlService {
       'certificate_url', // Still needed for certificates
       'image_url', // Still needed for general images
       'file_url', // Still needed for general files
-      'document_url' // Still needed for general documents
+      'document_url', // Still needed for general documents
     ];
 
     const fieldsToCheck = urlFields.length > 0 ? urlFields : defaultUrlFields;
@@ -196,8 +220,14 @@ export class S3UrlService {
       const transformedObj = { ...obj };
 
       for (const field of fieldsToCheck) {
-        if (transformedObj[field] && typeof transformedObj[field] === 'string') {
-          transformedObj[field] = await this.convertDirectUrlToSignedUrl(transformedObj[field], expiresIn);
+        if (
+          transformedObj[field] &&
+          typeof transformedObj[field] === 'string'
+        ) {
+          transformedObj[field] = await this.convertDirectUrlToSignedUrl(
+            transformedObj[field],
+            expiresIn,
+          );
         }
       }
 
@@ -211,13 +241,19 @@ export class S3UrlService {
   /**
    * Transform an array of objects by converting S3 URLs to signed URLs
    */
-  async transformArrayUrls(array: any[], urlFields: string[] = [], expiresIn?: number): Promise<any[]> {
+  async transformArrayUrls(
+    array: any[],
+    urlFields: string[] = [],
+    expiresIn?: number,
+  ): Promise<any[]> {
     if (!Array.isArray(array) || array.length === 0) {
       return array;
     }
 
     try {
-      const transformPromises = array.map(item => this.transformObjectUrls(item, urlFields, expiresIn));
+      const transformPromises = array.map((item) =>
+        this.transformObjectUrls(item, urlFields, expiresIn),
+      );
       return await Promise.all(transformPromises);
     } catch (error) {
       this.logger.error('Failed to transform array URLs', error);
