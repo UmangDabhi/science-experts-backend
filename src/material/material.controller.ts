@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
@@ -32,7 +32,7 @@ export class MaterialController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_MATERIAL)
   @ResponseMessage(MESSAGES.MATERIAL_CREATED)
   create(
@@ -48,7 +48,7 @@ export class MaterialController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_MATERIALS))
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.MANAGE_ALL_MATERIAL)
   @ResponseMessage(MESSAGES.ALL_MATERIAL_FETCHED)
   manageAllCourse(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
@@ -77,7 +77,7 @@ export class MaterialController {
     return this.materialService.findOne(req?.user, id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_UPDATED)
   update(
@@ -93,7 +93,7 @@ export class MaterialController {
     return this.materialService.update(req.user, id, updateMaterialDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

@@ -1,5 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -10,9 +20,9 @@ import { UpdateCollegeCourseDto } from './dto/update-college-course.dto';
 
 @Controller('college-courses')
 export class CollegeCoursesController {
-  constructor(private readonly collegeCoursesService: CollegeCoursesService) { }
+  constructor(private readonly collegeCoursesService: CollegeCoursesService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_COLLEGE_COURSE)
   @ResponseMessage(MESSAGES.COLLEGE_COURSE_CREATED)
   create(@Body() createCollegeCourseDto: CreateCollegeCourseDto) {
@@ -31,14 +41,17 @@ export class CollegeCoursesController {
     return this.collegeCoursesService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_COLLEGE_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COLLEGE_COURSE_UPDATED)
-  update(@Param('id') id: string, @Body() updateCollegeCourseDto: UpdateCollegeCourseDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCollegeCourseDto: UpdateCollegeCourseDto,
+  ) {
     return this.collegeCoursesService.update(id, updateCollegeCourseDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_COLLEGE_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COLLEGE_COURSE_DELETED)
   remove(@Param('id') id: string) {

@@ -1,31 +1,31 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
-  Req,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { ReviewsService } from './reviews.service';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { ReviewsService } from './reviews.service';
 
 @Controller('reviews')
 export class ReviewsController {
-  constructor(private readonly reviewsService: ReviewsService) { }
+  constructor(private readonly reviewsService: ReviewsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_REVIEW)
   @ResponseMessage(MESSAGES.REVIEW_CREATED)
   create(
@@ -47,7 +47,7 @@ export class ReviewsController {
     return this.reviewsService.findAllTestimonials(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_REVIEW}/:id`)
   @ResponseMessage(MESSAGES.REVIEW_DELETED)
   update(
@@ -58,14 +58,17 @@ export class ReviewsController {
     return this.reviewsService.update(req.user, id, updateReviewDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.CHANGE_TESTIMONIAL}/:id`)
   @ResponseMessage(MESSAGES.REVIEW_DELETED)
-  changeTestimonial(@Param('id') id: string, @Body() updateTestimonialDto: UpdateTestimonialDto) {
+  changeTestimonial(
+    @Param('id') id: string,
+    @Body() updateTestimonialDto: UpdateTestimonialDto,
+  ) {
     return this.reviewsService.changeTestimonial(id, updateTestimonialDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_REVIEW}/:id`)
   @ResponseMessage(MESSAGES.REVIEW_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

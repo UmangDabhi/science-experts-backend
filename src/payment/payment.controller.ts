@@ -1,5 +1,5 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -10,19 +10,25 @@ import { PaymentService } from './payment.service';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) { }
+  constructor(private readonly paymentService: PaymentService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_PAYMENT)
   @ResponseMessage(MESSAGES.PAYMENT_CREATED)
-  async createOrder(@Req() req: RequestWithUser, @Body() createPaymentDto: CreatePaymentDto) {
+  async createOrder(
+    @Req() req: RequestWithUser,
+    @Body() createPaymentDto: CreatePaymentDto,
+  ) {
     return this.paymentService.createOrder(req.user, createPaymentDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.VERIFY_PAYMENT)
   @ResponseMessage(MESSAGES.PAYMENT_VERIFIED)
-  async verifyPayment(@Req() req: RequestWithUser, @Body() verifyPaymentDto: VerifyPaymentDto) {
+  async verifyPayment(
+    @Req() req: RequestWithUser,
+    @Body() verifyPaymentDto: VerifyPaymentDto,
+  ) {
     return this.paymentService.verifyPayment(req.user, verifyPaymentDto);
   }
 }

@@ -1,29 +1,29 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { ModuleService } from './module.service';
-import { CreateModuleDto } from './dto/create-module.dto';
-import { UpdateModuleDto } from './dto/update-module.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { ResponseMessage } from 'src/Helper/constants';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { CreateModuleDto } from './dto/create-module.dto';
 import { UpdateModuleOrderDto } from './dto/update-module-order.dto';
+import { UpdateModuleDto } from './dto/update-module.dto';
+import { ModuleService } from './module.service';
 
 @Controller('module')
 export class ModuleController {
-  constructor(private readonly moduleService: ModuleService) { }
+  constructor(private readonly moduleService: ModuleService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_MODULE)
   @ResponseMessage(MESSAGES.MODULE_CREATED)
   create(@Body() createModuleDto: CreateModuleDto) {
@@ -48,21 +48,21 @@ export class ModuleController {
     return this.moduleService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_MODULE_ORDER}`)
   @ResponseMessage(MESSAGES.MODULE_UPDATED)
   updateOrder(@Body() updateModuleOrderDto: UpdateModuleOrderDto) {
     return this.moduleService.updateOrder(updateModuleOrderDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_MODULE}/:id`)
   @ResponseMessage(MESSAGES.MODULE_UPDATED)
   update(@Param('id') id: string, @Body() updateModuleDto: UpdateModuleDto) {
     return this.moduleService.update(id, updateModuleDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_MODULE}/:id`)
   @ResponseMessage(MESSAGES.MODULE_DELETED)
   remove(@Param('id') id: string) {

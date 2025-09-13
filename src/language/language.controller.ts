@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
@@ -29,7 +29,7 @@ export class LanguageController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_LANGUAGE)
   @ResponseMessage(MESSAGES.LANGUAGE_CREATED)
   create(@Body() createLanguageDto: CreateLanguageDto) {
@@ -47,7 +47,7 @@ export class LanguageController {
     return this.languageService.findAll(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_LANGUAGE}/:id`)
   @ResponseMessage(MESSAGES.LANGUAGE_UPDATED)
   update(
@@ -61,7 +61,7 @@ export class LanguageController {
     return this.languageService.update(id, updateLanguageDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_LANGUAGE}/:id`)
   @ResponseMessage(MESSAGES.LANGUAGE_DELETED)
   remove(@Param('id') id: string) {

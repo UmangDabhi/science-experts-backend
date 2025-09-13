@@ -1,23 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
-  UseGuards,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { TutorReqService } from './tutor_req.service';
+import { ResponseMessage } from 'src/Helper/constants';
+import { FilterDto } from 'src/Helper/dto/filter.dto';
+import { API_ENDPOINT } from 'src/Helper/message/api.message';
+import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { CreateTutorReqDto } from './dto/create-tutor_req.dto';
 import { UpdateTutorReqDto } from './dto/update-tutor_req.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { API_ENDPOINT } from 'src/Helper/message/api.message';
-import { ResponseMessage } from 'src/Helper/constants';
-import { MESSAGES } from 'src/Helper/message/resposne.message';
-import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
-import { FilterDto } from 'src/Helper/dto/filter.dto';
+import { TutorReqService } from './tutor_req.service';
 
 @Controller('tutor-req')
 export class TutorReqController {
@@ -29,7 +29,7 @@ export class TutorReqController {
     return this.tutorReqService.create(createTutorReqDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.GET_ALL_TUTOR_REQ)
   @ResponseMessage(MESSAGES.ALL_TUTOR_REQ_FETCHED)
   findAll(@Query() filterDto: FilterDto) {
@@ -43,7 +43,7 @@ export class TutorReqController {
     return this.tutorReqService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_TUTOR_REQ}/:id`)
   @ResponseMessage(MESSAGES.TUTOR_REQ_UPDATED)
   update(
@@ -53,7 +53,7 @@ export class TutorReqController {
     return this.tutorReqService.update(id, updateTutorReqDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_TUTOR_REQ}/:id`)
   @ResponseMessage(MESSAGES.TUTOR_REQ_DELETED)
   remove(@Param('id') id: string) {

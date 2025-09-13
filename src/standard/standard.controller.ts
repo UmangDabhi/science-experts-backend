@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
@@ -29,7 +29,7 @@ export class StandardController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_STANDARD)
   @ResponseMessage(MESSAGES.STANDARD_CREATED)
   create(@Body() createStandardDto: CreateStandardDto) {
@@ -53,7 +53,7 @@ export class StandardController {
     return this.standardService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_STANDARD}/:id`)
   @ResponseMessage(MESSAGES.STANDARD_UPDATED)
   update(
@@ -67,7 +67,7 @@ export class StandardController {
     return this.standardService.update(id, updateStandardDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_STANDARD}/:id`)
   @ResponseMessage(MESSAGES.STANDARD_DELETED)
   remove(@Param('id') id: string) {

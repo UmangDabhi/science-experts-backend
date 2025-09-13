@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
@@ -32,7 +32,7 @@ export class BooksController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_BOOK)
   @ResponseMessage(MESSAGES.BOOK_CREATED)
   create(@Req() req: RequestWithUser, @Body() createBookDto: CreateBookDto) {
@@ -45,7 +45,7 @@ export class BooksController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_BOOKS))
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.MANAGE_ALL_BOOK)
   @ResponseMessage(MESSAGES.ALL_BOOK_FETCHED)
   manageAllCourse(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
@@ -66,7 +66,7 @@ export class BooksController {
     return this.booksService.findOne(req?.user, id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_BOOK}/:id`)
   @ResponseMessage(MESSAGES.BOOK_UPDATED)
   update(
@@ -82,7 +82,7 @@ export class BooksController {
     return this.booksService.update(req.user, id, updateBookDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_BOOK}/:id`)
   @ResponseMessage(MESSAGES.BOOK_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

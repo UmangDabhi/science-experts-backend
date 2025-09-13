@@ -10,7 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
@@ -29,7 +29,7 @@ export class CategoryController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_CATEGORY)
   @ResponseMessage(MESSAGES.CATEGORY_CREATED)
   create(@Body() createCategoryDto: CreateCategoryDto) {
@@ -53,7 +53,7 @@ export class CategoryController {
     return this.categoryService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_CATEGORY}/:id`)
   @ResponseMessage(MESSAGES.CATEGORY_UPDATED)
   update(
@@ -67,7 +67,7 @@ export class CategoryController {
     return this.categoryService.update(id, updateCategoryDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_CATEGORY}/:id`)
   @ResponseMessage(MESSAGES.CATEGORY_DELETED)
   remove(@Param('id') id: string) {

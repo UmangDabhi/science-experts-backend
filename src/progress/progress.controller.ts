@@ -5,9 +5,9 @@ import {
   Param,
   Post,
   Req,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -19,7 +19,7 @@ import { ProgressService } from './progress.service';
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_PROGRESS)
   @ResponseMessage(MESSAGES.PROGRESS_CREATED)
   create(
@@ -29,7 +29,7 @@ export class ProgressController {
     return this.progressService.create(req.user, createProgressDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_PROGRESS}/:id`)
   @ResponseMessage(MESSAGES.PROGRESS_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
@@ -32,7 +32,7 @@ export class PapersController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_PAPER)
   @ResponseMessage(MESSAGES.PAPER_CREATED)
   create(@Req() req: RequestWithUser, @Body() createPaperDto: CreatePaperDto) {
@@ -45,7 +45,7 @@ export class PapersController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_PAPERS))
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.MANAGE_ALL_PAPER)
   @ResponseMessage(MESSAGES.ALL_PAPER_FETCHED)
   manageAllCourse(@Req() req: RequestWithUser, @Query() filterDto: FilterDto) {
@@ -67,7 +67,7 @@ export class PapersController {
     return this.papersService.findOne(req?.user, id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_PAPER}/:id`)
   @ResponseMessage(MESSAGES.PAPER_UPDATED)
   update(
@@ -83,7 +83,7 @@ export class PapersController {
     return this.papersService.update(req.user, id, updatePaperDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_PAPER}/:id`)
   @ResponseMessage(MESSAGES.PAPER_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

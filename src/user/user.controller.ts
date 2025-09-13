@@ -12,7 +12,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -57,14 +57,14 @@ export class UserController {
     return this.userService.findAllTutor(paginationDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(`${API_ENDPOINT.GET_USER}/:id`)
   @ResponseMessage(MESSAGES.USER_FETCHED)
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_USER}/:id`)
   @ResponseMessage(MESSAGES.USER_UPDATED)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
@@ -76,7 +76,7 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_USER}/:id`)
   @ResponseMessage(MESSAGES.USER_DELETED)
   remove(@Param('id') id: string) {
@@ -91,21 +91,21 @@ export class UserController {
   @UseInterceptors(CacheInterceptor)
   @CacheKey(CACHE_KEY.DASHBOARD_DETAILS)
   @CacheTTL(0)
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.DASHBOARD_DETAILS)
   @ResponseMessage(MESSAGES.DASHBOARD_DETAILS_FETCHED)
   dashboardDetails(@Req() req: RequestWithUser) {
     return this.userService.dashboardDetails(req.user);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.MARK_TUTORIAL_COMPLETED)
   @ResponseMessage('Tutorial marked as completed')
   markTutorialCompleted(@Req() req: RequestWithUser) {
     return this.userService.markTutorialCompleted(req.user.id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.GET_TUTORIAL_STATUS)
   @ResponseMessage('Tutorial status fetched')
   getTutorialStatus(@Req() req: RequestWithUser) {

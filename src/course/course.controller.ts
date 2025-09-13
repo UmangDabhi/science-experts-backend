@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
@@ -32,7 +32,7 @@ export class CourseController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_COURSE)
   @ResponseMessage(MESSAGES.COURSE_CREATED)
   create(
@@ -48,7 +48,7 @@ export class CourseController {
   }
 
   @UseInterceptors(GeneralCacheInterceptor(CACHE_KEY.MANAGE_COURSES))
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.MANAGE_ALL_COURSE)
   @ResponseMessage(MESSAGES.ALL_COURSE_FETCHED)
   manageAllCourse(
@@ -66,7 +66,7 @@ export class CourseController {
     return this.courseService.findAll(req?.user, courseFilterDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.GET_ENROLLED_COURSE)
   @ResponseMessage(MESSAGES.COURSE_FETCHED)
   findEnrolledCourse(
@@ -96,7 +96,7 @@ export class CourseController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_UPDATED)
   update(
@@ -112,7 +112,7 @@ export class CourseController {
     return this.courseService.update(req.user, id, updateCourseDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_COURSE}/:id`)
   @ResponseMessage(MESSAGES.COURSE_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {

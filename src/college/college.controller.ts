@@ -11,7 +11,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
@@ -32,7 +32,7 @@ export class CollegeController {
     private readonly cacheService: CacheService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.CREATE_COLLEGE)
   @ResponseMessage(MESSAGES.COLLEGE_CREATED)
   create(
@@ -65,7 +65,7 @@ export class CollegeController {
     return this.collegeService.findOne(id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_COLLEGE}/:id`)
   @ResponseMessage(MESSAGES.COLLEGE_UPDATED)
   update(
@@ -73,14 +73,14 @@ export class CollegeController {
     @Param('id') id: string,
     @Body() updateCollegeDto: UpdateCollegeDto,
   ) {
-     this.cacheService.deleteMultiple([
+    this.cacheService.deleteMultiple([
       CACHE_KEY.DASHBOARD_DETAILS,
       CACHE_KEY.COLLEGES,
     ]);
     return this.collegeService.update(req.user, id, updateCollegeDto);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(`${API_ENDPOINT.DELETE_COLLEGE}/:id`)
   @ResponseMessage(MESSAGES.COLLEGE_DELETED)
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {
