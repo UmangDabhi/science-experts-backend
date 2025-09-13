@@ -55,7 +55,17 @@ export class S3UrlService {
 
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
-      const pathname = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+      let pathname = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+
+      // Decode the pathname to get the actual S3 key
+      // This handles encoded characters like %20 (space), %28 ((), %29 ()), etc.
+      pathname = decodeURIComponent(pathname);
+
+      // Handle additional encoding issues: + signs are sometimes used for spaces in URLs
+      // but S3 keys might have actual spaces, so we need to convert + back to spaces
+      pathname = pathname.replace(/\+/g, ' ');
+
+      this.logger.debug(`Extracted S3 key: "${pathname}" from URL: ${url}`);
 
       // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
       if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
