@@ -8,7 +8,9 @@ import {
   Post,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -20,6 +22,7 @@ import { UpdateModuleDto } from './dto/update-module.dto';
 import { ModuleService } from './module.service';
 
 @Controller('module')
+@UseInterceptors(SignedUrlInterceptor)
 export class ModuleController {
   constructor(private readonly moduleService: ModuleService) {}
 

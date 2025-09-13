@@ -9,6 +9,7 @@ import {
   CompleteMultipartUploadCommand,
   AbortMultipartUploadCommand,
   CompletedPart,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as multer from 'multer';
@@ -346,6 +347,112 @@ export class FileService {
     } catch (error) {
       console.error('Error aborting multipart upload:', error);
       // Optional: fail silently or rethrow
+    }
+  }
+
+  /**
+   * Generate a signed URL for downloading/accessing an S3 object
+   */
+  async generateDownloadSignedUrl(key: string, expiresIn: number = 3600): Promise<string> {
+    try {
+      if (!key) {
+        throw new Error('S3 key is required');
+      }
+
+      const command = new GetObjectCommand({
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: key,
+      });
+
+      const signedUrl = await getSignedUrl(this.s3, command, {
+        expiresIn: expiresIn, // Default: 1 hour
+      });
+
+      return signedUrl;
+    } catch (error) {
+      console.error('Error generating download signed URL:', error);
+      throw new InternalServerErrorException('Could not generate download URL');
+    }
+  }
+
+  /**
+   * Extract S3 key from a full S3 URL
+   */
+  extractS3KeyFromUrl(url: string): string | null {
+    if (!url || typeof url !== 'string') {
+      return null;
+    }
+
+    try {
+      const bucketName = process.env.AWS_BUCKET_NAME;
+
+      // Handle different S3 URL formats
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname;
+      const pathname = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+
+      // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
+      if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
+        return pathname;
+      }
+
+      // Path-style URL: https://s3.region.amazonaws.com/bucket/key
+      if (hostname.startsWith('s3.') && hostname.includes('amazonaws.com')) {
+        const pathParts = pathname.split('/');
+        if (pathParts.length > 1 && pathParts[0] === bucketName) {
+          pathParts.shift(); // Remove bucket name
+          return pathParts.join('/');
+        }
+      }
+
+      return pathname;
+    } catch (error) {
+      console.error('Failed to extract S3 key from URL:', url, error);
+      return null;
+    }
+  }
+
+  /**
+   * Convert a direct S3 URL to a signed URL
+   */
+  async convertToSignedUrl(directUrl: string, expiresIn: number = 3600): Promise<string> {
+    try {
+      if (!directUrl || typeof directUrl !== 'string') {
+        return directUrl;
+      }
+
+      // Check if it's an S3 URL
+      if (!directUrl.includes('s3.') || !directUrl.includes('amazonaws.com')) {
+        return directUrl; // Not an S3 URL, return as-is
+      }
+
+      const s3Key = this.extractS3KeyFromUrl(directUrl);
+      if (!s3Key) {
+        console.warn(`Could not extract S3 key from URL: ${directUrl}`);
+        return directUrl; // Fallback to original URL
+      }
+
+      return await this.generateDownloadSignedUrl(s3Key, expiresIn);
+    } catch (error) {
+      console.error(`Failed to convert URL to signed URL: ${directUrl}`, error);
+      return directUrl; // Fallback to original URL
+    }
+  }
+
+  /**
+   * Generate signed URLs for multiple S3 URLs in batch
+   */
+  async generateSignedUrlsForUrls(urls: string[], expiresIn: number = 3600): Promise<string[]> {
+    if (!urls || urls.length === 0) {
+      return [];
+    }
+
+    try {
+      const signedUrlPromises = urls.map(url => this.convertToSignedUrl(url, expiresIn));
+      return await Promise.all(signedUrlPromises);
+    } catch (error) {
+      console.error('Failed to generate signed URLs in batch', error);
+      return urls; // Fallback to original URLs
     }
   }
 }

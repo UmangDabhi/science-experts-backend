@@ -21,11 +21,13 @@ import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
 import { CacheService } from 'src/Helper/services/cache.service';
 import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
+@UseInterceptors(SignedUrlInterceptor)
 export class UserController {
   constructor(
     private readonly userService: UserService,

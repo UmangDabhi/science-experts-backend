@@ -20,16 +20,20 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CacheService } from 'src/Helper/services/cache.service';
+import { SecureDownloadService } from 'src/Helper/services/secure-download.service';
 import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreatePaperDto } from './dto/create-paper.dto';
 import { UpdatePaperDto } from './dto/update-paper.dto';
 import { PapersService } from './papers.service';
 
 @Controller('papers')
+@UseInterceptors(SignedUrlInterceptor)
 export class PapersController {
   constructor(
     private readonly papersService: PapersService,
     private readonly cacheService: CacheService,
+    private readonly secureDownloadService: SecureDownloadService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -93,5 +97,12 @@ export class PapersController {
       CACHE_KEY.MANAGE_PAPERS,
     ]);
     return this.papersService.remove(req.user, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('download/:id')
+  @ResponseMessage('Paper download URL generated')
+  async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.secureDownloadService.getPaperDownloadUrl(id, req.user);
   }
 }

@@ -9,7 +9,9 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -21,6 +23,7 @@ import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { EnrollmentService } from './enrollment.service';
 
 @Controller('enrollment')
+@UseInterceptors(SignedUrlInterceptor)
 export class EnrollmentController {
   constructor(private readonly enrollmentService: EnrollmentService) {}
 

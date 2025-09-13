@@ -20,16 +20,20 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CacheService } from 'src/Helper/services/cache.service';
+import { SecureDownloadService } from 'src/Helper/services/secure-download.service';
 import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
+@UseInterceptors(SignedUrlInterceptor)
 export class BooksController {
   constructor(
     private readonly booksService: BooksService,
     private readonly cacheService: CacheService,
+    private readonly secureDownloadService: SecureDownloadService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -92,5 +96,12 @@ export class BooksController {
       CACHE_KEY.MANAGE_BOOKS,
     ]);
     return this.booksService.remove(req.user, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('download/:id')
+  @ResponseMessage('Book download URL generated')
+  async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.secureDownloadService.getBookDownloadUrl(id, req.user);
   }
 }

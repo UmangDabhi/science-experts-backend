@@ -20,16 +20,20 @@ import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CacheService } from 'src/Helper/services/cache.service';
+import { SecureDownloadService } from 'src/Helper/services/secure-download.service';
 import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialService } from './material.service';
 
 @Controller('material')
+@UseInterceptors(SignedUrlInterceptor)
 export class MaterialController {
   constructor(
     private readonly materialService: MaterialService,
     private readonly cacheService: CacheService,
+    private readonly secureDownloadService: SecureDownloadService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -103,5 +107,12 @@ export class MaterialController {
       CACHE_KEY.MANAGE_MATERIALS,
     ]);
     return this.materialService.remove(req.user, id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('download/:id')
+  @ResponseMessage('Material download URL generated')
+  async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
+    return this.secureDownloadService.getMaterialDownloadUrl(id, req.user);
   }
 }

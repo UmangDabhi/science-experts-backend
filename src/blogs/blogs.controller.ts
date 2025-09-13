@@ -9,7 +9,9 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
@@ -22,6 +24,7 @@ import { BlogFilterDto } from './dto/filter-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
 
 @Controller('blogs')
+@UseInterceptors(SignedUrlInterceptor)
 export class BlogsController {
   constructor(private readonly blogsService: BlogsService) {}
 

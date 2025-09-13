@@ -21,11 +21,13 @@ import { CACHE_KEY } from 'src/Helper/message/cache.const';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
 import { CacheService } from 'src/Helper/services/cache.service';
 import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.interceptor';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CourseService } from './course.service';
 import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 @Controller('course')
+@UseInterceptors(SignedUrlInterceptor)
 export class CourseController {
   constructor(
     private readonly courseService: CourseService,
