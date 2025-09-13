@@ -9,8 +9,10 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { OptionalAuthGuard } from 'src/auth/optional-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
@@ -20,8 +22,10 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
 import { ReviewsService } from './reviews.service';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 
 @Controller('reviews')
+@UseInterceptors(SignedUrlInterceptor)
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
@@ -45,6 +49,21 @@ export class ReviewsController {
   @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
   findAllTestimonials(@Query() paginationDto: PaginationDto) {
     return this.reviewsService.findAllTestimonials(paginationDto);
+  }
+
+  @UseGuards(OptionalAuthGuard)
+  @Get(`${API_ENDPOINT.GET_COURSE_REVIEWS}/:courseId`)
+  @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
+  findCourseReviews(
+    @Req() req: RequestWithUser,
+    @Param('courseId') courseId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.reviewsService.findCourseReviews(
+      courseId,
+      req?.user,
+      paginationDto,
+    );
   }
 
   @UseGuards(JwtAuthGuard)

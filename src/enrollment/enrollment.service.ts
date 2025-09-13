@@ -1,21 +1,20 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
-import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
-import { User } from 'src/user/entities/user.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ERRORS } from 'src/Helper/message/error.message';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
-import { Enrollment } from './entities/enrollment.entity';
 import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { Course } from 'src/course/entities/course.entity';
+import { User } from 'src/user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
+import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
+import { Enrollment } from './entities/enrollment.entity';
 
 @Injectable()
 export class EnrollmentService {
@@ -24,7 +23,7 @@ export class EnrollmentService {
     private readonly enrollmentRepository: Repository<Enrollment>,
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
-  ) { }
+  ) {}
   async create(currUser: User, createEnrollmentDto: CreateEnrollmentDto) {
     try {
       const existingCourse = await this.courseRepository.findOne({
@@ -33,6 +32,19 @@ export class EnrollmentService {
       if (!existingCourse) {
         throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       }
+
+      const existingEnrollment = await this.enrollmentRepository.findOne({
+        where: {
+          course: { id: createEnrollmentDto.course },
+          student: { id: currUser.id },
+        },
+        relations: ['course', 'student'],
+      });
+
+      if (existingEnrollment) {
+        return existingEnrollment;
+      }
+
       const newEnrollment = await this.enrollmentRepository.save({
         course: existingCourse,
         student: { id: currUser.id },
@@ -40,9 +52,6 @@ export class EnrollmentService {
       return newEnrollment;
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
-      if (error.code === '23505') {
-        throw new ConflictException(ERRORS.ERROR_ENROLLMENT_ALREADY_EXISTS);
-      }
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_ENROLLMENT);
     }
   }

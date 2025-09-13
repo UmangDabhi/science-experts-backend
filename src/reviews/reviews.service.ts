@@ -1,23 +1,22 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
+  NotFoundException
 } from '@nestjs/common';
-import { CreateReviewDto } from './dto/create-review.dto';
-import { UpdateReviewDto } from './dto/update-review.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Course } from 'src/course/entities/course.entity';
+import { ERRORS } from 'src/Helper/message/error.message';
+import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
+import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
+import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
+import { ModuleEntity } from 'src/module/entities/module.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { Course } from 'src/course/entities/course.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { ModuleEntity } from 'src/module/entities/module.entity';
-import { Review } from './entities/review.entity';
-import { ERRORS } from 'src/Helper/message/error.message';
-import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
-import { PaginationDto } from 'src/Helper/pagination/pagination.dto';
-import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
+import { CreateReviewDto } from './dto/create-review.dto';
+import { UpdateReviewDto } from './dto/update-review.dto';
 import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { Review } from './entities/review.entity';
 
 @Injectable()
 export class ReviewsService {
@@ -72,6 +71,54 @@ export class ReviewsService {
 
       return result;
     } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_REVIEWS);
+    }
+  }
+
+  async findCourseReviews(
+    courseId: string,
+    currUser: User,
+    paginationDto: PaginationDto,
+  ): Promise<PaginatedResult<Review>> {
+    try {
+      if (!courseId) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+
+      const course = await this.courseRepository.findOne({
+        where: { id: courseId },
+      });
+      if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
+
+      const searchableFields: (keyof Review)[] = ['review'];
+      const queryOptions = { course: { id: courseId } };
+      const relations = ['student'];
+      const orderBy = { field: 'created_at' as keyof Review, direction: 'DESC' as const };
+
+      const result = await pagniateRecords(
+        this.reviewRepository,
+        paginationDto,
+        searchableFields,
+        queryOptions,
+        relations,
+        orderBy,
+      );
+
+      if (currUser) {
+        result.data = result.data.map(review => ({
+          ...review,
+          isMyReview: review.student?.id === currUser.id
+        }));
+
+        result.data.sort((a, b) => {
+          if (a['isMyReview'] && !b['isMyReview']) return -1;
+          if (!a['isMyReview'] && b['isMyReview']) return 1;
+          return 0;
+        });
+      }
+
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof BadRequestException)
+        throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_REVIEWS);
     }
   }

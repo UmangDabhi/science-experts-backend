@@ -241,8 +241,6 @@ export class CourseService {
           'standards',
           'language',
           'modules.progress',
-          'reviews',
-          'reviews.student',
         ],
       });
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
