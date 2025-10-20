@@ -22,6 +22,7 @@ import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { College } from 'src/college/entities/college.entity';
 import { CollegeCourse } from 'src/college-courses/entities/college-course.entity';
+import { EmailAutomationService } from 'src/email/email-automation.service';
 
 @Injectable()
 export class UserService {
@@ -40,6 +41,7 @@ export class UserService {
     private readonly collegeCourseRepository: Repository<CollegeCourse>,
     private readonly counterService: CounterService,
     private readonly userBalanceService: UserBalanceService,
+    private readonly emailAutomationService: EmailAutomationService,
   ) { }
   async create(createUserDto: CreateUserDto) {
     try {
@@ -78,6 +80,15 @@ export class UserService {
       if (userExists && createUserDto.referral_code) {
         await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.REFEREE_SIGNUP_BONUS)
       }
+
+      // Trigger welcome email for new user
+      try {
+        await this.emailAutomationService.triggerWelcomeEmail(newUser.id);
+      } catch (emailError) {
+        // Log the error but don't fail the user creation
+        console.error('Failed to send welcome email:', emailError.message);
+      }
+
       return newUser
     } catch (error) {
       if (error.code === '23505') {

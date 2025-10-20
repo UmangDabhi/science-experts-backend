@@ -17,6 +17,7 @@ import { CategoryModule } from './category/category.module';
 import { CollegeCoursesModule } from './college-courses/college-courses.module';
 import { CollegeModule } from './college/college.module';
 import { CourseModule } from './course/course.module';
+import { EmailModule } from './email/email.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { FileModule } from './file/file.module';
 import { CommonModule } from './Helper/modules/common.module';
@@ -105,6 +106,7 @@ import { UserModule } from './user/user.module';
     CollegeCoursesModule,
     TutorReqModule,
     CommonModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

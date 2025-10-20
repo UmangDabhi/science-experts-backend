@@ -13,9 +13,13 @@ import { Category } from 'src/category/entities/category.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { College } from 'src/college/entities/college.entity';
 import { CollegeCourse } from 'src/college-courses/entities/college-course.entity';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, User_Balance, Balance_Type, Counter, Standard, Category, Language, College, CollegeCourse])],
+  imports: [
+    TypeOrmModule.forFeature([User, User_Balance, Balance_Type, Counter, Standard, Category, Language, College, CollegeCourse]),
+    EmailModule,
+  ],
   controllers: [UserController],
   providers: [UserService, UserBalanceService, CounterService],
   exports: [UserService],
