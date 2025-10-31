@@ -15,42 +15,40 @@ export class S3UrlService {
   private s3: S3Client;
   private readonly defaultExpirationSeconds: number;
   private readonly bucketName: string;
-  private readonly region: string;
+  private readonly publicUrl: string;
 
   constructor() {
+    // Cloudflare R2 configuration (S3-compatible)
     if (
-      !process.env.AWS_ACCESS_KEY_ID ||
-      !process.env.AWS_SECRET_ACCESS_KEY ||
-      !process.env.AWS_REGION
+      !process.env.R2_ACCESS_KEY_ID ||
+      !process.env.R2_SECRET_ACCESS_KEY ||
+      !process.env.R2_ACCOUNT_ID
     ) {
-      throw new Error('Missing AWS S3 configuration in environment variables');
+      throw new Error('Missing Cloudflare R2 configuration in environment variables');
     }
 
+    this.bucketName = process.env.R2_BUCKET_NAME || 'scienceexperts-uploads';
+    this.publicUrl = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+
+    const r2Endpoint = `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+
     this.s3 = new S3Client({
-      region: process.env.AWS_REGION,
+      region: 'auto',
+      endpoint: r2Endpoint,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
       },
     });
 
-    this.bucketName =
-      process.env.AWS_BUCKET_NAME || process.env.AWS_S3_BUCKET_NAME;
-    this.region = process.env.AWS_REGION;
     this.defaultExpirationSeconds = parseInt(
       process.env.SIGNED_URL_EXPIRATION_SECONDS || '3600',
       10,
     );
-
-    if (!this.bucketName) {
-      throw new Error(
-        'AWS bucket name is required. Set AWS_BUCKET_NAME or AWS_S3_BUCKET_NAME',
-      );
-    }
   }
 
   /**
-   * Extract S3 key from a full S3 URL
+   * Extract object key from a full R2 or S3 URL
    */
   private extractS3Key(url: string): string | null {
     if (!url || typeof url !== 'string') {
@@ -58,11 +56,6 @@ export class S3UrlService {
     }
 
     try {
-      // Handle different S3 URL formats:
-      // https://bucket.s3.region.amazonaws.com/key
-      // https://s3.region.amazonaws.com/bucket/key
-      // https://bucket.s3.amazonaws.com/key (legacy)
-
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
       let pathname = urlObj.pathname.startsWith('/')
@@ -71,29 +64,33 @@ export class S3UrlService {
 
       pathname = decodeURIComponent(pathname).replace(/\+/g, ' ');
 
-      // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
+      // R2 URL format: https://pub-<account_id>.r2.dev/key
+      if (hostname.includes('.r2.dev') || hostname.includes('.r2.cloudflarestorage.com')) {
+        return pathname;
+      }
+
+      // Legacy AWS S3 URL formats (for migration compatibility)
       if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
         return pathname;
       }
 
-      // Path-style URL: https://s3.region.amazonaws.com/bucket/key
       if (hostname.startsWith('s3.') && hostname.includes('amazonaws.com')) {
         const pathParts = pathname.split('/');
         if (pathParts.length > 1) {
-          pathParts.shift(); // Remove bucket name
+          pathParts.shift();
           return pathParts.join('/');
         }
       }
 
       return pathname;
     } catch (error) {
-      this.logger.warn(`Failed to extract S3 key from URL: ${url}`, error);
+      this.logger.warn(`Failed to extract key from URL: ${url}`, error);
       return null;
     }
   }
 
   /**
-   * Check if a URL is an S3 URL
+   * Check if a URL is an R2 or S3 URL
    */
   private isS3Url(url: string): boolean {
     if (!url || typeof url !== 'string') {
@@ -104,7 +101,10 @@ export class S3UrlService {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
 
-      return hostname.includes('s3.') && hostname.includes('amazonaws.com');
+      return (
+        hostname.includes('.r2.') ||
+        (hostname.includes('s3.') && hostname.includes('amazonaws.com'))
+      );
     } catch {
       return false;
     }

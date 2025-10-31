@@ -1,4 +1,3 @@
-import { createKeyv } from '@keyv/redis';
 import { CacheModule } from '@nestjs/cache-manager';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -37,14 +36,10 @@ import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 @Module({
   imports: [
-    CacheModule.registerAsync({
+    CacheModule.register({
       isGlobal: true,
-      useFactory: async () => {
-        return {
-          ttl: 60 * 5,
-          stores: [createKeyv('redis://localhost:6379')],
-        };
-      },
+      ttl: 60 * 5,
+      max: 100,
     }),
 
     ServeStaticModule.forRoot({
@@ -69,16 +64,23 @@ import { UserModule } from './user/user.module';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_DATABASE'),
-        // ssl: {
-        //   rejectUnauthorized: false,
-        // },
-        // extra: {
-        //   ssl: {
-        //     rejectUnauthorized: false,
-        //   },
-        // },
+
+        // Enable SSL for Neon.tech
+        ssl: configService.get<string>('DB_SSL') === 'true' ? {
+          rejectUnauthorized: false,
+        } : false,
+
+        extra: {
+          ...(configService.get<string>('DB_SSL') === 'true' && {
+            ssl: {
+              rejectUnauthorized: false,
+            },
+          }),
+        },
+
         autoLoadEntities: true,
-        synchronize: true,
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true',
+        logging: configService.get<string>('DB_LOGGING') === 'true',
       }),
     }),
     TypeOrmModule.forFeature([Log, User, Balance_Type]),

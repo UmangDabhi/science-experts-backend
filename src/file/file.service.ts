@@ -25,21 +25,33 @@ dotenv.config();
 @Injectable()
 export class FileService {
   private s3: S3Client;
+  private bucketName: string;
+  private publicUrl: string;
 
   constructor() {
+    // Cloudflare R2 configuration (R2 is S3-compatible)
     if (
-      !process.env.AWS_ACCESS_KEY_ID ||
-      !process.env.AWS_SECRET_ACCESS_KEY ||
-      !process.env.AWS_REGION
+      !process.env.R2_ACCESS_KEY_ID ||
+      !process.env.R2_SECRET_ACCESS_KEY ||
+      !process.env.R2_ACCOUNT_ID
     ) {
-      throw new Error('Missing AWS S3 configuration in environment variables');
+      throw new Error('Missing Cloudflare R2 configuration in environment variables');
     }
 
+    this.bucketName = process.env.R2_BUCKET_NAME || 'scienceexperts-uploads';
+
+    // R2 endpoint format: https://<account_id>.r2.cloudflarestorage.com
+    const r2Endpoint = `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+
+    // Public URL for R2 (if you have a custom domain or R2.dev subdomain)
+    this.publicUrl = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+
     this.s3 = new S3Client({
-      region: process.env.AWS_REGION,
+      region: 'auto', // R2 uses 'auto' for region
+      endpoint: r2Endpoint,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.R2_ACCESS_KEY_ID,
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
       },
     });
   }
@@ -62,7 +74,7 @@ export class FileService {
     const key = `${folder}/${Date.now()}-${filename}`;
 
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
     });
@@ -78,7 +90,7 @@ export class FileService {
     }
   }
 
-  // Upload file using SDK (single part)
+  // Upload file using SDK (single part) - now uploads to R2
   async uploadToS3(file: Express.Multer.File, folder: string): Promise<string> {
     const safeFolder = this.sanitizeFolderPath(folder);
     const fileStream = fs.createReadStream(file.path);
@@ -86,7 +98,7 @@ export class FileService {
     const key = `${safeFolder}/${this.generateUniqueFilename(file.originalname)}`;
 
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       Body: fileStream,
       ContentType: file.mimetype,
@@ -95,10 +107,11 @@ export class FileService {
     try {
       await this.s3.send(command);
       await fs.promises.unlink(file.path);
-      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+      // Return R2 public URL
+      return `${this.publicUrl}/${key}`;
     } catch (error) {
-      console.error('S3 upload error:', error);
-      throw new InternalServerErrorException('Error uploading file to S3');
+      console.error('R2 upload error:', error);
+      throw new InternalServerErrorException('Error uploading file to R2');
     }
   }
 
@@ -132,7 +145,7 @@ export class FileService {
     contentType: string,
   ): Promise<string> {
     const command = new PutObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       Body: buffer,
       ContentType: contentType,
@@ -140,7 +153,7 @@ export class FileService {
 
     await this.s3.send(command);
 
-    return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    return `${this.publicUrl}/${key}`;
   }
 
   async uploadFile(
@@ -153,15 +166,15 @@ export class FileService {
 
   async deleteFromS3(fileKey: string): Promise<void> {
     const command = new DeleteObjectCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: fileKey,
     });
 
     try {
       await this.s3.send(command);
     } catch (error) {
-      console.error('S3 deletion error:', error);
-      throw new InternalServerErrorException('Error deleting file from S3');
+      console.error('R2 deletion error:', error);
+      throw new InternalServerErrorException('Error deleting file from R2');
     }
   }
 
@@ -200,7 +213,7 @@ export class FileService {
     const safeFolder = this.sanitizeFolderPath(folder);
 
     const command = new ListObjectsV2Command({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Prefix: safeFolder.endsWith('/') ? safeFolder : safeFolder + '/',
     });
 
@@ -208,8 +221,8 @@ export class FileService {
       const result = await this.s3.send(command);
       return result.Contents || [];
     } catch (error) {
-      console.error('S3 list error:', error);
-      throw new InternalServerErrorException('Error listing files from S3');
+      console.error('R2 list error:', error);
+      throw new InternalServerErrorException('Error listing files from R2');
     }
   }
 
@@ -255,7 +268,7 @@ export class FileService {
     const key = `${folder}/${Date.now()}-${filename}`;
 
     const command = new CreateMultipartUploadCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
     });
@@ -286,7 +299,7 @@ export class FileService {
 
       for (let partNumber = 1; partNumber <= partCount; partNumber++) {
         const command = new UploadPartCommand({
-          Bucket: process.env.AWS_BUCKET_NAME,
+          Bucket: this.bucketName,
           Key: key,
           UploadId: uploadId,
           PartNumber: partNumber,
@@ -318,7 +331,7 @@ export class FileService {
     );
 
     const command = new CompleteMultipartUploadCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       UploadId: uploadId,
       MultipartUpload: { Parts: completedParts },
@@ -326,7 +339,7 @@ export class FileService {
 
     try {
       await this.s3.send(command);
-      return `https://${process.env.AWS_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+      return `${this.publicUrl}/${key}`;
     } catch (error) {
       console.error('Error completing multipart upload:', error);
       throw new InternalServerErrorException(
@@ -337,7 +350,7 @@ export class FileService {
 
   async abortMultipartUpload(key: string, uploadId: string): Promise<void> {
     const command = new AbortMultipartUploadCommand({
-      Bucket: process.env.AWS_BUCKET_NAME,
+      Bucket: this.bucketName,
       Key: key,
       UploadId: uploadId,
     });
@@ -351,7 +364,7 @@ export class FileService {
   }
 
   /**
-   * Generate a signed URL for downloading/accessing an S3 object
+   * Generate a signed URL for downloading/accessing an R2 object
    */
   async generateDownloadSignedUrl(
     key: string,
@@ -359,12 +372,12 @@ export class FileService {
   ): Promise<string> {
     try {
       if (!key) {
-        throw new Error('S3 key is required');
+        throw new Error('Object key is required');
       }
       key = decodeURIComponent(key).replace(/\+/g, ' ');
 
       const command = new GetObjectCommand({
-        Bucket: process.env.AWS_BUCKET_NAME,
+        Bucket: this.bucketName,
         Key: key,
       });
 
@@ -380,7 +393,7 @@ export class FileService {
   }
 
   /**
-   * Extract S3 key from a full S3 URL
+   * Extract object key from a full R2 URL
    */
   extractS3KeyFromUrl(url: string): string | null {
     if (!url || typeof url !== 'string') {
@@ -388,38 +401,31 @@ export class FileService {
     }
 
     try {
-      const bucketName = process.env.AWS_BUCKET_NAME;
-
-      // Handle different S3 URL formats
+      // Handle R2 URL formats
       const urlObj = new URL(url);
-      const hostname = urlObj.hostname;
       const pathname = urlObj.pathname.startsWith('/')
         ? urlObj.pathname.slice(1)
         : urlObj.pathname;
 
-      // Virtual-hosted-style URL: https://bucket.s3.region.amazonaws.com/key
-      if (hostname.includes('.s3.') && hostname.includes('amazonaws.com')) {
+      // R2 public URL format: https://pub-<account_id>.r2.dev/key
+      if (urlObj.hostname.includes('.r2.dev') || urlObj.hostname.includes('.r2.cloudflarestorage.com')) {
         return pathname;
       }
 
-      // Path-style URL: https://s3.region.amazonaws.com/bucket/key
-      if (hostname.startsWith('s3.') && hostname.includes('amazonaws.com')) {
-        const pathParts = pathname.split('/');
-        if (pathParts.length > 1 && pathParts[0] === bucketName) {
-          pathParts.shift(); // Remove bucket name
-          return pathParts.join('/');
-        }
+      // Also handle legacy AWS S3 URLs for migration compatibility
+      if (urlObj.hostname.includes('.s3.') && urlObj.hostname.includes('amazonaws.com')) {
+        return pathname;
       }
 
       return pathname;
     } catch (error) {
-      console.error('Failed to extract S3 key from URL:', url, error);
+      console.error('Failed to extract key from URL:', url, error);
       return null;
     }
   }
 
   /**
-   * Convert a direct S3 URL to a signed URL
+   * Convert a direct R2 URL to a signed URL
    */
   async convertToSignedUrl(
     directUrl: string,
@@ -430,18 +436,18 @@ export class FileService {
         return directUrl;
       }
 
-      // Check if it's an S3 URL
-      if (!directUrl.includes('s3.') || !directUrl.includes('amazonaws.com')) {
-        return directUrl; // Not an S3 URL, return as-is
+      // Check if it's an R2 or S3 URL
+      if (!directUrl.includes('.r2.') && !directUrl.includes('.s3.')) {
+        return directUrl; // Not a storage URL, return as-is
       }
 
-      const s3Key = this.extractS3KeyFromUrl(directUrl);
-      if (!s3Key) {
-        console.warn(`Could not extract S3 key from URL: ${directUrl}`);
+      const objectKey = this.extractS3KeyFromUrl(directUrl);
+      if (!objectKey) {
+        console.warn(`Could not extract key from URL: ${directUrl}`);
         return directUrl; // Fallback to original URL
       }
 
-      return await this.generateDownloadSignedUrl(s3Key, expiresIn);
+      return await this.generateDownloadSignedUrl(objectKey, expiresIn);
     } catch (error) {
       console.error(`Failed to convert URL to signed URL: ${directUrl}`, error);
       return directUrl; // Fallback to original URL

@@ -44,7 +44,24 @@ lerna-debug.log*
 .env.production.local
 .env.local
 
-# temp directory
+# Migration and deployment files with sensitive data
+QUICKSTART.md
+MIGRATION_COMPLETE.md
+TEST_RESULTS.md
+FINAL_TEST_REPORT.md
+R2_SETUP.md
+GET_R2_CREDENTIALS.md
+migrate-aws-to-neon.sh
+test-connection.js
+*.dump
+backup_*.dump
+
+# Serena MCP project files
+.serena/
+
+# Temporary files
+nul
+*.tmp
 .temp
 .tmp
 
