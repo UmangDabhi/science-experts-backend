@@ -20,7 +20,8 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '2000mb' }));
   app.use(bodyParser.urlencoded({ limit: '2000mb', extended: true }));
 
-  const port = process.env.BACKEND_PORT || 3000;
+  // Render uses PORT, local dev uses BACKEND_PORT
+  const port = process.env.PORT || process.env.BACKEND_PORT || 3000;
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
