@@ -40,16 +40,24 @@ export class UserService {
     private readonly collegeCourseRepository: Repository<CollegeCourse>,
     private readonly counterService: CounterService,
     private readonly userBalanceService: UserBalanceService,
-  ) { }
+  ) {}
   async create(createUserDto: CreateUserDto) {
     try {
-      const userExists = await this.userRepository.findOne({ where: { referral_code: createUserDto.referral_code } });
+      const userExists = await this.userRepository.findOne({
+        where: { referral_code: createUserDto.referral_code },
+      });
       if (createUserDto.has_referral) {
         if (!userExists)
           throw new BadRequestException(ERRORS.ERROR_INVALID_REFERRAL_CODE);
         else {
-          await this.userBalanceService.addCoins(userExists, BALANCE_TYPE.REFERRER_SIGNUP_BONUS)
-          await this.userRepository.update({ id: userExists.id }, { referral_count: userExists.referral_count + 1 })
+          await this.userBalanceService.addCoins(
+            userExists,
+            BALANCE_TYPE.REFERRER_SIGNUP_BONUS,
+          );
+          await this.userRepository.update(
+            { id: userExists.id },
+            { referral_count: userExists.referral_count + 1 },
+          );
         }
       }
       const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -59,7 +67,9 @@ export class UserService {
 
       while (!isUnique) {
         referral_code = this.generateAlphanumericCode();
-        const userExists = await this.userRepository.findOne({ where: { referral_code } });
+        const userExists = await this.userRepository.findOne({
+          where: { referral_code },
+        });
         if (!userExists) {
           isUnique = true;
         }
@@ -74,16 +84,25 @@ export class UserService {
         newUser.referred_by = userExists;
       }
       await this.userRepository.save(newUser);
-      await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.WELCOME_BONUS)
+      await this.userBalanceService.addCoins(
+        newUser,
+        BALANCE_TYPE.WELCOME_BONUS,
+      );
       if (userExists && createUserDto.referral_code) {
-        await this.userBalanceService.addCoins(newUser, BALANCE_TYPE.REFEREE_SIGNUP_BONUS)
+        await this.userBalanceService.addCoins(
+          newUser,
+          BALANCE_TYPE.REFEREE_SIGNUP_BONUS,
+        );
       }
-      return newUser
+      return newUser;
     } catch (error) {
       if (error.code === '23505') {
         throw new ConflictException(ERRORS.ERROR_USER_ALREADY_EXISTS);
       }
-      if (error instanceof BadRequestException || error instanceof ConflictException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
       throw new InternalServerErrorException(ERRORS.ERROR_CREATING_USER);
@@ -91,7 +110,8 @@ export class UserService {
   }
 
   private generateAlphanumericCode(length = 8): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let code = '';
     for (let i = 0; i < length; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -137,11 +157,23 @@ export class UserService {
       if (!id) {
         throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
       }
-      const user = await this.userRepository.findOne({ where: { id: id }, relations: ["enrollments", "enrollments.course",  "user_balance", 'referrals'] });
+      const user = await this.userRepository.findOne({
+        where: { id: id },
+        relations: [
+          'enrollments',
+          'enrollments.course',
+          'user_balance',
+          'referrals',
+          'material_purchases',
+          'book_purchases',
+          'paper_purchases',
+        ],
+      });
 
       if (!user) {
         throw new NotFoundException(ERRORS.ERROR_USER_NOT_FOUND);
       }
+
       const groupedBalances = {};
 
       user.user_balance.forEach((balance) => {
@@ -157,13 +189,22 @@ export class UserService {
 
         groupedBalances[type].total += balance.expert_coins;
       });
-      user.user_balance = Object.values(groupedBalances);
+
+      const enrolledCoursesCount = user.enrollments?.length || 0;
+      const purchasedMaterialsCount = user.material_purchases?.length || 0;
+      const purchasedBooksCount = user.book_purchases?.length || 0;
+      const purchasedPapersCount = user.paper_purchases?.length || 0;
+
       return {
         ...user,
         user_balance: Object.values(groupedBalances),
         referrals: user.referrals.map((ref) => ({
           name: ref.name,
         })),
+        enrolledCourses: enrolledCoursesCount,
+        purchasedMaterials: purchasedMaterialsCount,
+        purchasedNotes: purchasedBooksCount,
+        purchasedPapers: purchasedPapersCount,
       };
     } catch (error) {
       if (
@@ -172,11 +213,10 @@ export class UserService {
       ) {
         throw error;
       }
-      console.log(error)
+      console.log(error);
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_USER);
     }
   }
-
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
       if (!id) {
@@ -258,7 +298,7 @@ export class UserService {
       // Execute user-specific counts and static counts in parallel
       const [userCounts, staticCounts] = await Promise.all([
         this.getUserSpecificCounts(user.id),
-        this.getStaticCounts()
+        this.getStaticCounts(),
       ]);
 
       return {
@@ -274,7 +314,6 @@ export class UserService {
         languageCount: staticCounts.languageCount,
         collegeCourseCount: staticCounts.collegeCourseCount,
       };
-
     } catch (error) {
       console.log(error);
       if (
@@ -291,7 +330,14 @@ export class UserService {
 
   private async getUserSpecificCounts(userId: string) {
     // Use optimized QueryBuilder for better performance and type safety
-    const [courseCount, materialsCount, booksCount, papersCount, blogsCount, tutorCount] = await Promise.all([
+    const [
+      courseCount,
+      materialsCount,
+      booksCount,
+      papersCount,
+      blogsCount,
+      tutorCount,
+    ] = await Promise.all([
       this.userRepository
         .createQueryBuilder('user')
         .leftJoin('user.tutor_courses', 'course')
@@ -324,9 +370,12 @@ export class UserService {
         .getRawOne(),
       this.userRepository
         .createQueryBuilder('user')
-        .where('user.id = :userId AND user.role = :role', { userId, role: 'tutor' })
+        .where('user.id = :userId AND user.role = :role', {
+          userId,
+          role: 'tutor',
+        })
         .select('COUNT(user.id)', 'count')
-        .getRawOne()
+        .getRawOne(),
     ]);
 
     return {
@@ -339,15 +388,20 @@ export class UserService {
     };
   }
 
-  private async getStaticCounts() {  
-
+  private async getStaticCounts() {
     // Execute all static counts in parallel using repository methods
-    const [categoryCount, standardCount, languageCount, collegeCount, collegeCourseCount] = await Promise.all([
+    const [
+      categoryCount,
+      standardCount,
+      languageCount,
+      collegeCount,
+      collegeCourseCount,
+    ] = await Promise.all([
       this.categoryRepository.count(),
       this.standardRepository.count(),
       this.languageRepository.count(),
       this.collegeRepository.count(),
-      this.collegeCourseRepository.count()
+      this.collegeCourseRepository.count(),
     ]);
 
     const counts = {
@@ -381,7 +435,9 @@ export class UserService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('Failed to update tutorial status');
+      throw new InternalServerErrorException(
+        'Failed to update tutorial status',
+      );
     }
   }
 
@@ -393,7 +449,7 @@ export class UserService {
 
       const user = await this.userRepository.findOne({
         where: { id: id },
-        select: ['id', 'has_completed_tutorial']
+        select: ['id', 'has_completed_tutorial'],
       });
 
       if (!user) {
@@ -401,7 +457,7 @@ export class UserService {
       }
 
       return {
-        has_completed_tutorial: user.has_completed_tutorial || false
+        has_completed_tutorial: user.has_completed_tutorial || false,
       };
     } catch (error) {
       if (
