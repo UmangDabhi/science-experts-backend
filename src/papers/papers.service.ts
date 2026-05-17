@@ -86,7 +86,7 @@ export class PapersService {
       }
 
       const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Most Popular': { field: 'created_at', direction: 'DESC' },
         'Price:Low to High': { field: 'amount', direction: 'ASC' },
         'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
@@ -146,7 +146,7 @@ export class PapersService {
       }
 
       const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Most Popular': { field: 'created_at', direction: 'DESC' },
         'Price:Low to High': { field: 'amount', direction: 'ASC' },
         'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };

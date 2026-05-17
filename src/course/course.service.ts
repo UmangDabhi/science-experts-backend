@@ -20,6 +20,7 @@ import { Language } from 'src/language/entities/language.entity';
 import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
 import { Material } from 'src/material/entities/material.entity';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Injectable()
 export class CourseService {
@@ -34,6 +35,8 @@ export class CourseService {
     private readonly standardRepository: Repository<Standard>,
     @InjectRepository(Language)
     private readonly languageRepository: Repository<Language>,
+    @InjectRepository(Enrollment)
+    private readonly enrollmentRepository: Repository<Enrollment>,
   ) {}
   async create(currUser: User, createCourseDto: CreateCourseDto): Promise<any> {
     try {
@@ -71,44 +74,106 @@ export class CourseService {
     courseFilterDto: FilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
-      const searchableFields: (keyof Course)[] = ['title'];
-      const queryOptions: any = {};
-      const orderBy: any = {
-        field: 'created_at',
-        direction: 'DESC',
-      };
+      const page = Number(courseFilterDto.page);
+      const limit = Number(courseFilterDto.limit);
+
+      const qb = this.courseRepository
+        .createQueryBuilder('course')
+        .leftJoinAndSelect('course.tutor', 'tutor')
+        .leftJoin('course.categories', 'categories')
+        .leftJoin('course.standards', 'standards')
+        .loadRelationCountAndMap('course.modulesCount', 'course.modules')
+        .loadRelationCountAndMap('course.reviewsCount', 'course.reviews')
+        .loadRelationCountAndMap(
+          'course.enrollmentsCount',
+          'course.enrollments',
+        );
+
+      // Tutor restriction
+      if (currUser.role === Role.TUTOR) {
+        qb.andWhere('tutor.id = :tutorId', {
+          tutorId: currUser.id,
+        });
+      }
+
+      // Search
+      if (courseFilterDto?.search) {
+        qb.andWhere('LOWER(course.title) LIKE LOWER(:search)', {
+          search: `%${courseFilterDto.search}%`,
+        });
+      }
+
+      // Category Filter
       if (courseFilterDto?.category) {
-        queryOptions.categories = { id: courseFilterDto.category };
+        qb.andWhere('categories.id = :categoryId', {
+          categoryId: courseFilterDto.category,
+        });
       }
+
+      // Standard Filter
       if (courseFilterDto?.standard) {
-        queryOptions.standards = { id: courseFilterDto.standard };
+        qb.andWhere('standards.id = :standardId', {
+          standardId: courseFilterDto.standard,
+        });
       }
-      if (currUser.role == Role.TUTOR) {
-        queryOptions.tutor = { id: currUser.id };
+
+      // Sorting
+      switch (courseFilterDto?.sortby) {
+        case 'Price:Low to High':
+          qb.orderBy('course.price', 'ASC');
+          break;
+
+        case 'Price:High to Low':
+          qb.orderBy('course.price', 'DESC');
+          break;
+
+        default:
+          qb.orderBy('course.created_at', 'DESC');
       }
-      const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
-        'Price:Low to High': { field: 'price', direction: 'ASC' },
-        'Price:High to Low': { field: 'price', direction: 'DESC' },
+
+      // Optional Pagination
+      if (page && limit) {
+        qb.skip((page - 1) * limit).take(limit);
+      }
+
+      const [data, total] = await qb.getManyAndCount();
+
+      // Enrollment State
+      if (currUser?.role === Role.STUDENT) {
+        const enrolledCourses = await this.enrollmentRepository
+          .createQueryBuilder('enrollment')
+          .select('enrollment.courseId', 'courseId')
+          .where('enrollment.studentId = :studentId', {
+            studentId: currUser.id,
+          })
+          .getRawMany();
+
+        const enrolledSet = new Set(enrolledCourses.map((e) => e.courseId));
+
+        data.forEach((course) => {
+          course['is_enrolled'] = enrolledSet.has(course.id);
+        });
+      } else if (currUser?.role === Role.TUTOR) {
+        data.forEach((course) => {
+          course['is_enrolled'] = course.tutor?.id === currUser.id;
+        });
+      } else if (currUser?.role === Role.ADMIN) {
+        data.forEach((course) => {
+          course['is_enrolled'] = true;
+        });
+      }
+
+      return {
+        data,
+        total,
+        ...(page && limit
+          ? {
+              page,
+              limit,
+              totalPages: Math.ceil(total / limit),
+            }
+          : {}),
       };
-
-      const selectedSort = sortOptions[courseFilterDto?.sortby] || undefined;
-      if (selectedSort) {
-        orderBy.field = selectedSort.field || '';
-        orderBy.direction = selectedSort.direction;
-      }
-
-      const relations = ['modules', 'enrollments', 'reviews'];
-      const result = await pagniateRecords(
-        this.courseRepository,
-        courseFilterDto,
-        searchableFields,
-        queryOptions,
-        relations,
-        orderBy,
-      );
-
-      return result;
     } catch (error) {
       console.log(error);
 
@@ -120,62 +185,107 @@ export class CourseService {
     courseFilterDto: FilterDto,
   ): Promise<PaginatedResult<Course>> {
     try {
-      const searchableFields: (keyof Course)[] = ['title'];
-      const queryOptions: any = {};
-      const orderBy: any = {
-        field: 'created_at',
-        direction: 'DESC',
-      };
+      const page = Number(courseFilterDto.page);
+      const limit = Number(courseFilterDto.limit);
 
+      const qb = this.courseRepository
+        .createQueryBuilder('course')
+        .leftJoinAndSelect('course.tutor', 'tutor')
+        .leftJoin('course.categories', 'categories')
+        .leftJoin('course.standards', 'standards')
+        .loadRelationCountAndMap('course.modulesCount', 'course.modules')
+        .loadRelationCountAndMap('course.reviewsCount', 'course.reviews')
+        .loadRelationCountAndMap(
+          'course.enrollmentsCount',
+          'course.enrollments',
+        )
+        .where('course.is_approved = :approved', {
+          approved: Is_Approved.YES,
+        });
+
+      // Search
+      if (courseFilterDto?.search) {
+        qb.andWhere('LOWER(course.title) LIKE LOWER(:search)', {
+          search: `%${courseFilterDto.search}%`,
+        });
+      }
+
+      // Category Filter
       if (courseFilterDto?.category) {
-        queryOptions.categories = { id: courseFilterDto.category };
+        qb.andWhere('categories.id = :categoryId', {
+          categoryId: courseFilterDto.category,
+        });
       }
+
+      // Standard Filter
       if (courseFilterDto?.standard) {
-        queryOptions.standards = { id: courseFilterDto.standard };
+        qb.andWhere('standards.id = :standardId', {
+          standardId: courseFilterDto.standard,
+        });
       }
 
-      const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
-        'Price:Low to High': { field: 'price', direction: 'ASC' },
-        'Price:High to Low': { field: 'price', direction: 'DESC' },
+      // Sorting
+      switch (courseFilterDto?.sortby) {
+        case 'Price:Low to High':
+          qb.orderBy('course.price', 'ASC');
+          break;
+
+        case 'Price:High to Low':
+          qb.orderBy('course.price', 'DESC');
+          break;
+
+        default:
+          qb.orderBy('course.created_at', 'DESC');
+      }
+
+      // Pagination Optional Support
+      if (page && limit) {
+        qb.skip((page - 1) * limit).take(limit);
+      }
+
+      const [data, total] = await qb.getManyAndCount();
+
+      // Enrollment State
+      if (currUser) {
+        if (currUser.role === Role.STUDENT) {
+          const enrolledCourses = await this.enrollmentRepository
+            .createQueryBuilder('enrollment')
+            .select('enrollment.courseId', 'courseId')
+            .where('enrollment.studentId = :studentId', {
+              studentId: currUser.id,
+            })
+            .getRawMany();
+
+          const enrolledSet = new Set(enrolledCourses.map((e) => e.courseId));
+
+          data.forEach((course) => {
+            course['is_enrolled'] = enrolledSet.has(course.id);
+          });
+        } else if (currUser.role === Role.TUTOR) {
+          data.forEach((course) => {
+            course['is_enrolled'] = course.tutor?.id === currUser.id;
+          });
+        } else if (currUser.role === Role.ADMIN) {
+          data.forEach((course) => {
+            course['is_enrolled'] = true;
+          });
+        }
+      }
+
+      return {
+        data,
+        total,
+        ...(page && limit
+          ? {
+              page,
+              limit,
+              totalPages: Math.ceil(total / limit),
+            }
+          : {}),
       };
-
-      const selectedSort = sortOptions[courseFilterDto?.sortby] || undefined;
-      if (selectedSort) {
-        orderBy.field = selectedSort.field || '';
-        orderBy.direction = selectedSort.direction;
-      }
-
-      queryOptions.is_approved = Is_Approved.YES;
-      const relations = ['modules', 'enrollments', 'reviews'];
-      const result = await pagniateRecords(
-        this.courseRepository,
-        courseFilterDto,
-        searchableFields,
-        queryOptions,
-        relations,
-        orderBy,
-      );
-
-      // Add is_enrolled property for each course
-      if (currUser && currUser.role === Role.STUDENT) {
-        for (const course of result.data) {
-          course['is_enrolled'] = course.enrollments?.some(
-            (enrollment) => enrollment.student?.id === currUser.id,
-          );
-        }
-      } else if (currUser && currUser.role === Role.TUTOR) {
-        for (const course of result.data) {
-          course['is_enrolled'] = course.tutor?.id === currUser.id;
-        }
-      } else if (currUser && currUser.role === Role.ADMIN) {
-        for (const course of result.data) {
-          course['is_enrolled'] = true;
-        }
-      }
-      return result;
     } catch (error) {
       console.log(error);
+
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
     }
   }
@@ -197,7 +307,7 @@ export class CourseService {
         queryOptions.standards = { id: courseFilterDto.standard };
       }
       const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Most Popular': { field: 'created_at', direction: 'DESC' },
         'Price:Low to High': { field: 'price', direction: 'ASC' },
         'Price:High to Low': { field: 'price', direction: 'DESC' },
       };

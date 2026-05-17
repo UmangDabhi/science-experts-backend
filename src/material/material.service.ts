@@ -12,12 +12,14 @@ import { ERRORS } from 'src/Helper/message/error.message';
 import { PaginatedResult } from 'src/Helper/pagination/paginated-result.interface';
 import { pagniateRecords } from 'src/Helper/pagination/pagination.util';
 import { Category } from 'src/category/entities/category.entity';
+import { Course } from 'src/course/entities/course.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
 import { In, Repository } from 'typeorm';
 import { CreateMaterialDto } from './dto/create-material.dto';
+import { LinkMaterialDto } from './dto/link-material.dto';
 import { MaterialPublicDto } from './dto/material-public.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { Material } from './entities/material.entity';
@@ -27,6 +29,8 @@ export class MaterialService {
   constructor(
     @InjectRepository(Material)
     private readonly materialRepository: Repository<Material>,
+    @InjectRepository(Course)
+    private readonly courseRepository: Repository<Course>,
     @InjectRepository(MaterialPurchase)
     private readonly materialPurchaseRepository: Repository<MaterialPurchase>,
     @InjectRepository(Category)
@@ -90,7 +94,7 @@ export class MaterialService {
       }
 
       const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Most Popular': { field: 'created_at', direction: 'DESC' },
         'Price:Low to High': { field: 'amount', direction: 'ASC' },
         'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
@@ -149,7 +153,7 @@ export class MaterialService {
       }
 
       const sortOptions = {
-        'Most Populer': { field: 'created_at', direction: 'DESC' },
+        'Most Popular': { field: 'created_at', direction: 'DESC' },
         'Price:Low to High': { field: 'amount', direction: 'ASC' },
         'Price:High to Low': { field: 'amount', direction: 'DESC' },
       };
@@ -171,26 +175,30 @@ export class MaterialService {
 
       // Add purchase status to each material
       if (currUser) {
-        const materialIds = materials.data.map(material => material.id);
+        const materialIds = materials.data.map((material) => material.id);
         const userPurchases = await this.materialPurchaseRepository.find({
           where: {
             material: { id: In(materialIds) },
-            student: { id: currUser.id }
+            student: { id: currUser.id },
           },
-          relations: ['material']
+          relations: ['material'],
         });
-        const purchasedMaterialIds = new Set(userPurchases.map(purchase => purchase.material.id));
+        const purchasedMaterialIds = new Set(
+          userPurchases.map((purchase) => purchase.material.id),
+        );
 
-        materials.data.forEach(material => {
-          if (currUser.role === Role.ADMIN ||
-              (currUser.role === Role.TUTOR && material.tutor?.id === currUser.id)) {
+        materials.data.forEach((material) => {
+          if (
+            currUser.role === Role.ADMIN ||
+            (currUser.role === Role.TUTOR && material.tutor?.id === currUser.id)
+          ) {
             material['is_purchased'] = true;
           } else {
             material['is_purchased'] = purchasedMaterialIds.has(material.id);
           }
         });
       } else {
-        materials.data.forEach(material => {
+        materials.data.forEach((material) => {
           material['is_purchased'] = false;
         });
       }
@@ -211,17 +219,92 @@ export class MaterialService {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIALS);
     }
   }
-  async findAllByCourseId(courseId: string) {
+  async findAllByCourseId(courseId: string, filterDto: FilterDto) {
     try {
-      const result = await this.materialRepository.find({
-        where: {
-          course: {
-            id: courseId,
-          },
+      const orderBy: any = {
+        field: 'created_at',
+        direction: 'DESC',
+      };
+
+      const sortOptions = {
+        'Most Populer': {
+          field: 'created_at',
+          direction: 'DESC',
         },
-      });
-      return result;
+        'Price:Low to High': {
+          field: 'amount',
+          direction: 'ASC',
+        },
+        'Price:High to Low': {
+          field: 'amount',
+          direction: 'DESC',
+        },
+      };
+
+      const selectedSort = sortOptions[filterDto?.sortby];
+
+      if (selectedSort) {
+        orderBy.field = selectedSort.field;
+        orderBy.direction = selectedSort.direction;
+      }
+
+      const { page, limit, search } = filterDto;
+
+      const skip = page && limit ? (page - 1) * limit : 0;
+
+      const queryBuilder = this.materialRepository
+        .createQueryBuilder('material')
+        .leftJoinAndSelect('material.course', 'course')
+        .where('(course.id = :courseId OR material.course_id IS NULL)', {
+          courseId,
+        });
+
+      // SEARCH
+      if (search) {
+        queryBuilder.andWhere('material.title ILIKE :search', {
+          search: `%${search}%`,
+        });
+      }
+
+      // LINKED FIRST
+      queryBuilder.addSelect(
+        `
+      CASE
+        WHEN course.id = :courseId THEN 0
+        ELSE 1
+      END
+      `,
+        'linked_priority',
+      );
+
+      queryBuilder.setParameter('courseId', courseId);
+
+      queryBuilder.orderBy('linked_priority', 'ASC');
+
+      queryBuilder.addOrderBy(`material.${orderBy.field}`, orderBy.direction);
+
+      // PAGINATION
+      if (page && limit) {
+        queryBuilder.skip(skip).take(limit);
+      }
+
+      const [materials, total] = await queryBuilder.getManyAndCount();
+
+      const data = materials.map((material) => ({
+        ...material,
+        linked: material.course?.id === courseId,
+      }));
+
+      return {
+        data,
+        total,
+        page,
+        limit,
+        totalPages: page && limit ? Math.ceil(total / limit) : 1,
+      };
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MODULES);
     }
   }
@@ -279,6 +362,62 @@ export class MaterialService {
       )
         throw error;
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_MATERIAL);
+    }
+  }
+
+  async manageCourseMaterialLink(linkMaterialDto: LinkMaterialDto) {
+    try {
+      const { course_id, material_id, linked } = linkMaterialDto;
+      // Find material
+      const material = await this.materialRepository.findOne({
+        where: {
+          id: material_id,
+        },
+        relations: ['course'],
+      });
+
+      if (!material) {
+        throw new NotFoundException('Material not found');
+      }
+
+      // LINK
+      if (linked) {
+        const course = await this.courseRepository.findOne({
+          where: {
+            id: course_id,
+          },
+        });
+
+        if (!course) {
+          throw new NotFoundException('Course not found');
+        }
+
+        material.course = course;
+      }
+
+      // UNLINK
+      else {
+        // only unlink if currently linked to same course
+        if (material.course?.id === course_id) {
+          material.course = null;
+        }
+      }
+
+      await this.materialRepository.save(material);
+
+      return {
+        material_id,
+        course_id,
+        linked,
+      };
+    } catch (error) {
+      console.log(error);
+
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException('Error managing material link');
     }
   }
 

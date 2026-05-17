@@ -26,6 +26,7 @@ import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreateMaterialDto } from './dto/create-material.dto';
 import { UpdateMaterialDto } from './dto/update-material.dto';
 import { MaterialService } from './material.service';
+import { LinkMaterialDto } from './dto/link-material.dto';
 
 @Controller('material')
 @UseInterceptors(SignedUrlInterceptor)
@@ -70,8 +71,11 @@ export class MaterialController {
   @UseGuards(OptionalAuthGuard)
   @Get(`${API_ENDPOINT.GET_COURSE_MATERIAL}/:courseId`)
   @ResponseMessage(MESSAGES.MATERIAL_FETCHED)
-  findAllByCourseId(@Param('courseId') courseId: string) {
-    return this.materialService.findAllByCourseId(courseId);
+  findAllByCourseId(
+    @Param('courseId') courseId: string,
+    @Query() filterDto: FilterDto,
+  ) {
+    return this.materialService.findAllByCourseId(courseId, filterDto);
   }
 
   @UseGuards(OptionalAuthGuard)
@@ -81,6 +85,20 @@ export class MaterialController {
     return this.materialService.findOne(req?.user, id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(`${API_ENDPOINT.LINK_MATERIAL}`)
+  @ResponseMessage(MESSAGES.MATERIAL_UPDATED)
+  manageCourseMaterialLink(
+    @Req() req: RequestWithUser,
+    @Body() linkMaterialDto: LinkMaterialDto,
+  ) {
+    this.cacheService.deleteMultiple([
+      CACHE_KEY.DASHBOARD_DETAILS,
+      CACHE_KEY.MATERIALS,
+      CACHE_KEY.MANAGE_MATERIALS,
+    ]);
+    return this.materialService.manageCourseMaterialLink(linkMaterialDto);
+  }
   @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_MATERIAL}/:id`)
   @ResponseMessage(MESSAGES.MATERIAL_UPDATED)

@@ -7,10 +7,20 @@ import { Category } from 'src/category/entities/category.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { Material } from 'src/material/entities/material.entity';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Course, Material, Category, Standard, Language])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Course,
+      Material,
+      Category,
+      Standard,
+      Language,
+      Enrollment,
+    ]),
+  ],
   controllers: [CourseController],
   providers: [CourseService],
 })
-export class CourseModule { }
+export class CourseModule {}

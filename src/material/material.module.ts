@@ -8,12 +8,22 @@ import { Language } from 'src/language/entities/language.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { MaterialPurchaseService } from './material_purchase.service';
+import { Course } from 'src/course/entities/course.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Material, MaterialPurchase, Category, Language, Standard, MaterialPurchase])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Material,
+      MaterialPurchase,
+      Category,
+      Language,
+      Standard,
+      MaterialPurchase,
+      Course,
+    ]),
+  ],
   controllers: [MaterialController],
   providers: [MaterialService, MaterialPurchaseService],
   exports: [MaterialPurchaseService],
-
 })
-export class MaterialModule { }
+export class MaterialModule {}

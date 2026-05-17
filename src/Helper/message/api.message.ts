@@ -34,6 +34,7 @@ export const API_ENDPOINT = {
   GET_COURSE_MATERIAL: 'get_course_material',
   GET_MATERIAL: 'get_material',
   UPDATE_MATERIAL: 'update_material',
+  LINK_MATERIAL: 'link_material',
   DELETE_MATERIAL: 'delete_material',
 
   CREATE_BOOK: 'create_book',
