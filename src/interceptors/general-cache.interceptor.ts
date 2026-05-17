@@ -26,12 +26,10 @@ class DynamicCacheInterceptor implements NestInterceptor {
     const { page = 1, limit = 10, search = '' } = request.query;
 
     const key = `${this.cacheKeyPrefix}:page=${page}&limit=${limit}&search=${search}`;
-    const cached: any = await this.cacheManager.get(key);
-
-    if (cached) {
+    const cached = await this.cacheManager.get<string>(key);
+    if (cached !== undefined && cached !== null) {
       return of(JSON.parse(cached));
     }
-
     return next.handle().pipe(
       tap((response) => {
         if (response !== undefined && response !== null) {

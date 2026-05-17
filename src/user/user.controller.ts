@@ -1,4 +1,3 @@
-import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import {
   Body,
   Controller,
@@ -90,9 +89,6 @@ export class UserController {
     return this.userService.remove(id);
   }
 
-  @UseInterceptors(CacheInterceptor)
-  @CacheKey(CACHE_KEY.DASHBOARD_DETAILS)
-  @CacheTTL(0)
   @UseGuards(JwtAuthGuard)
   @Get(API_ENDPOINT.DASHBOARD_DETAILS)
   @ResponseMessage(MESSAGES.DASHBOARD_DETAILS_FETCHED)

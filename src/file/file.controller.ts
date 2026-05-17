@@ -4,45 +4,45 @@ import {
   Param,
   Post,
   UploadedFile,
-  UseInterceptors
+  UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 
 @Controller('files')
 export class FileController {
-  constructor(private readonly fileService: FileService) { }
+  constructor(private readonly fileService: FileService) {}
 
   @Post('presigned-url')
   async getPresignedUrl(
-    @Body() body: { folderPath: string; filename: string; contentType: string }
+    @Body() body: { folderPath: string; filename: string; contentType: string },
   ) {
     const { folderPath, filename, contentType } = body;
     const key = `${folderPath}/${Date.now()}-${filename}`;
     const url = await this.fileService.getPresignedUploadUrl(
       folderPath,
       filename,
-      contentType
+      contentType,
     );
     return { uploadUrl: url, key };
   }
 
-  @Post('upload/:folderPath*')
+  @Post('upload{/*folderPath}')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
-        fileSize: 2000 * 1024 * 1024, // 2 GB
+        fileSize: 2000 * 1024 * 1024,
       },
-    })
+    }),
   )
   async uploadFile(
     @UploadedFile() file: Express.Multer.File,
-    @Param('folderPath') folderPath: string
+    @Param('folderPath') folderPath: string,
   ) {
     try {
       const result = await this.fileService.uploadFile(
         file,
-        folderPath || 'default'
+        folderPath || 'default',
       );
       return {
         message: 'File uploaded successfully',
@@ -56,22 +56,22 @@ export class FileController {
     }
   }
 
-  @Post('upload_locally/:folderPath*')
+  @Post('upload_locally{/*folderPath}')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: {
         fileSize: 1500 * 1024 * 1024, // 1.5 GB
       },
-    })
+    }),
   )
   async uploadLocally(
     @UploadedFile() file: Express.Multer.File,
-    @Param('folderPath') folderPath: string
+    @Param('folderPath') folderPath: string,
   ) {
     try {
       const result = await this.fileService.uploadLocally(
         file,
-        folderPath || 'default'
+        folderPath || 'default',
       );
       return {
         message: 'File uploaded locally',
@@ -85,7 +85,7 @@ export class FileController {
     }
   }
 
-  @Post('list/:folderPath*')
+  @Post('list{/*folderPath}')
   async listFiles(@Param('folderPath') folderPath: string) {
     try {
       const [localFiles, s3Files] = await Promise.all([
@@ -104,10 +104,10 @@ export class FileController {
     }
   }
 
-  @Post('delete/:folderPath*')
+  @Post('delete{/*folderPath}')
   async deleteFile(
     @Param('folderPath') folderPath: string,
-    @Body('filename') filename: string
+    @Body('filename') filename: string,
   ) {
     try {
       const fileKey = `${folderPath}/${filename}`;
@@ -139,17 +139,25 @@ export class FileController {
     const { folderPath, filename, contentType, partSize, fileSize } = body;
 
     // Step 1: Initiate multipart upload
-    const { uploadId, key } = await this.fileService.initiateMultipartUpload(folderPath, filename, contentType);
+    const { uploadId, key } = await this.fileService.initiateMultipartUpload(
+      folderPath,
+      filename,
+      contentType,
+    );
 
     // Step 2: Calculate part count
     const partCount = Math.ceil(fileSize / partSize);
 
     // Step 3: Get presigned URLs for all parts
-    const presignedUrls = await this.fileService.getMultipartUploadPresignedUrls(key, uploadId, partCount);
+    const presignedUrls =
+      await this.fileService.getMultipartUploadPresignedUrls(
+        key,
+        uploadId,
+        partCount,
+      );
 
     return { uploadId, presignedUrls, key };
   }
-
 
   // 2. Get presigned URL for part upload
   // @Post('multipart/presigned-url')
@@ -187,8 +195,12 @@ export class FileController {
     },
   ) {
     const { key, uploadId, parts } = body;
-    const url = await this.fileService.completeMultipartUpload(key, uploadId, parts);
-    console.log(url)
+    const url = await this.fileService.completeMultipartUpload(
+      key,
+      uploadId,
+      parts,
+    );
+    console.log(url);
     return url;
   }
 }
