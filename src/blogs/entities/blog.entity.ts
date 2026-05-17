@@ -13,9 +13,11 @@ import {
     ManyToMany,
     ManyToOne,
     OneToMany,
+    Index
 } from 'typeorm';
 @Entity()
 export class Blog extends BaseEntity {
+    @Index()
     @Column()
     title: string;
 
@@ -35,6 +37,7 @@ export class Blog extends BaseEntity {
     })
     is_approved: boolean;
 
+    @Index()
     @ManyToOne(() => User, (tutor) => tutor.blogs, { eager: true })
     @JoinColumn({ name: 'tutor_id' })
     tutor: User;

@@ -7,6 +7,7 @@ import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -18,6 +19,7 @@ import { Is_Paid } from 'src/Helper/constants';
 
 @Entity()
 export class Book extends BaseEntity {
+  @Index()
   @Column()
   title: string;
 
@@ -30,6 +32,7 @@ export class Book extends BaseEntity {
   @Column()
   book_url: string;
 
+  @Index()
   @ManyToOne(() => User, (tutor) => tutor.tutor_books)
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;

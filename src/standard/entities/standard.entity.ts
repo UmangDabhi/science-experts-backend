@@ -2,10 +2,11 @@ import { Book } from 'src/books/entities/book.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Material } from 'src/material/entities/material.entity';
-import { Entity, Column, ManyToMany } from 'typeorm';
+import { Entity, Index, Column, ManyToMany } from 'typeorm';
 
 @Entity()
 export class Standard extends BaseEntity {
+  @Index()
   @Column({ unique: true })
   standard: string;
 

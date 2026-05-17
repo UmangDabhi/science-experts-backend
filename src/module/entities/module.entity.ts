@@ -4,10 +4,18 @@ import { BaseEntity } from 'src/Helper/base.entity';
 import { Is_Free_To_Watch } from 'src/Helper/constants';
 import { Progress } from 'src/progress/entities/progress.entity';
 import { Review } from 'src/reviews/entities/review.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity('module')
 export class ModuleEntity extends BaseEntity {
+  @Index()
   @Column()
   title: string;
 

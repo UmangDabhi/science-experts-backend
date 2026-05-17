@@ -13,6 +13,7 @@ import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
+  Index,
   JoinColumn,
   JoinTable,
   ManyToMany,
@@ -69,6 +70,7 @@ export class Course extends BaseEntity {
   })
   is_approved: boolean;
 
+  @Index()
   @ManyToOne(() => User, (tutor) => tutor.tutor_courses, { eager: true })
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
@@ -101,7 +103,6 @@ export class Course extends BaseEntity {
     inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
   })
   categories: Category[];
-
 
   @ManyToMany(() => Standard, (standards) => standards.courses)
   @JoinTable({

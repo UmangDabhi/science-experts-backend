@@ -6,10 +6,20 @@ import { MaterialPurchase } from 'src/material/entities/material_purchase.entity
 import { Review } from 'src/reviews/entities/review.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Index,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 
 @Entity()
 export class Material extends BaseEntity {
+  @Index()
   @Column()
   title: string;
 
@@ -30,7 +40,9 @@ export class Material extends BaseEntity {
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
 
-  @ManyToOne(() => Language, (language) => language.materials, { nullable: true })
+  @ManyToOne(() => Language, (language) => language.materials, {
+    nullable: true,
+  })
   @JoinColumn({ name: 'language_id' })
   language: Language;
 
@@ -40,7 +52,7 @@ export class Material extends BaseEntity {
   @ManyToMany(() => Category, (categories) => categories.materials)
   @JoinTable({
     name: 'material_category_mapping',
-    joinColumn: { name: 'material_id', referencedColumnName: 'id', },
+    joinColumn: { name: 'material_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
   })
   categories: Category[];
@@ -53,10 +65,12 @@ export class Material extends BaseEntity {
   })
   standards: Standard[];
 
-  @OneToMany(() => MaterialPurchase, (material_purchases) => material_purchases.material)
+  @OneToMany(
+    () => MaterialPurchase,
+    (material_purchases) => material_purchases.material,
+  )
   material_purchases: MaterialPurchase[];
 
   @OneToMany(() => Review, (reviews) => reviews.material)
   reviews: Review[];
-
 }

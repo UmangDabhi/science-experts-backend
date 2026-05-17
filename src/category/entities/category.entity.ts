@@ -2,10 +2,11 @@ import { Book } from 'src/books/entities/book.entity';
 import { Course } from 'src/course/entities/course.entity';
 import { BaseEntity } from 'src/Helper/base.entity';
 import { Material } from 'src/material/entities/material.entity';
-import { Column, Entity, ManyToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToMany } from 'typeorm';
 
 @Entity()
 export class Category extends BaseEntity {
+  @Index()
   @Column({ unique: true })
   category: string;
 
