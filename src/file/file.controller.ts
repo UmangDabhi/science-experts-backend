@@ -40,9 +40,13 @@ export class FileController {
     @Param('folderPath') folderPath: string,
   ) {
     try {
+      const rawPath = Array.isArray(folderPath)
+        ? folderPath.join('/')
+        : folderPath;
+      const resolvedPath = (rawPath || 'default').replace(/\\/g, '/');
       const result = await this.fileService.uploadFile(
         file,
-        folderPath || 'default',
+        resolvedPath || 'default',
       );
       return {
         message: 'File uploaded successfully',
@@ -69,9 +73,13 @@ export class FileController {
     @Param('folderPath') folderPath: string,
   ) {
     try {
+      const rawPath = Array.isArray(folderPath)
+        ? folderPath.join('/')
+        : folderPath;
+      const resolvedPath = (rawPath || 'default').replace(/\\/g, '/');
       const result = await this.fileService.uploadLocally(
         file,
-        folderPath || 'default',
+        resolvedPath || 'default',
       );
       return {
         message: 'File uploaded locally',
@@ -88,9 +96,13 @@ export class FileController {
   @Post('list{/*folderPath}')
   async listFiles(@Param('folderPath') folderPath: string) {
     try {
+      const rawPath = Array.isArray(folderPath)
+        ? folderPath.join('/')
+        : folderPath;
+      const resolvedPath = (rawPath || 'default').replace(/\\/g, '/');
       const [localFiles, s3Files] = await Promise.all([
-        this.fileService.listFilesInLocalFolder(folderPath),
-        this.fileService.listFilesInS3Folder(folderPath),
+        this.fileService.listFilesInLocalFolder(resolvedPath),
+        this.fileService.listFilesInS3Folder(resolvedPath),
       ]);
       return {
         message: 'Files listed successfully',
@@ -110,8 +122,12 @@ export class FileController {
     @Body('filename') filename: string,
   ) {
     try {
-      const fileKey = `${folderPath}/${filename}`;
-      const localFilePath = `${folderPath}/${filename}`;
+      const rawPath = Array.isArray(folderPath)
+        ? folderPath.join('/')
+        : folderPath;
+      const resolvedPath = (rawPath || 'default').replace(/\\/g, '/');
+      const fileKey = `${resolvedPath}/${filename}`;
+      const localFilePath = `${resolvedPath}/${filename}`;
       await this.fileService.deleteFile(fileKey, localFilePath);
       return { message: 'File deleted successfully' };
     } catch (error) {

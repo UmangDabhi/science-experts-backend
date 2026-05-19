@@ -165,8 +165,11 @@ export class UserService {
           'user_balance',
           'referrals',
           'material_purchases',
+          'material_purchases.material',
           'book_purchases',
+          'book_purchases.book',
           'paper_purchases',
+          'paper_purchases.paper',
         ],
       });
 

@@ -35,7 +35,9 @@ export class FileService {
       !process.env.R2_SECRET_ACCESS_KEY ||
       !process.env.R2_ACCOUNT_ID
     ) {
-      throw new Error('Missing Cloudflare R2 configuration in environment variables');
+      throw new Error(
+        'Missing Cloudflare R2 configuration in environment variables',
+      );
     }
 
     this.bucketName = process.env.R2_BUCKET_NAME || 'scienceexperts-uploads';
@@ -44,7 +46,9 @@ export class FileService {
     const r2Endpoint = `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
 
     // Public URL for R2 (if you have a custom domain or R2.dev subdomain)
-    this.publicUrl = process.env.R2_PUBLIC_URL || `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
+    this.publicUrl =
+      process.env.R2_PUBLIC_URL ||
+      `https://pub-${process.env.R2_ACCOUNT_ID}.r2.dev`;
 
     this.s3 = new S3Client({
       region: 'auto', // R2 uses 'auto' for region
@@ -57,7 +61,8 @@ export class FileService {
   }
 
   private sanitizeFolderPath(folder: string): string {
-    return normalize(folder).replace(/^(\.\.(\/|\\|$))+/, '');
+    const normalized = normalize(folder).replace(/^(\.\.(\/|\\|$))+/, '');
+    return normalized.replace(/\\/g, '/'); // Forces Unix slashes for R2 keys
   }
 
   private generateUniqueFilename(originalFilename: string): string {
@@ -71,7 +76,7 @@ export class FileService {
     filename: string,
     contentType: string,
   ): Promise<string> {
-    const key = `${folder}/${Date.now()}-${filename}`;
+    const key = `${folder}/${Date.now()}-${filename}`.replace(/\\/g, '/');
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -95,7 +100,8 @@ export class FileService {
     const safeFolder = this.sanitizeFolderPath(folder);
     const fileStream = fs.createReadStream(file.path);
 
-    const key = `${safeFolder}/${this.generateUniqueFilename(file.originalname)}`;
+    const rawKey = `${safeFolder}/${this.generateUniqueFilename(file.originalname)}`;
+    const key = rawKey.replace(/\\/g, '/');
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
@@ -265,7 +271,7 @@ export class FileService {
     filename: string,
     contentType: string,
   ): Promise<{ uploadId: string; key: string }> {
-    const key = `${folder}/${Date.now()}-${filename}`;
+    const key = `${folder}/${Date.now()}-${filename}`.replace(/\\/g, '/');
 
     const command = new CreateMultipartUploadCommand({
       Bucket: this.bucketName,
@@ -408,12 +414,18 @@ export class FileService {
         : urlObj.pathname;
 
       // R2 public URL format: https://pub-<account_id>.r2.dev/key
-      if (urlObj.hostname.includes('.r2.dev') || urlObj.hostname.includes('.r2.cloudflarestorage.com')) {
+      if (
+        urlObj.hostname.includes('.r2.dev') ||
+        urlObj.hostname.includes('.r2.cloudflarestorage.com')
+      ) {
         return pathname;
       }
 
       // Also handle legacy AWS S3 URLs for migration compatibility
-      if (urlObj.hostname.includes('.s3.') && urlObj.hostname.includes('amazonaws.com')) {
+      if (
+        urlObj.hostname.includes('.s3.') &&
+        urlObj.hostname.includes('amazonaws.com')
+      ) {
         return pathname;
       }
 

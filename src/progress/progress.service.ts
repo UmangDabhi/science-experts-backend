@@ -1,3 +1,4 @@
+import 'regenerator-runtime/runtime';
 import {
   BadRequestException,
   ConflictException,
@@ -6,18 +7,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as fontkit from '@pdf-lib/fontkit';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PDFDocument, rgb } from 'pdf-lib';
 import { ERRORS } from 'src/Helper/message/error.message';
 import { Course } from 'src/course/entities/course.entity';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { FileService } from 'src/file/file.service';
 import { ModuleEntity } from 'src/module/entities/module.entity';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateProgressDto } from './dto/create-progress.dto';
 import { Progress } from './entities/progress.entity';
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
-import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Injectable()
 export class ProgressService {
@@ -51,6 +53,14 @@ export class ProgressService {
         throw new NotFoundException(ERRORS.ERROR_MODULE_NOT_FOUND);
       }
 
+      //  1. Save the new progress record FIRST so it is included in the database counts
+      const newProgress = await this.progressRepository.save({
+        course: existingCourse,
+        module: existingModule,
+        student: { id: currUser.id },
+      });
+
+      // 2. Fetch the total modules and the updated completed module count
       const totalModules = existingCourse.modules.length;
       const completedModulesCount = await this.progressRepository.count({
         where: {
@@ -59,26 +69,42 @@ export class ProgressService {
         },
       });
 
+      // 3. Find the student's course enrollment record
       const enrollment = await this.enrollmentRepository.findOne({
         where: {
           student: { id: currUser.id },
           course: { id: existingCourse.id },
         },
       });
-      console.log('Enrollment:', enrollment);
-      if (
-        completedModulesCount === totalModules &&
-        !enrollment.certificate_url
-      ) {
-        const url = await this.generateCertificate(currUser, existingCourse);
-        console.log('Certificate URL:', url);
+
+      if (enrollment) {
+        const isCourseFinished = completedModulesCount === totalModules;
+        const hasCertificateGenerated = Boolean(enrollment.certificate_url);
+
+        console.log('Total Course Modules:', totalModules);
+        console.log(
+          'Completed Modules Count (Includes current):',
+          completedModulesCount,
+        );
+        console.log('Is Course Finished?:', isCourseFinished);
+
+        // 4. Evaluate certificate threshold safely
+        if (isCourseFinished && !hasCertificateGenerated) {
+          console.log(
+            'Certificate generation started for enrollment:',
+            enrollment.id,
+          );
+
+          const url = await this.generateCertificate(currUser, existingCourse);
+          console.log('Generated Certificate URL:', url);
+
+          //  5. Save the generated URL back to the enrollment table!
+          enrollment.certificate_url = url;
+          await this.enrollmentRepository.save(enrollment);
+        }
       }
-      const newEnrollment = await this.progressRepository.save({
-        course: existingCourse,
-        module: existingModule,
-        student: { id: currUser.id },
-      });
-      return newEnrollment;
+
+      return newProgress;
     } catch (error) {
       console.error('Error creating progress:', error);
       if (error instanceof NotFoundException) throw error;
@@ -91,29 +117,44 @@ export class ProgressService {
 
   async generateCertificate(user: User, course: Course) {
     try {
-      // 1️⃣ Load the template
+      // 1️⃣ Load the template path cleanly
       const templatePath = path.join(
-        __dirname,
-        '..',
+        process.cwd(),
+        'src',
         'assets',
         'certificate.pdf',
       );
+      console.log('1: Template located');
       const existingPdfBytes = fs.readFileSync(templatePath);
-
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+      // 2️⃣ Register fontkit to handle complex Unicode character sets
+      pdfDoc.registerFontkit(fontkit);
+
+      // 3️⃣ Read and embed your custom Gujarati TrueType Font
+      const fontPath = path.join(
+        process.cwd(),
+        'src',
+        'assets',
+        'NotoSansGujarati-Bold.ttf',
+      );
+      const fontBytes = fs.readFileSync(fontPath);
+      const customFont = await pdfDoc.embedFont(fontBytes);
+      console.log('2: Unicode font embedded successfully');
 
       const firstPage = pdfDoc.getPages()[0];
       const { width } = firstPage.getSize();
+      console.log('3: Page sizes captured');
 
-      // Helper to calculate dynamic font size
+      // Helper to calculate dynamic font size using the embedded custom font
       const getDynamicFontSize = (
         text: string,
         maxWidth: number,
         baseSize: number,
       ) => {
         let size = baseSize;
-        const textWidth = font.widthOfTextAtSize(text, size);
+        // Uses customFont instead of standard Helvetica
+        const textWidth = customFont.widthOfTextAtSize(text, size);
         if (textWidth > maxWidth) {
           size = (maxWidth / textWidth) * size;
         }
@@ -124,32 +165,36 @@ export class ProgressService {
       const name = user.name;
       const courseTitle = course.title;
       const dateText = new Date().toLocaleDateString();
+      console.log('4: Text vectors compiled');
 
-      // Dynamic sizes
+      // Calculate sizes safely via custom Unicode metrics
       const nameFontSize = getDynamicFontSize(name, 400, 24);
-      const nameWidth = font.widthOfTextAtSize(name, nameFontSize);
+      const nameWidth = customFont.widthOfTextAtSize(name, nameFontSize);
 
       const courseFontSize = getDynamicFontSize(courseTitle, 500, 18);
-      const courseWidth = font.widthOfTextAtSize(courseTitle, courseFontSize);
+      const courseWidth = customFont.widthOfTextAtSize(
+        courseTitle,
+        courseFontSize,
+      );
 
       const dateFontSize = getDynamicFontSize(dateText, 200, 14);
-      const dateWidth = font.widthOfTextAtSize(dateText, dateFontSize);
+      const dateWidth = customFont.widthOfTextAtSize(dateText, dateFontSize);
 
       // Draw Name (centered)
       firstPage.drawText(name, {
         x: width / 2 - nameWidth / 2,
         y: 275,
         size: nameFontSize,
-        font,
+        font: customFont,
         color: rgb(0, 0, 0),
       });
 
-      // Draw Course Title (centered)
+      // Draw Course Title (centered - Now safe from encoding crashes!)
       firstPage.drawText(courseTitle, {
         x: width / 2 - courseWidth / 2,
         y: 210,
         size: courseFontSize,
-        font,
+        font: customFont,
         color: rgb(0.2, 0.2, 0.2),
       });
 
@@ -158,19 +203,24 @@ export class ProgressService {
         x: width / 2 - dateWidth / 2,
         y: 180,
         size: dateFontSize,
-        font,
+        font: customFont,
         color: rgb(0.4, 0.4, 0.4),
       });
 
-      // ========================
-      // SIGNATURE IMAGES
-      // ========================
-      const tutorBytes = fs.readFileSync(
-        path.join(__dirname, '..', 'assets', 'tutor-signature.png'),
-      );
-      if (tutorBytes) {
-        const tutorImage = await pdfDoc.embedPng(tutorBytes);
+      console.log('5: Main fields rendered');
 
+      // ========================
+      // SIGNATURE IMAGES (Fixed absolute paths for dist mapping)
+      // ========================
+      const tutorPath = path.join(
+        process.cwd(),
+        'src',
+        'assets',
+        'tutor-signature.png',
+      );
+      if (fs.existsSync(tutorPath)) {
+        const tutorBytes = fs.readFileSync(tutorPath);
+        const tutorImage = await pdfDoc.embedPng(tutorBytes);
         firstPage.drawImage(tutorImage, {
           x: width / 4 - 50,
           y: 70,
@@ -178,13 +228,17 @@ export class ProgressService {
           height: 100,
         });
       }
+      console.log('6: Tutor signature processed');
 
-      const ceoBytes = fs.readFileSync(
-        path.join(__dirname, '..', 'assets', 'ceo-signature.png'),
+      const ceoPath = path.join(
+        process.cwd(),
+        'src',
+        'assets',
+        'ceo-signature.png',
       );
-      if (ceoBytes) {
+      if (fs.existsSync(ceoPath)) {
+        const ceoBytes = fs.readFileSync(ceoPath);
         const ceoImage = await pdfDoc.embedPng(ceoBytes);
-
         firstPage.drawImage(ceoImage, {
           x: (width * 3) / 4 - 50,
           y: 70,
@@ -193,9 +247,10 @@ export class ProgressService {
         });
       }
 
-      // 4️⃣ Save PDF
+      // 4️⃣ Save PDF changes
       const pdfBytes = await pdfDoc.save();
       const pdfBuffer = Buffer.from(pdfBytes);
+      console.log('7: Data buffered');
 
       // 5️⃣ Upload to S3
       const fileName = `certificates/${user.id}_${course.id}.pdf`;
@@ -204,11 +259,13 @@ export class ProgressService {
         fileName,
         'application/pdf',
       );
+      console.log('8: Cloud storage complete');
 
       await this.enrollmentRepository.update(
         { student: { id: user.id }, course: { id: course.id } },
         { certificate_url: fileUrl },
       );
+      console.log('9: Database synchronization closed');
 
       return fileUrl;
     } catch (err) {

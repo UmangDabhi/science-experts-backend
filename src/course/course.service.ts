@@ -142,8 +142,8 @@ export class CourseService {
       if (currUser?.role === Role.STUDENT) {
         const enrolledCourses = await this.enrollmentRepository
           .createQueryBuilder('enrollment')
-          .select('enrollment.courseId', 'courseId')
-          .where('enrollment.studentId = :studentId', {
+          .select('enrollment.course', 'courseId')
+          .where('enrollment.student = :studentId', {
             studentId: currUser.id,
           })
           .getRawMany();
@@ -250,8 +250,8 @@ export class CourseService {
         if (currUser.role === Role.STUDENT) {
           const enrolledCourses = await this.enrollmentRepository
             .createQueryBuilder('enrollment')
-            .select('enrollment.courseId', 'courseId')
-            .where('enrollment.studentId = :studentId', {
+            .select('enrollment.course', 'courseId')
+            .where('enrollment.student = :studentId', {
               studentId: currUser.id,
             })
             .getRawMany();
@@ -359,9 +359,13 @@ export class CourseService {
         .getOne();
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       if (!currUser || currUser.role == Role.STUDENT) {
-        const isEnrolled = await this.courseRepository.findOne({
-          where: { id: id, enrollments: { id: currUser?.id } },
+        const isEnrolled = await this.enrollmentRepository.findOne({
+          where: {
+            course: { id: id },
+            student: { id: currUser?.id },
+          },
         });
+
         if (!isEnrolled || !currUser) {
           return {
             ...course,
