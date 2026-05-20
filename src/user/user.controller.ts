@@ -23,6 +23,7 @@ import { GeneralCacheInterceptor } from 'src/interceptors/general-cache.intercep
 import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AdminListQueryDto } from './dto/admin-list-query.dto';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -94,6 +95,41 @@ export class UserController {
   @ResponseMessage(MESSAGES.DASHBOARD_DETAILS_FETCHED)
   dashboardDetails(@Req() req: RequestWithUser) {
     return this.userService.dashboardDetails(req.user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/students')
+  @ResponseMessage('Students fetched successfully')
+  adminStudents(@Query() query: AdminListQueryDto) {
+    return this.userService.adminStudents(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/referrals')
+  @ResponseMessage('Referrals fetched successfully')
+  adminReferrals(@Query() query: AdminListQueryDto) {
+    return this.userService.adminReferrals(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/enrollments')
+  @ResponseMessage('Enrollments fetched successfully')
+  adminEnrollments(@Query() query: AdminListQueryDto) {
+    return this.userService.adminEnrollments(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/purchases')
+  @ResponseMessage('Purchases fetched successfully')
+  adminPurchases(@Query() query: AdminListQueryDto) {
+    return this.userService.adminPurchases(query);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/certificates')
+  @ResponseMessage('Certificates fetched successfully')
+  adminCertificates(@Query() query: AdminListQueryDto) {
+    return this.userService.adminCertificates(query);
   }
 
   @UseGuards(JwtAuthGuard)
