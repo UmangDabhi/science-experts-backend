@@ -78,7 +78,8 @@ export class ProgressService {
       });
 
       if (enrollment) {
-        const isCourseFinished = completedModulesCount === totalModules;
+        const isCourseFinished =
+          totalModules > 0 && completedModulesCount >= totalModules;
         const hasCertificateGenerated = Boolean(enrollment.certificate_url);
 
         console.log('Total Course Modules:', totalModules);
@@ -88,18 +89,25 @@ export class ProgressService {
         );
         console.log('Is Course Finished?:', isCourseFinished);
 
-        // 4. Evaluate certificate threshold safely
-        if (isCourseFinished && !hasCertificateGenerated) {
-          console.log(
-            'Certificate generation started for enrollment:',
-            enrollment.id,
-          );
+        if (isCourseFinished) {
+          if (!enrollment.completed_at) {
+            enrollment.completed_at = new Date();
+            await this.enrollmentRepository.save(enrollment);
+          }
 
-          const url = await this.generateCertificate(currUser, existingCourse);
-          console.log('Generated Certificate URL:', url);
+          // 4. Evaluate certificate threshold safely
+          if (!hasCertificateGenerated) {
+            console.log(
+              'Certificate generation started for enrollment:',
+              enrollment.id,
+            );
 
-          //  5. Save the generated URL back to the enrollment table!
-          enrollment.certificate_url = url;
+            const url = await this.generateCertificate(currUser, existingCourse);
+            console.log('Generated Certificate URL:', url);
+
+            enrollment.certificate_url = url;
+          }
+
           await this.enrollmentRepository.save(enrollment);
         }
       }
@@ -263,7 +271,7 @@ export class ProgressService {
 
       await this.enrollmentRepository.update(
         { student: { id: user.id }, course: { id: course.id } },
-        { certificate_url: fileUrl },
+        { certificate_url: fileUrl, completed_at: new Date() },
       );
       console.log('9: Database synchronization closed');
 
