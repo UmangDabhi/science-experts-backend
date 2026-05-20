@@ -292,6 +292,17 @@ export class UserService {
     }
   }
 
+  async updatePassword(id: string, password: string) {
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await this.userRepository.update(id, {
+        password: hashedPassword,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(ERRORS.ERROR_UPDATING_USER);
+    }
+  }
+
   async dashboardDetails(user: User) {
     try {
       if (!user) {
