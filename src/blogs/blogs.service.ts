@@ -73,13 +73,11 @@ export class BlogsService {
         queryOptions.standards = { id: blogFilterDto.standard };
       }
       queryOptions.is_approved = Is_Approved.YES
-      const relations = ["reviews"];
       const result = await pagniateRecords(
         this.blogRepository,
         blogFilterDto,
         searchableFields,
-        queryOptions,
-        relations
+        queryOptions
       );
 
       return result;
@@ -107,13 +105,11 @@ export class BlogsService {
       if (currUser.role == Role.TUTOR) {
         queryOptions.tutor = { id: currUser.id };
       }
-      const relations = ["reviews"];
       const result = await pagniateRecords(
         this.blogRepository,
         blogFilterDto,
         searchableFields,
-        queryOptions,
-        relations
+        queryOptions
       );
 
       return result;
@@ -135,7 +131,6 @@ export class BlogsService {
           'categories',
           'standards',
           'language',
-          'reviews',
         ],
       });
       if (!blog) throw new NotFoundException(ERRORS.ERROR_BLOG_NOT_FOUND);

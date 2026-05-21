@@ -66,6 +66,23 @@ export class ReviewsController {
     );
   }
 
+  @UseGuards(OptionalAuthGuard)
+  @Get(`${API_ENDPOINT.GET_ENTITY_REVIEWS}/:entityType/:entityId`)
+  @ResponseMessage(MESSAGES.ALL_REVIEW_FETCHED)
+  findEntityReviews(
+    @Req() req: RequestWithUser,
+    @Param('entityType') entityType: string,
+    @Param('entityId') entityId: string,
+    @Query() paginationDto: PaginationDto,
+  ) {
+    return this.reviewsService.findEntityReviews(
+      entityType,
+      entityId,
+      req?.user,
+      paginationDto,
+    );
+  }
+
   @UseGuards(JwtAuthGuard)
   @Patch(`${API_ENDPOINT.UPDATE_REVIEW}/:id`)
   @ResponseMessage(MESSAGES.REVIEW_DELETED)

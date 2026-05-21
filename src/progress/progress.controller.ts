@@ -6,16 +6,19 @@ import {
   Post,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { ResponseMessage } from 'src/Helper/constants';
 import { RequestWithUser } from 'src/Helper/interfaces/requestwithuser.interface';
 import { API_ENDPOINT } from 'src/Helper/message/api.message';
 import { MESSAGES } from 'src/Helper/message/resposne.message';
+import { SignedUrlInterceptor } from 'src/interceptors/signed-url.interceptor';
 import { CreateProgressDto } from './dto/create-progress.dto';
 import { ProgressService } from './progress.service';
 
 @Controller('progress')
+@UseInterceptors(SignedUrlInterceptor)
 export class ProgressController {
   constructor(private readonly progressService: ProgressService) {}
 

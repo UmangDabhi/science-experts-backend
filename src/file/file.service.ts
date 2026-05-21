@@ -19,6 +19,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { localStoragePath } from 'src/Helper/constants';
 import * as dotenv from 'dotenv';
 import * as fs from 'fs';
+import { Readable } from 'stream';
 
 dotenv.config();
 
@@ -395,6 +396,36 @@ export class FileService {
     } catch (error) {
       console.error('Error generating download signed URL:', error);
       throw new InternalServerErrorException('Could not generate download URL');
+    }
+  }
+
+  async getObjectReadStream(
+    key: string,
+  ): Promise<{ stream: Readable; contentType?: string; contentLength?: number }> {
+    try {
+      if (!key) {
+        throw new Error('Object key is required');
+      }
+
+      key = decodeURIComponent(key).replace(/\+/g, ' ');
+
+      const result = await this.s3.send(
+        new GetObjectCommand({
+          Bucket: this.bucketName,
+          Key: key,
+          ResponseContentType: 'application/octet-stream',
+          ResponseContentDisposition: 'inline; filename="protected-document"',
+        }),
+      );
+
+      return {
+        stream: result.Body as Readable,
+        contentType: result.ContentType || 'application/pdf',
+        contentLength: result.ContentLength,
+      };
+    } catch (error) {
+      console.error('Error fetching object stream:', error);
+      throw new InternalServerErrorException('Could not fetch file');
     }
   }
 

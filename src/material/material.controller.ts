@@ -133,4 +133,13 @@ export class MaterialController {
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getMaterialDownloadUrl(id, req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(`view/:id`)
+  async viewMaterial(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+  ) {
+    return this.secureDownloadService.getMaterialViewPayload(id, req.user);
+  }
 }

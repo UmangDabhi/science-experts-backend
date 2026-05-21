@@ -4,6 +4,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   ConflictException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -671,6 +672,49 @@ export class UserService {
       return this.paginateQuery(qb, query);
     } catch (error) {
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_ENROLLMENTS);
+    }
+  }
+
+  async getCertificateUrl(currUser: User, enrollmentId: string) {
+    try {
+      if (!enrollmentId) {
+        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      }
+
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: { id: enrollmentId },
+        relations: ['student', 'course', 'course.tutor'],
+      });
+
+      if (!enrollment) {
+        throw new NotFoundException(ERRORS.ERROR_ENROLLMENT_NOT_FOUND);
+      }
+
+      if (!enrollment.certificate_url) {
+        throw new NotFoundException('Certificate not generated yet');
+      }
+
+      const isAdmin = currUser?.role === Role.ADMIN;
+      const isOwner = enrollment.student?.id === currUser?.id;
+      const isCourseTutor = enrollment.course?.tutor?.id === currUser?.id;
+
+      if (!isAdmin && !isOwner && !isCourseTutor) {
+        throw new ForbiddenException('You are not allowed to access this certificate');
+      }
+
+      return {
+        enrollment_id: enrollment.id,
+        certificate_url: enrollment.certificate_url,
+      };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error fetching certificate');
     }
   }
 

@@ -12,6 +12,7 @@ import { BookPurchase } from 'src/books/entities/book_purchase.entity';
 import { MaterialPurchase } from 'src/material/entities/material_purchase.entity';
 import { PaperPurchase } from 'src/papers/entities/paper_purchase.entity';
 import { FileService } from 'src/file/file.service';
+import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 
 @Global()
 @Module({
@@ -23,7 +24,8 @@ import { FileService } from 'src/file/file.service';
       Paper,
       BookPurchase,
       MaterialPurchase,
-      PaperPurchase
+      PaperPurchase,
+      Enrollment
     ])
   ],
   providers: [CacheService, S3UrlService, SecureDownloadService, FileService],

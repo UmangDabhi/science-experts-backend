@@ -105,4 +105,13 @@ export class BooksController {
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getBookDownloadUrl(id, req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(`view/:id`)
+  async viewBook(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+  ) {
+    return this.secureDownloadService.getBookViewPayload(id, req.user);
+  }
 }

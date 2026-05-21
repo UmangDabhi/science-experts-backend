@@ -46,7 +46,7 @@ export class Blog extends BaseEntity {
     @JoinColumn({ name: 'language' })
     language: Language;
 
-    @OneToMany(() => Review, (reviews) => reviews.course)
+    @OneToMany(() => Review, (reviews) => reviews.blog)
     reviews: Review[];
 
     @ManyToMany(() => Category, (categories) => categories.courses, { nullable: true })

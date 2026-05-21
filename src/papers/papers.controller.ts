@@ -105,4 +105,13 @@ export class PapersController {
   async getDownloadUrl(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.secureDownloadService.getPaperDownloadUrl(id, req.user);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(`view/:id`)
+  async viewPaper(
+    @Req() req: RequestWithUser,
+    @Param('id') id: string,
+  ) {
+    return this.secureDownloadService.getPaperViewPayload(id, req.user);
+  }
 }

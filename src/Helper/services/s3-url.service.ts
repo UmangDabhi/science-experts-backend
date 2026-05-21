@@ -100,14 +100,34 @@ export class S3UrlService {
     try {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname;
+      const publicHostnames = [
+        this.publicUrl ? new URL(this.publicUrl).hostname : '',
+        ...(process.env.R2_ADDITIONAL_PUBLIC_HOSTS || '')
+          .split(',')
+          .map((host) => host.trim())
+          .filter(Boolean),
+      ];
 
       return (
+        publicHostnames.includes(hostname) ||
         hostname.includes('.r2.') ||
         (hostname.includes('s3.') && hostname.includes('amazonaws.com'))
       );
     } catch {
       return false;
     }
+  }
+
+  private isObjectKey(value: string): boolean {
+    if (!value || typeof value !== 'string') {
+      return false;
+    }
+
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(value)) {
+      return false;
+    }
+
+    return value.includes('/') && /\.[a-z0-9]{2,8}($|\?)/i.test(value);
   }
 
   /**
@@ -123,15 +143,25 @@ export class S3UrlService {
         throw new Error('S3 key is required');
       }
       const isVideoField = fieldName === 'video_url'; // 👈 Based on field name
+      const isCertificateField = fieldName === 'certificate_url';
       const contentType = isVideoField ? 'video/mp4' : undefined;
+      const signedUrlExpiry =
+        expiresIn ||
+        (isVideoField
+          ? parseInt(process.env.VIDEO_SIGNED_URL_EXPIRATION_SECONDS || '300', 10)
+          : this.defaultExpirationSeconds);
 
       const command = new GetObjectCommand({
         Bucket: this.bucketName,
         Key: s3Key,
         ...(contentType && { ResponseContentType: contentType }),
+        ...(isCertificateField && {
+          ResponseContentType: 'application/pdf',
+          ResponseContentDisposition: 'attachment; filename="science-experts-certificate.pdf"',
+        }),
       });
       const signedUrl = await getSignedUrl(this.s3, command, {
-        expiresIn: expiresIn || this.defaultExpirationSeconds,
+        expiresIn: signedUrlExpiry,
       });
 
       return signedUrl;
@@ -153,6 +183,10 @@ export class S3UrlService {
     fieldName?: string,
   ): Promise<string> {
     try {
+      if (this.isObjectKey(directUrl)) {
+        return await this.generateSignedUrl(directUrl, expiresIn, fieldName);
+      }
+
       if (!this.isS3Url(directUrl)) {
         // Not an S3 URL, return as-is
         return directUrl;

@@ -133,6 +133,16 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('certificate/:enrollmentId')
+  @ResponseMessage('Certificate URL fetched successfully')
+  getCertificateUrl(
+    @Req() req: RequestWithUser,
+    @Param('enrollmentId') enrollmentId: string,
+  ) {
+    return this.userService.getCertificateUrl(req.user, enrollmentId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post(API_ENDPOINT.MARK_TUTORIAL_COMPLETED)
   @ResponseMessage('Tutorial marked as completed')
   markTutorialCompleted(@Req() req: RequestWithUser) {

@@ -59,6 +59,8 @@ export class ProgressService {
         module: existingModule,
         student: { id: currUser.id },
       });
+      let certificateUrl = null;
+      let enrollmentId = null;
 
       // 2. Fetch the total modules and the updated completed module count
       const totalModules = existingCourse.modules.length;
@@ -78,6 +80,8 @@ export class ProgressService {
       });
 
       if (enrollment) {
+        enrollmentId = enrollment.id;
+        certificateUrl = enrollment.certificate_url || null;
         const isCourseFinished =
           totalModules > 0 && completedModulesCount >= totalModules;
         const hasCertificateGenerated = Boolean(enrollment.certificate_url);
@@ -106,13 +110,22 @@ export class ProgressService {
             console.log('Generated Certificate URL:', url);
 
             enrollment.certificate_url = url;
+            certificateUrl = url;
           }
 
           await this.enrollmentRepository.save(enrollment);
+          certificateUrl = enrollment.certificate_url || certificateUrl;
         }
       }
 
-      return newProgress;
+      return {
+        ...newProgress,
+        enrollment_id: enrollmentId,
+        certificate_url: certificateUrl,
+        is_course_finished: totalModules > 0 && completedModulesCount >= totalModules,
+        completed_modules_count: completedModulesCount,
+        total_modules_count: totalModules,
+      };
     } catch (error) {
       console.error('Error creating progress:', error);
       if (error instanceof NotFoundException) throw error;
