@@ -8,6 +8,7 @@ import { Standard } from 'src/standard/entities/standard.entity';
 import { Language } from 'src/language/entities/language.entity';
 import { Material } from 'src/material/entities/material.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
+import { ModuleEntity } from 'src/module/entities/module.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
       Standard,
       Language,
       Enrollment,
+      ModuleEntity,
     ]),
   ],
   controllers: [CourseController],

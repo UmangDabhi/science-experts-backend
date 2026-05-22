@@ -21,6 +21,7 @@ import { FilterDto } from 'src/Helper/dto/filter.dto';
 import { AttachCourseMaterialDto } from './dto/attach-course-material.dto';
 import { Material } from 'src/material/entities/material.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
+import { ModuleEntity } from 'src/module/entities/module.entity';
 
 @Injectable()
 export class CourseService {
@@ -37,6 +38,8 @@ export class CourseService {
     private readonly languageRepository: Repository<Language>,
     @InjectRepository(Enrollment)
     private readonly enrollmentRepository: Repository<Enrollment>,
+    @InjectRepository(ModuleEntity)
+    private readonly moduleRepository: Repository<ModuleEntity>,
   ) {}
   async create(currUser: User, createCourseDto: CreateCourseDto): Promise<any> {
     try {
@@ -138,6 +141,7 @@ export class CourseService {
       }
 
       const [data, total] = await qb.getManyAndCount();
+      await this.attachCourseDurationTotals(data);
 
       // Enrollment State
       if (currUser?.role === Role.STUDENT) {
@@ -246,6 +250,7 @@ export class CourseService {
       }
 
       const [data, total] = await qb.getManyAndCount();
+      await this.attachCourseDurationTotals(data);
 
       // Enrollment State
       if (currUser) {
@@ -337,6 +342,28 @@ export class CourseService {
 
       throw new InternalServerErrorException(ERRORS.ERROR_FETCHING_COURSES);
     }
+  }
+
+  private async attachCourseDurationTotals(courses: Course[]) {
+    if (!courses.length) return;
+
+    const totals = await this.moduleRepository
+      .createQueryBuilder('module')
+      .select('module.course_id', 'courseId')
+      .addSelect('COALESCE(SUM(module.duration), 0)', 'totalDuration')
+      .where('module.course_id IN (:...courseIds)', {
+        courseIds: courses.map((course) => course.id),
+      })
+      .groupBy('module.course_id')
+      .getRawMany();
+
+    const totalByCourse = new Map(
+      totals.map((item) => [item.courseId, Number(item.totalDuration || 0)]),
+    );
+
+    courses.forEach((course) => {
+      course['totalDuration'] = totalByCourse.get(course.id) || 0;
+    });
   }
 
   async findOne(currUser: User, id: string) {
