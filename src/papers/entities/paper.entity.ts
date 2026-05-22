@@ -4,12 +4,13 @@ import { Language } from 'src/language/entities/language.entity';
 import { Review } from 'src/reviews/entities/review.entity';
 import { Standard } from 'src/standard/entities/standard.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 import { Is_Paid } from 'src/Helper/constants';
 import { PaperPurchase } from './paper_purchase.entity';
 
 @Entity()
 export class Paper extends BaseEntity {
+    @Index()
     @Column()
     title: string;
 
@@ -22,6 +23,7 @@ export class Paper extends BaseEntity {
     @Column()
     paper_url: string;
 
+    @Index()
     @ManyToOne(() => User, (tutor) => tutor.tutor_papers)
     @JoinColumn({ name: 'tutor_id' })
     tutor: User;
@@ -35,8 +37,10 @@ export class Paper extends BaseEntity {
         enum: Is_Paid,
         default: Is_Paid.NO,
     })
+    @Index()
     is_paid: boolean;
 
+    @Index()
     @Column({
         nullable: true
     })

@@ -97,9 +97,10 @@ export class CourseService {
       }
 
       // Search
-      if (courseFilterDto?.search) {
+      const search = courseFilterDto?.search?.trim();
+      if (search) {
         qb.andWhere('LOWER(course.title) LIKE LOWER(:search)', {
-          search: `%${courseFilterDto.search}%`,
+          search: `%${search}%`,
         });
       }
 
@@ -204,9 +205,10 @@ export class CourseService {
         });
 
       // Search
-      if (courseFilterDto?.search) {
+      const search = courseFilterDto?.search?.trim();
+      if (search) {
         qb.andWhere('LOWER(course.title) LIKE LOWER(:search)', {
-          search: `%${courseFilterDto.search}%`,
+          search: `%${search}%`,
         });
       }
 

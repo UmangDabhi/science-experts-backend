@@ -39,6 +39,8 @@ export class SignedUrlInterceptor implements NestInterceptor {
     const urlFields = [
       'video_url',
       'profile_url',
+      'ceo_signature_url',
+      'tutor_signature_url',
       'certificate_url',
       'image_url',
       'file_url',

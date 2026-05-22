@@ -23,6 +23,7 @@ import {
 
 @Entity()
 export class Course extends BaseEntity {
+  @Index()
   @Column()
   title: string;
 
@@ -40,12 +41,14 @@ export class Course extends BaseEntity {
     enum: Is_Paid,
     default: Is_Paid.NO,
   })
+  @Index()
   is_paid: boolean;
 
   @Column({
     type: 'bigint',
     nullable: true,
   })
+  @Index()
   price: number;
 
   @Column({
@@ -68,6 +71,7 @@ export class Course extends BaseEntity {
     enum: Is_Approved,
     default: Is_Approved.NO,
   })
+  @Index()
   is_approved: boolean;
 
   @Index()

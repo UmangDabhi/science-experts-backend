@@ -46,8 +46,10 @@ export class Book extends BaseEntity {
     enum: Is_Paid,
     default: Is_Paid.NO,
   })
+  @Index()
   is_paid: boolean;
 
+  @Index()
   @Column({
     nullable: true,
   })

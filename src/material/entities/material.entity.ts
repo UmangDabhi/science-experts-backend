@@ -32,10 +32,12 @@ export class Material extends BaseEntity {
   @Column()
   material_url: string;
 
+  @Index()
   @ManyToOne(() => Course, (course) => course.materials, { nullable: true })
   @JoinColumn({ name: 'course_id' })
   course: Course;
 
+  @Index()
   @ManyToOne(() => User, (tutor) => tutor.tutor_materials)
   @JoinColumn({ name: 'tutor_id' })
   tutor: User;
@@ -46,6 +48,7 @@ export class Material extends BaseEntity {
   @JoinColumn({ name: 'language_id' })
   language: Language;
 
+  @Index()
   @Column()
   amount: number;
 

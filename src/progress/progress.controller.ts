@@ -38,4 +38,14 @@ export class ProgressController {
   remove(@Req() req: RequestWithUser, @Param('id') id: string) {
     return this.progressService.remove(req.user, id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('regenerate_certificate/:enrollmentId')
+  @ResponseMessage('Certificate regenerated successfully')
+  regenerateCertificate(
+    @Req() req: RequestWithUser,
+    @Param('enrollmentId') enrollmentId: string,
+  ) {
+    return this.progressService.regenerateCertificate(req.user, enrollmentId);
+  }
 }

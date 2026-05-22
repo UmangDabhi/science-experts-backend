@@ -260,9 +260,10 @@ export class MaterialService {
         });
 
       // SEARCH
-      if (search) {
+      const normalizedSearch = search?.trim();
+      if (normalizedSearch) {
         queryBuilder.andWhere('material.title ILIKE :search', {
-          search: `%${search}%`,
+          search: `%${normalizedSearch}%`,
         });
       }
 

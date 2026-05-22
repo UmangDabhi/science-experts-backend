@@ -38,6 +38,14 @@ export class CreateUserDto {
   profile_url?: string;
 
   @IsOptional()
+  @IsString()
+  ceo_signature_url?: string;
+
+  @IsOptional()
+  @IsString()
+  tutor_signature_url?: string;
+
+  @IsOptional()
   phone_no?: string;
 
   @IsOptional()

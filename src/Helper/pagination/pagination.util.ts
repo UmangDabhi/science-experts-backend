@@ -15,7 +15,8 @@ export async function pagniateRecords<T>(
   relations: string[] = [],
   orderBy?: OrderBy<T>,
 ): Promise<PaginatedResult<T>> {
-  const { page, limit, search } = paginationDto;
+  const { page, limit } = paginationDto;
+  const search = paginationDto.search?.trim();
 
   const skip = page && limit ? (page - 1) * limit : 0;
 
@@ -43,7 +44,7 @@ export async function pagniateRecords<T>(
   }
 
   const data = await repository.find({ where, relations, skip, take: limit, order });
-  const total = await repository.count({ where, order });
+  const total = await repository.count({ where });
 
   return {
     data,

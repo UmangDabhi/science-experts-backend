@@ -41,6 +41,12 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   profile_url: string;
 
+  @Column({ nullable: true, select: false })
+  ceo_signature_url: string;
+
+  @Column({ nullable: true, select: false })
+  tutor_signature_url: string;
+
   @Column()
   password: string;
 
@@ -49,17 +55,20 @@ export class User extends BaseEntity {
     enum: Role,
     default: Role.STUDENT,
   })
+  @Index()
   role: Role;
 
   @Column({ type: 'varchar', length: 8, nullable: true, unique: true })
   referral_code: string;
 
+  @Index()
   @Column({ default: 0 })
   referral_count: number;
 
   @Column({ default: false })
   has_completed_tutorial: boolean;
 
+  @Index()
   @Column({ nullable: true })
   phone_no: string;
 
@@ -84,6 +93,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   pincode: string;
 
+  @Index()
   @OneToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'referred_by_id' })
   referred_by: User;

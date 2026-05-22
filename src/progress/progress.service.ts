@@ -2,6 +2,7 @@ import 'regenerator-runtime/runtime';
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -10,8 +11,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as fontkit from '@pdf-lib/fontkit';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PDFDocument, rgb } from 'pdf-lib';
+import { PDFDocument, PDFPage, rgb } from 'pdf-lib';
 import { ERRORS } from 'src/Helper/message/error.message';
+import { Role } from 'src/Helper/constants';
 import { Course } from 'src/course/entities/course.entity';
 import { Enrollment } from 'src/enrollment/entities/enrollment.entity';
 import { FileService } from 'src/file/file.service';
@@ -106,7 +108,14 @@ export class ProgressService {
               enrollment.id,
             );
 
-            const url = await this.generateCertificate(currUser, existingCourse);
+            const courseForCertificate = await this.courseRepository.findOne({
+              where: { id: existingCourse.id },
+              relations: ['tutor'],
+            });
+            const url = await this.generateCertificate(
+              currUser,
+              courseForCertificate || existingCourse,
+            );
             console.log('Generated Certificate URL:', url);
 
             enrollment.certificate_url = url;
@@ -183,8 +192,8 @@ export class ProgressService {
       };
 
       // Data
-      const name = user.name;
-      const courseTitle = course.title;
+      const name = user.name || '';
+      const courseTitle = course.title || '';
       const dateText = new Date().toLocaleDateString();
       console.log('4: Text vectors compiled');
 
@@ -231,42 +240,26 @@ export class ProgressService {
       console.log('5: Main fields rendered');
 
       // ========================
-      // SIGNATURE IMAGES (Fixed absolute paths for dist mapping)
+      // SIGNATURE IMAGES
       // ========================
-      const tutorPath = path.join(
-        process.cwd(),
-        'src',
-        'assets',
-        'tutor-signature.png',
+      const signatures = await this.resolveCertificateSignatures(course);
+
+      await this.drawStoredSignature(
+        pdfDoc,
+        firstPage,
+        signatures.tutorSignatureUrl,
+        width / 4 - 50,
+        70,
       );
-      if (fs.existsSync(tutorPath)) {
-        const tutorBytes = fs.readFileSync(tutorPath);
-        const tutorImage = await pdfDoc.embedPng(tutorBytes);
-        firstPage.drawImage(tutorImage, {
-          x: width / 4 - 50,
-          y: 70,
-          width: 100,
-          height: 100,
-        });
-      }
       console.log('6: Tutor signature processed');
 
-      const ceoPath = path.join(
-        process.cwd(),
-        'src',
-        'assets',
-        'ceo-signature.png',
+      await this.drawStoredSignature(
+        pdfDoc,
+        firstPage,
+        signatures.ceoSignatureUrl,
+        (width * 3) / 4 - 50,
+        70,
       );
-      if (fs.existsSync(ceoPath)) {
-        const ceoBytes = fs.readFileSync(ceoPath);
-        const ceoImage = await pdfDoc.embedPng(ceoBytes);
-        firstPage.drawImage(ceoImage, {
-          x: (width * 3) / 4 - 50,
-          y: 70,
-          width: 100,
-          height: 100,
-        });
-      }
 
       // 4️⃣ Save PDF changes
       const pdfBytes = await pdfDoc.save();
@@ -292,6 +285,140 @@ export class ProgressService {
     } catch (err) {
       console.error('Error generating certificate:', err);
       throw err;
+    }
+  }
+
+  async regenerateCertificate(currUser: User, enrollmentId: string) {
+    try {
+      if (!enrollmentId) {
+        throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
+      }
+
+      const enrollment = await this.enrollmentRepository.findOne({
+        where: { id: enrollmentId },
+        relations: ['student', 'course', 'course.tutor'],
+      });
+
+      if (!enrollment) {
+        throw new NotFoundException(ERRORS.ERROR_ENROLLMENT_NOT_FOUND);
+      }
+
+      if (!enrollment.certificate_url && !enrollment.completed_at) {
+        throw new BadRequestException('Certificate is not ready to regenerate');
+      }
+
+      const isAdmin = currUser?.role === Role.ADMIN;
+      const isOwner = enrollment.student?.id === currUser?.id;
+      const isCourseTutor = enrollment.course?.tutor?.id === currUser?.id;
+
+      if (!isAdmin && !isOwner && !isCourseTutor) {
+        throw new ForbiddenException(
+          'You are not allowed to regenerate this certificate',
+        );
+      }
+
+      const certificateUrl = await this.generateCertificate(
+        enrollment.student,
+        enrollment.course,
+      );
+
+      return {
+        enrollment_id: enrollment.id,
+        certificate_url: certificateUrl,
+      };
+    } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Error regenerating certificate');
+    }
+  }
+
+  private async resolveCertificateSignatures(course: Course) {
+    try {
+      const adminCeo = await this.userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.ceo_signature_url')
+        .where('user.role = :role', { role: Role.ADMIN })
+        .andWhere('user.ceo_signature_url IS NOT NULL')
+        .andWhere("user.ceo_signature_url != ''")
+        .orderBy('user.created_at', 'ASC')
+        .getOne();
+
+      const fallbackAdminTutor = await this.userRepository
+        .createQueryBuilder('user')
+        .addSelect('user.tutor_signature_url')
+        .where('user.role = :role', { role: Role.ADMIN })
+        .andWhere('user.tutor_signature_url IS NOT NULL')
+        .andWhere("user.tutor_signature_url != ''")
+        .orderBy('user.created_at', 'ASC')
+        .getOne();
+
+      const ceoSignatureUrl = adminCeo?.ceo_signature_url || null;
+      const tutorSignatureUrl =
+        course?.tutor?.tutor_signature_url ||
+        fallbackAdminTutor?.tutor_signature_url ||
+        ceoSignatureUrl ||
+        null;
+
+      return { ceoSignatureUrl, tutorSignatureUrl };
+    } catch (error) {
+      console.warn(
+        'Certificate signatures skipped until signature columns are migrated:',
+        error?.message || error,
+      );
+      return { ceoSignatureUrl: null, tutorSignatureUrl: null };
+    }
+  }
+
+  private async readStoredFile(fileUrl: string): Promise<Buffer> {
+    const key = this.fileService.extractS3KeyFromUrl(fileUrl);
+    if (!key) {
+      throw new Error('Invalid signature file URL');
+    }
+
+    const { stream } = await this.fileService.getObjectReadStream(key);
+    const chunks: Buffer[] = [];
+
+    for await (const chunk of stream) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+
+    return Buffer.concat(chunks);
+  }
+
+  private async embedImage(pdfDoc: PDFDocument, imageBytes: Buffer) {
+    try {
+      return await pdfDoc.embedPng(imageBytes);
+    } catch {
+      return await pdfDoc.embedJpg(imageBytes);
+    }
+  }
+
+  private async drawStoredSignature(
+    pdfDoc: PDFDocument,
+    page: PDFPage,
+    signatureUrl: string | null,
+    x: number,
+    y: number,
+  ) {
+    if (!signatureUrl) return;
+
+    try {
+      const signatureBytes = await this.readStoredFile(signatureUrl);
+      const signatureImage = await this.embedImage(pdfDoc, signatureBytes);
+      page.drawImage(signatureImage, {
+        x,
+        y,
+        width: 100,
+        height: 100,
+      });
+    } catch (error) {
+      console.warn('Certificate signature skipped:', error?.message || error);
     }
   }
 

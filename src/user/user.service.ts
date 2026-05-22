@@ -512,10 +512,11 @@ export class UserService {
         );
       }
 
-      if (query.search) {
+      const search = this.normalizeSearch(query.search);
+      if (search) {
         qb.andWhere(
           `(user.name ILIKE :search OR user.email ILIKE :search OR user.stu_id ILIKE :search OR user.phone_no ILIKE :search)`,
-          { search: `%${query.search}%` },
+          { search: `%${search}%` },
         );
       }
 
@@ -562,10 +563,11 @@ export class UserService {
           .orderBy('user.created_at', 'DESC');
       }
 
-      if (query.search) {
+      const search = this.normalizeSearch(query.search);
+      if (search) {
         qb.andWhere(
           `(user.name ILIKE :search OR user.email ILIKE :search OR user.stu_id ILIKE :search OR user.referral_code ILIKE :search)`,
-          { search: `%${query.search}%` },
+          { search: `%${search}%` },
         );
       }
 
@@ -598,10 +600,11 @@ export class UserService {
         ])
         .orderBy('enrollment.enrolled_at', 'DESC');
 
-      if (query.search) {
+      const search = this.normalizeSearch(query.search);
+      if (search) {
         qb.andWhere(
           `(student.name ILIKE :search OR student.email ILIKE :search OR student.stu_id ILIKE :search OR course.title ILIKE :search)`,
-          { search: `%${query.search}%` },
+          { search: `%${search}%` },
         );
       }
 
@@ -614,19 +617,56 @@ export class UserService {
   async adminPurchases(query: AdminListQueryDto) {
     try {
       const type = query.type || 'all';
-      const purchases = [
-        ...(type === 'all' || type === 'material'
-          ? await this.getMaterialPurchases(query)
-          : []),
-        ...(type === 'all' || type === 'book' ? await this.getBookPurchases(query) : []),
-        ...(type === 'all' || type === 'paper' ? await this.getPaperPurchases(query) : []),
-      ].sort((a, b) => new Date(b.purchased_at).getTime() - new Date(a.purchased_at).getTime());
-
-      const total = purchases.length;
       const page = Number(query.page || 1);
-      const limit = Number(query.limit || total || 10);
+      const limit = Number(query.limit || 10);
+
+      if (type === 'material') {
+        return this.getPaginatedPurchaseResult(
+          await this.getMaterialPurchases(query, true),
+          page,
+          limit,
+        );
+      }
+
+      if (type === 'book') {
+        return this.getPaginatedPurchaseResult(
+          await this.getBookPurchases(query, true),
+          page,
+          limit,
+        );
+      }
+
+      if (type === 'paper') {
+        return this.getPaginatedPurchaseResult(
+          await this.getPaperPurchases(query, true),
+          page,
+          limit,
+        );
+      }
+
+      const maxRowsPerType = query.page && query.limit ? page * limit : undefined;
+      const [materialPurchases, bookPurchases, paperPurchases] =
+        await Promise.all([
+          this.getMaterialPurchases(query, false, maxRowsPerType),
+          this.getBookPurchases(query, false, maxRowsPerType),
+          this.getPaperPurchases(query, false, maxRowsPerType),
+        ]);
+
+      const purchases = [
+        ...materialPurchases.data,
+        ...bookPurchases.data,
+        ...paperPurchases.data,
+      ].sort(
+        (a, b) =>
+          new Date(b.purchased_at).getTime() -
+          new Date(a.purchased_at).getTime(),
+      );
+
+      const total =
+        materialPurchases.total + bookPurchases.total + paperPurchases.total;
       const start = query.page && query.limit ? (page - 1) * limit : 0;
-      const data = query.page && query.limit ? purchases.slice(start, start + limit) : purchases;
+      const data =
+        query.page && query.limit ? purchases.slice(start, start + limit) : purchases;
 
       return {
         data,
@@ -662,10 +702,11 @@ export class UserService {
         ])
         .orderBy('enrollment.completed_at', 'DESC');
 
-      if (query.search) {
+      const search = this.normalizeSearch(query.search);
+      if (search) {
         qb.andWhere(
           `(student.name ILIKE :search OR student.email ILIKE :search OR student.stu_id ILIKE :search OR course.title ILIKE :search)`,
-          { search: `%${query.search}%` },
+          { search: `%${search}%` },
         );
       }
 
@@ -718,14 +759,47 @@ export class UserService {
     }
   }
 
-  private async getMaterialPurchases(query: AdminListQueryDto) {
-    const purchases = await this.materialPurchaseRepository.find({
-      relations: ['student', 'material'],
-      order: { enrolled_at: 'DESC' },
-    });
-    return purchases
-      .filter((purchase) => this.matchesPurchaseSearch(purchase.student, purchase.material, query.search))
-      .map((purchase) => ({
+  private async getMaterialPurchases(
+    query: AdminListQueryDto,
+    paginate = false,
+    maxRows?: number,
+  ) {
+    const qb = this.materialPurchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.student', 'student')
+      .leftJoinAndSelect('purchase.material', 'material')
+      .select([
+        'purchase.id',
+        'purchase.feedback',
+        'purchase.enrolled_at',
+        'purchase.completed_at',
+        'student.id',
+        'student.stu_id',
+        'student.name',
+        'student.email',
+        'student.phone_no',
+        'student.standard',
+        'student.school',
+        'student.city',
+        'student.state',
+        'student.referral_code',
+        'student.referral_count',
+        'student.has_completed_tutorial',
+        'student.created_at',
+        'material.id',
+        'material.title',
+        'material.amount',
+      ])
+      .orderBy('purchase.enrolled_at', 'DESC');
+
+    this.applyPurchaseSearch(qb, 'student', 'material', query.search);
+    this.applyPurchasePagination(qb, query, paginate);
+    this.applyPurchaseMaxRows(qb, paginate, maxRows);
+
+    const [purchases, total] = await qb.getManyAndCount();
+
+    return {
+      data: purchases.map((purchase) => ({
         id: `material-${purchase.id}`,
         purchase_id: purchase.id,
         type: 'Note',
@@ -738,17 +812,51 @@ export class UserService {
         feedback: purchase.feedback,
         purchased_at: purchase.enrolled_at,
         completed_at: purchase.completed_at,
-      }));
+      })),
+      total,
+    };
   }
 
-  private async getBookPurchases(query: AdminListQueryDto) {
-    const purchases = await this.bookPurchaseRepository.find({
-      relations: ['student', 'book'],
-      order: { purchased_at: 'DESC' },
-    });
-    return purchases
-      .filter((purchase) => this.matchesPurchaseSearch(purchase.student, purchase.book, query.search))
-      .map((purchase) => ({
+  private async getBookPurchases(
+    query: AdminListQueryDto,
+    paginate = false,
+    maxRows?: number,
+  ) {
+    const qb = this.bookPurchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.student', 'student')
+      .leftJoinAndSelect('purchase.book', 'book')
+      .select([
+        'purchase.id',
+        'purchase.feedback',
+        'purchase.purchased_at',
+        'student.id',
+        'student.stu_id',
+        'student.name',
+        'student.email',
+        'student.phone_no',
+        'student.standard',
+        'student.school',
+        'student.city',
+        'student.state',
+        'student.referral_code',
+        'student.referral_count',
+        'student.has_completed_tutorial',
+        'student.created_at',
+        'book.id',
+        'book.title',
+        'book.amount',
+      ])
+      .orderBy('purchase.purchased_at', 'DESC');
+
+    this.applyPurchaseSearch(qb, 'student', 'book', query.search);
+    this.applyPurchasePagination(qb, query, paginate);
+    this.applyPurchaseMaxRows(qb, paginate, maxRows);
+
+    const [purchases, total] = await qb.getManyAndCount();
+
+    return {
+      data: purchases.map((purchase) => ({
         id: `book-${purchase.id}`,
         purchase_id: purchase.id,
         type: 'Book',
@@ -760,17 +868,51 @@ export class UserService {
         },
         feedback: purchase.feedback,
         purchased_at: purchase.purchased_at,
-      }));
+      })),
+      total,
+    };
   }
 
-  private async getPaperPurchases(query: AdminListQueryDto) {
-    const purchases = await this.paperPurchaseRepository.find({
-      relations: ['student', 'paper'],
-      order: { purchased_at: 'DESC' },
-    });
-    return purchases
-      .filter((purchase) => this.matchesPurchaseSearch(purchase.student, purchase.paper, query.search))
-      .map((purchase) => ({
+  private async getPaperPurchases(
+    query: AdminListQueryDto,
+    paginate = false,
+    maxRows?: number,
+  ) {
+    const qb = this.paperPurchaseRepository
+      .createQueryBuilder('purchase')
+      .leftJoinAndSelect('purchase.student', 'student')
+      .leftJoinAndSelect('purchase.paper', 'paper')
+      .select([
+        'purchase.id',
+        'purchase.feedback',
+        'purchase.purchased_at',
+        'student.id',
+        'student.stu_id',
+        'student.name',
+        'student.email',
+        'student.phone_no',
+        'student.standard',
+        'student.school',
+        'student.city',
+        'student.state',
+        'student.referral_code',
+        'student.referral_count',
+        'student.has_completed_tutorial',
+        'student.created_at',
+        'paper.id',
+        'paper.title',
+        'paper.amount',
+      ])
+      .orderBy('purchase.purchased_at', 'DESC');
+
+    this.applyPurchaseSearch(qb, 'student', 'paper', query.search);
+    this.applyPurchasePagination(qb, query, paginate);
+    this.applyPurchaseMaxRows(qb, paginate, maxRows);
+
+    const [purchases, total] = await qb.getManyAndCount();
+
+    return {
+      data: purchases.map((purchase) => ({
         id: `paper-${purchase.id}`,
         purchase_id: purchase.id,
         type: 'Paper',
@@ -782,15 +924,59 @@ export class UserService {
         },
         feedback: purchase.feedback,
         purchased_at: purchase.purchased_at,
-      }));
+      })),
+      total,
+    };
   }
 
-  private matchesPurchaseSearch(student: User, item: any, search?: string) {
-    if (!search) return true;
-    const value = search.toLowerCase();
-    return [student?.name, student?.email, student?.stu_id, item?.title]
-      .filter(Boolean)
-      .some((field) => String(field).toLowerCase().includes(value));
+  private applyPurchaseSearch(
+    qb: any,
+    studentAlias: string,
+    itemAlias: string,
+    search?: string,
+  ) {
+    const normalizedSearch = this.normalizeSearch(search);
+    if (!normalizedSearch) return;
+
+    qb.andWhere(
+      `(${studentAlias}.name ILIKE :search OR ${studentAlias}.email ILIKE :search OR ${studentAlias}.stu_id ILIKE :search OR ${itemAlias}.title ILIKE :search)`,
+      { search: `%${normalizedSearch}%` },
+    );
+  }
+
+  private applyPurchasePagination(
+    qb: any,
+    query: AdminListQueryDto,
+    paginate: boolean,
+  ) {
+    if (!paginate || !query.page || !query.limit) return;
+
+    const page = Number(query.page || 1);
+    const limit = Number(query.limit || 10);
+    qb.skip((page - 1) * limit).take(limit);
+  }
+
+  private applyPurchaseMaxRows(qb: any, paginate: boolean, maxRows?: number) {
+    if (paginate || !maxRows) return;
+    qb.take(maxRows);
+  }
+
+  private getPaginatedPurchaseResult(
+    result: { data: any[]; total: number },
+    page: number,
+    limit: number,
+  ) {
+    return {
+      data: result.data,
+      total: result.total,
+      page,
+      limit,
+      totalPages: Math.ceil(result.total / limit),
+    };
+  }
+
+  private normalizeSearch(search?: string) {
+    return search?.trim() || '';
   }
 
   private safeUser(user: User) {
