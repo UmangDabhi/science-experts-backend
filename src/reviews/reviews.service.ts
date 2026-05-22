@@ -211,7 +211,7 @@ export class ReviewsService implements OnModuleInit {
         orderBy,
       );
 
-      if (currUser) {
+      if (currUser?.id) {
         result.data = result.data.map(review => ({
           ...review,
           isMyReview: review.student?.id === currUser.id
@@ -293,7 +293,7 @@ export class ReviewsService implements OnModuleInit {
         { field: 'created_at' as keyof Review, direction: 'DESC' as const },
       );
 
-      if (currUser) {
+      if (currUser?.id) {
         result.data = result.data.map(review => ({
           ...review,
           isMyReview: review.student?.id === currUser.id

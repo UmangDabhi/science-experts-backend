@@ -78,6 +78,9 @@ export class TutorReqService {
         where: { id: id },
       });
 
+      if (!tutorReq)
+        throw new NotFoundException(ERRORS.ERROR_TUTOR_REQ_NOT_FOUND);
+
       return tutorReq;
     } catch (error) {
       if (

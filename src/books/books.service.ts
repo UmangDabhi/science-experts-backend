@@ -167,7 +167,7 @@ export class BooksService {
       );
 
       // Add purchase status to each book
-      if (currUser) {
+      if (currUser?.id) {
         const bookIds = books.data.map((book) => book.id);
         const userPurchases = await this.bookPurchaseRepository.find({
           where: {
@@ -177,7 +177,7 @@ export class BooksService {
           relations: ['book'],
         });
         const purchasedBookIds = new Set(
-          userPurchases.map((purchase) => purchase.book.id),
+          userPurchases.map((purchase) => purchase.book?.id).filter(Boolean),
         );
         books.data.forEach((book) => {
           if (
@@ -222,19 +222,21 @@ export class BooksService {
         relations: ['tutor', 'categories', 'standards', 'language'],
       });
       if (!book) throw new NotFoundException(ERRORS.ERROR_BOOK_NOT_FOUND);
-      if (currUser) {
+      if (currUser?.id) {
         const book_purchase = await this.bookPurchaseRepository.findOne({
           where: {
             book: {
               id: book.id,
             },
             student: {
-              id: currUser?.id,
+              id: currUser.id,
             },
           },
         });
         if (book_purchase) book['is_purchased'] = true;
         else book['is_purchased'] = false;
+      } else {
+        book['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(BookPublicDto, book, {
@@ -244,7 +246,7 @@ export class BooksService {
       if (
         currUser &&
         currUser.role == Role.TUTOR &&
-        book.tutor.id == currUser.id
+        book.tutor?.id == currUser.id
       ) {
         book['is_purchased'] = true;
       } else {

@@ -253,7 +253,7 @@ export class CourseService {
       await this.attachCourseDurationTotals(data);
 
       // Enrollment State
-      if (currUser) {
+      if (currUser?.id) {
         if (currUser.role === Role.STUDENT) {
           const enrolledCourses = await this.enrollmentRepository
             .createQueryBuilder('enrollment')
@@ -370,40 +370,53 @@ export class CourseService {
     try {
       if (!id) throw new BadRequestException(ERRORS.ERROR_ID_NOT_PROVIDED);
 
-      const course = await this.courseRepository
+      const qb = this.courseRepository
         .createQueryBuilder('course')
         .leftJoinAndSelect('course.tutor', 'tutor')
         .leftJoinAndSelect('course.materials', 'materials')
         .leftJoinAndSelect('course.categories', 'categories')
         .leftJoinAndSelect('course.standards', 'standards')
         .leftJoinAndSelect('course.language', 'language')
-        .leftJoinAndSelect('course.modules', 'modules')
-        .leftJoinAndSelect(
+        .leftJoinAndSelect('course.modules', 'modules');
+
+      if (currUser?.id) {
+        qb.leftJoinAndSelect(
           'modules.progress',
           'progress',
           'progress.student_id = :studentId',
           { studentId: currUser.id },
-        )
+        );
+      }
+
+      const course = await qb
         .where('course.id = :courseId', { courseId: id })
         .getOne();
       if (!course) throw new NotFoundException(ERRORS.ERROR_COURSE_NOT_FOUND);
       if (!currUser || currUser.role == Role.STUDENT) {
-        const isEnrolled = await this.enrollmentRepository.findOne({
-          where: {
-            course: { id: id },
-            student: { id: currUser?.id },
-          },
-        });
+        const isEnrolled = currUser?.id
+          ? await this.enrollmentRepository.findOne({
+              where: {
+                course: { id: id },
+                student: { id: currUser.id },
+              },
+            })
+          : null;
 
         if (!isEnrolled || !currUser) {
           return {
             ...course,
-            modules: course.modules.map((ele) => ({
-              ...ele,
-              video_url: ele.is_free_to_watch ? ele.video_url : null,
-            })),
+            modules: [...(course.modules || [])]
+              .sort((a, b) => a?.order - b?.order)
+              .map((ele) => ({
+                ...ele,
+                video_url:
+                  ele.is_free_to_watch === true ||
+                  String(ele.is_free_to_watch) === 'true'
+                    ? ele.video_url
+                    : null,
+              })),
 
-            materials: course.materials.map((ele) => {
+            materials: (course.materials || []).map((ele) => {
               return { ...ele, material_url: null };
             }),
           };
@@ -415,7 +428,7 @@ export class CourseService {
       if (
         currUser &&
         currUser.role == Role.TUTOR &&
-        course.tutor.id == currUser.id
+        course.tutor?.id == currUser.id
       ) {
         course['is_enrolled'] = true;
       }
@@ -424,7 +437,9 @@ export class CourseService {
       }
       return {
         ...course,
-        modules: course?.modules.sort((a, b) => a?.order - b?.order),
+        modules: [...(course?.modules || [])].sort(
+          (a, b) => a?.order - b?.order,
+        ),
       };
     } catch (error) {
       if (

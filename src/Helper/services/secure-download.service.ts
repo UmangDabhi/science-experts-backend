@@ -186,6 +186,10 @@ export class SecureDownloadService {
    * Check if user has access to download a book
    */
   private async checkBookAccess(bookId: string, user: User): Promise<boolean> {
+    if (!user?.id) {
+      return false;
+    }
+
     // Admin has access to everything
     if (user.role === Role.ADMIN) {
       return true;
@@ -197,7 +201,7 @@ export class SecureDownloadService {
       relations: ['tutor'],
     });
 
-    if (book && book.tutor && book.tutor.id === user.id) {
+    if (book?.tutor?.id === user.id) {
       return true;
     }
 
@@ -219,6 +223,10 @@ export class SecureDownloadService {
     materialId: string,
     user: User,
   ): Promise<boolean> {
+    if (!user?.id) {
+      return false;
+    }
+
     // Admin has access to everything
     if (user.role === Role.ADMIN) {
       return true;
@@ -230,14 +238,16 @@ export class SecureDownloadService {
       relations: ['tutor', 'course'],
     });
 
-    if (material && material.tutor && material.tutor.id === user.id) {
+    if (material?.tutor?.id === user.id) {
       return true;
     }
 
-    if (material?.course?.id) {
+    const linkedCourseId = material?.course?.id;
+
+    if (linkedCourseId) {
       const enrollment = await this.enrollmentRepository.findOne({
         where: {
-          course: { id: material.course.id },
+          course: { id: linkedCourseId },
           student: { id: user.id },
         },
       });
@@ -262,6 +272,10 @@ export class SecureDownloadService {
     paperId: string,
     user: User,
   ): Promise<boolean> {
+    if (!user?.id) {
+      return false;
+    }
+
     // Admin has access to everything
     if (user.role === Role.ADMIN) {
       return true;
@@ -273,7 +287,7 @@ export class SecureDownloadService {
       relations: ['tutor'],
     });
 
-    if (paper && paper.tutor && paper.tutor.id === user.id) {
+    if (paper?.tutor?.id === user.id) {
       return true;
     }
 

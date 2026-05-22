@@ -167,7 +167,7 @@ export class PapersService {
       );
 
       // Add purchase status to each paper
-      if (currUser) {
+      if (currUser?.id) {
         const paperIds = papers.data.map(paper => paper.id);
         const userPurchases = await this.paperPurchaseRepository.find({
           where: {
@@ -176,7 +176,7 @@ export class PapersService {
           },
           relations: ['paper']
         });
-        const purchasedPaperIds = new Set(userPurchases.map(purchase => purchase.paper.id));
+        const purchasedPaperIds = new Set(userPurchases.map(purchase => purchase.paper?.id).filter(Boolean));
 
         papers.data.forEach(paper => {
           if (currUser.role === Role.ADMIN ||
@@ -218,19 +218,21 @@ export class PapersService {
         relations: ['tutor', 'categories', 'standards', 'language'],
       });
       if (!paper) throw new NotFoundException(ERRORS.ERROR_PAPER_NOT_FOUND);
-      if (currUser) {
+      if (currUser?.id) {
         const paper_purchase = await this.paperPurchaseRepository.findOne({
           where: {
             paper: {
               id: paper.id,
             },
             student: {
-              id: currUser?.id,
+              id: currUser.id,
             },
           },
         });
         if (paper_purchase) paper['is_purchased'] = true;
         else paper['is_purchased'] = false;
+      } else {
+        paper['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(PaperPublicDto, paper, {
@@ -240,7 +242,7 @@ export class PapersService {
       if (
         currUser &&
         currUser.role == Role.TUTOR &&
-        paper.tutor.id == currUser.id
+        paper.tutor?.id == currUser.id
       ) {
         paper['is_purchased'] = true;
       } else {

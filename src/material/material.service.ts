@@ -174,7 +174,7 @@ export class MaterialService {
       );
 
       // Add purchase status to each material
-      if (currUser) {
+      if (currUser?.id) {
         const materialIds = materials.data.map((material) => material.id);
         const userPurchases = await this.materialPurchaseRepository.find({
           where: {
@@ -184,7 +184,9 @@ export class MaterialService {
           relations: ['material'],
         });
         const purchasedMaterialIds = new Set(
-          userPurchases.map((purchase) => purchase.material.id),
+          userPurchases
+            .map((purchase) => purchase.material?.id)
+            .filter(Boolean),
         );
 
         materials.data.forEach((material) => {
@@ -320,7 +322,7 @@ export class MaterialService {
       });
       if (!material)
         throw new NotFoundException(ERRORS.ERROR_MATERIAL_NOT_FOUND);
-      if (currUser) {
+      if (currUser?.id) {
         const material_purchase = await this.materialPurchaseRepository.findOne(
           {
             where: {
@@ -328,13 +330,15 @@ export class MaterialService {
                 id: material.id,
               },
               student: {
-                id: currUser?.id,
+                id: currUser.id,
               },
             },
           },
         );
         if (material_purchase) material['is_purchased'] = true;
         else material['is_purchased'] = false;
+      } else {
+        material['is_purchased'] = false;
       }
       if (!currUser || currUser.role == Role.STUDENT) {
         plainToInstance(MaterialPublicDto, material, {
@@ -344,7 +348,7 @@ export class MaterialService {
       if (
         currUser &&
         currUser.role == Role.TUTOR &&
-        material.tutor.id == currUser.id
+        material.tutor?.id == currUser.id
       ) {
         material['is_purchased'] = true;
       } else {
